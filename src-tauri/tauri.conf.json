@@ -6,21 +6,17 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "helmer-micro",
-    "version": "0.0.0"
+    "productName": "Helmer Micro",
+    "version": "../package.json"
   },
   "tauri": {
     "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      }
+      "all": true
     },
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "com.helmermicro.dev",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -40,6 +36,9 @@
         "width": 800,
         "height": 600
       }
-    ]
+    ],
+    "systemTray": {
+      "iconPath": "icons/128x128.png"
+    }
   }
 }
