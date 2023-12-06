@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod cropper;
+mod editor;
 mod recorder;
 mod tray;
 
@@ -45,12 +47,15 @@ fn main() {
         .plugin(tp_store)
         .plugin(tp_autostart)
         .plugin(tp_single_instance)
+        .plugin(tauri_nspanel::init())
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]
             app.set_activation_policy(ActivationPolicy::Accessory);
 
             let app_handle = app.app_handle();
+
+            cropper::init_cropper(&app_handle);
 
             let mut shortcuts = app_handle.global_shortcut_manager();
             if !shortcuts.is_registered(SHORTCUT).unwrap() {
