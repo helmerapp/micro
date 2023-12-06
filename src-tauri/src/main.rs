@@ -14,7 +14,7 @@ use tauri::ActivationPolicy;
 
 pub enum Status {
     Idle,
-    Stage,
+    Cropper,
     Recording,
     Editing,
 }
@@ -56,7 +56,7 @@ fn main() {
             if !shortcuts.is_registered(SHORTCUT).unwrap() {
                 shortcuts
                     .register(SHORTCUT, move || {
-                        println!("TODO: trigger recording");
+                        println!("TODO: open cropper");
                     })
                     .unwrap();
             }

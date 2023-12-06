@@ -7,7 +7,7 @@ use opener::open;
 pub fn build() -> SystemTray {
     // id, label
     let menu_items = vec![
-        ("record", "Start Recording"),
+        ("record", "Record"),
         ("settings", "Preferences"),
         ("separator", ""),
         ("feedback", "Give Feedback"),
@@ -56,11 +56,11 @@ pub fn events(app: &AppHandle, event: SystemTrayEvent) {
             ..
         } => {
             // TODO: if not already recording
-            println!("TODO: trigger recording");
+            println!("TODO: open cropper");
         }
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
             "record" => {
-                println!("TODO: trigger recording");
+                println!("TODO: open cropper");
             }
             "settings" => {
                 println!("TODO: open settings");
