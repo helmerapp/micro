@@ -3,5 +3,20 @@ import Base from "../components/base.astro";
 ---
 
 <Base>
-	<h1>Cropper</h1>
+	<img id="image">
 </Base>
+
+<style>
+	html, body {
+		width: 100%;
+		height: 100%;
+	}
+</style>
+
+<script>
+import Cropper from 'cropperjs';
+
+const cropper = new Cropper('#image');
+
+console.log(cropper);
+</script>

@@ -61,7 +61,7 @@ fn main() {
             if !shortcuts.is_registered(SHORTCUT).unwrap() {
                 shortcuts
                     .register(SHORTCUT, move || {
-                        println!("TODO: open cropper");
+                        cropper::toggle_cropper(&app_handle);
                     })
                     .unwrap();
             }
