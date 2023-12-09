@@ -3,20 +3,203 @@ import Base from "../components/base.astro";
 ---
 
 <Base>
-	<img id="image">
+	<div id="selectableArea">
+		<div id="selection">
+			<div id="selectionBorder" ></div>
+			<div id="selectionInner"></div>
+		</div>
+		<button class="record hidden btn btn-hover"></button>
+	</div>
 </Base>
 
 <style>
-	html, body {
+	body {
+		background: transparent;
+	}
+	#selectableArea {
 		width: 100%;
 		height: 100%;
+	}
+	#selection {
+		position: absolute;
+		pointer-events: none;
+	}
+
+	#selectionInner {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+	}
+
+	#selection::before, #selection::after, #selectionInner::before, #selectionInner::after {
+		content: "";
+		position: absolute;
+		width: 100%;
+		height: 100vh;
+		background: rgba(0, 0, 0, 0.7);
+	}
+
+	#selection::before {
+		top: 100%;
+	}
+
+	#selection::after {
+		bottom: 100%;
+	}
+
+	#selectionInner::before, #selectionInner::after {
+		width: 100vw;
+		height: 200vh;
+		top: -100vh;
+		bottom: 0;
+	}
+
+	#selectionInner::before {
+		left: 100%;
+	}
+
+	#selectionInner::after {
+		right: 100%;
+	}
+
+	#selectionBorder {
+		height: calc(100% - 4px);
+		width: calc(100% - 4px);
+		border: 2px dashed white;
+		display: block;
+	}
+
+	.record {
+		width: 4rem;
+		height: 4rem;
+		display: block;
+		position: absolute;
+		background: rgb(255, 29, 157);
+		border: none;
+		outline: none;
+		border-radius: 50%;
+		transition: transform 0.2s ease-in-out;
+		transform: scale(1);
+		overflow: hidden;
+		cursor: pointer;
+	}
+
+	.record:hover {
+		transform: scale(1.1);
+	}
+
+	.record:active {
+		transform: scale(0.95);
+	}
+
+	.hidden {
+		transform: scale(0);
+	}
+
+	:root {
+		--btn-shadow: 1px 1px 24px 4px rgba(255, 255, 255, 0.2);
+		--shine-degree: 120deg;
+		--shine-color: rgba(255, 255, 255, 0.2);
+		--shine-effect: linear-gradient(
+			var(--shine-degree),
+			transparent,
+			var(--shine-color),
+			transparent
+		);
+		--shine-transition: all 0.4s ease-in-out;
+	}
+
+	.btn::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		background: var(--shine-effect);
+	}
+
+	.btn-hover::before {
+		left: -100%;
+		transition: var(--shine-transition);
+	}
+	.btn-hover:hover {
+		box-shadow: var(--btn-shadow);
+	}
+	.btn-hover:hover::before {
+		left: 100%;
+	}
+
+	.btn-anim::before {
+		-webkit-animation: shine 2s ease-in-out infinite;
+						animation: shine 2s ease-in-out infinite;
+	}
+
+	@-webkit-keyframes shine {
+		0% {
+			left: -100%;
+			transition-property: left;
+		}
+		11.5044247788%, 100% {
+			left: 100%;
+			transition-property: left;
+		}
+	}
+
+	@keyframes shine {
+		0% {
+			left: -100%;
+			transition-property: left;
+		}
+		11.5044247788%, 100% {
+			left: 100%;
+			transition-property: left;
+		}
 	}
 </style>
 
 <script>
-import Cropper from 'cropperjs';
+	let isSelecting = false;
+	let startX = 0;
+	let startY = 0;
+	let endX = 0;
+	let endY = 0;
 
-const cropper = new Cropper('#image');
+	const selectionEl = document.getElementById('selection')!;
+	const selectableAreaEl = document.getElementById('selectableArea')!;
+	const recordButtonEl = document.querySelector('.record')!;
 
-console.log(cropper);
+	selectableAreaEl.addEventListener('mousedown', (e) => {
+		isSelecting = true;
+		recordButtonEl.classList.add('hidden');
+		startX = e.clientX - selectableAreaEl.offsetLeft;
+		startY = e.clientY - selectableAreaEl.offsetTop;
+	});
+
+	selectableAreaEl.addEventListener('mousemove', (e) => {
+		if (isSelecting) {
+			endX = e.clientX - selectableAreaEl.offsetLeft;
+			endY = e.clientY - selectableAreaEl.offsetTop;
+
+			const width = endX - startX;
+			const height = endY - startY;
+
+			selectionEl.style.width = `${Math.abs(width)}px`;
+			selectionEl.style.height = `${Math.abs(height)}px`;
+			selectionEl.style.left = `${width > 0 ? startX : endX}px`;
+			selectionEl.style.top = `${height > 0 ? startY : endY}px`;
+		}
+	});
+
+	selectableAreaEl.addEventListener('mouseup', () => {
+		if (isSelecting) {
+			recordButtonEl.style.top = `${endY}px`;
+			recordButtonEl.style.left = `${endX}px`;
+			recordButtonEl.classList.remove('hidden');
+		}
+		isSelecting = false;
+	});
+
+	recordButtonEl.addEventListener('click', () => {
+		console.log("selected area: ", startX, startY, endX, endY);
+	});
 </script>
