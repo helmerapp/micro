@@ -18,7 +18,6 @@ import Base from "../components/base.astro";
 
 <style>
 	body {
-		background-image: url("https://placekitten.com/1900/1200");
 		/* background: transparent; */
 	}
 	main {
@@ -151,18 +150,22 @@ import Base from "../components/base.astro";
 </style>
 
 <script>
+	// Cropper State
 	let isSelecting = false;
+	let isRecording = false;
 	let startX = 0;
 	let startY = 0;
 	let endX = 0;
 	let endY = 0;
 
+	// Constants
 	const selectionEl = document.querySelector('section')!;
 	const selectableAreaEl = document.querySelector('main')!;
 	const buttonEl = document.querySelector('button')!;
 	const buttonWidth = buttonEl.offsetWidth;
 	const buttonHeight = buttonEl.offsetHeight;
 
+	// Events
 	selectableAreaEl.addEventListener('mousedown', (e) => {
 		isSelecting = true;
 		buttonEl.classList.add('hidden');

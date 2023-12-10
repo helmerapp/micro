@@ -23,14 +23,14 @@ pub enum Status {
 
 pub struct AppState {
     status: Status,
-    recorder: Arc<Mutex<recorder::Recorder>>,
+    recorder: Arc<Mutex<capturer::Capturer>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
             status: Status::Idle,
-            recorder: Arc::new(Mutex::new(recorder::new())),
+            recorder: Arc::new(Mutex::new(capturer::new())),
         }
     }
 }
@@ -72,5 +72,5 @@ fn main() {
         .system_tray(tray::build())
         .on_system_tray_event(tray::events)
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("error while running Helmer Micro");
 }
