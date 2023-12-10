@@ -3,26 +3,32 @@ import Base from "../components/base.astro";
 ---
 
 <Base>
-	<div id="selectableArea">
-		<div id="selection">
-			<div id="selectionBorder" ></div>
+	<main>
+		<section class="hidden">
+			<div id="selectionBorder"></div>
 			<div id="selectionInner"></div>
-		</div>
-		<button class="record hidden btn btn-hover"></button>
-	</div>
+		</section>
+		<button class="record hidden">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="12" cy="12" r="10"></circle>
+			</svg>
+		</button>
+	</main>
 </Base>
 
 <style>
 	body {
-		background: transparent;
+		background-image: url("https://placekitten.com/1900/1200");
+		/* background: transparent; */
 	}
-	#selectableArea {
-		width: 100%;
-		height: 100%;
+	main {
+		width: 100vw;
+		height: 100vh;
+		overflow: hidden;
+		cursor: crosshair;
 	}
-	#selection {
+	section {
 		position: absolute;
-		pointer-events: none;
 	}
 
 	#selectionInner {
@@ -31,7 +37,7 @@ import Base from "../components/base.astro";
 		height: 100%;
 	}
 
-	#selection::before, #selection::after, #selectionInner::before, #selectionInner::after {
+	section::before, section::after, #selectionInner::before, #selectionInner::after {
 		content: "";
 		position: absolute;
 		width: 100%;
@@ -39,11 +45,11 @@ import Base from "../components/base.astro";
 		background: rgba(0, 0, 0, 0.7);
 	}
 
-	#selection::before {
+	section::before {
 		top: 100%;
 	}
 
-	#selection::after {
+	section::after {
 		bottom: 100%;
 	}
 
@@ -69,26 +75,31 @@ import Base from "../components/base.astro";
 		display: block;
 	}
 
-	.record {
-		width: 4rem;
-		height: 4rem;
-		display: block;
+	button {
+		width: 3rem;
+		height: 3rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		position: absolute;
 		background: rgb(255, 29, 157);
-		border: none;
+		border: 2px solid rgba(0,0,0,0.4);
 		outline: none;
 		border-radius: 50%;
-		transition: transform 0.2s ease-in-out;
+		/* transition: transform 0.1s ease-out; */
+		transition: transform 0.4s cubic-bezier(.47,1.64,.41,.8);
 		transform: scale(1);
 		overflow: hidden;
 		cursor: pointer;
+		box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0);
 	}
 
-	.record:hover {
-		transform: scale(1.1);
+	button:hover {
+		transform: scale(1.05);
+		box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0.2);
 	}
 
-	.record:active {
+	button:active {
 		transform: scale(0.95);
 	}
 
@@ -96,42 +107,24 @@ import Base from "../components/base.astro";
 		transform: scale(0);
 	}
 
-	:root {
-		--btn-shadow: 1px 1px 24px 4px rgba(255, 255, 255, 0.2);
-		--shine-degree: 120deg;
-		--shine-color: rgba(255, 255, 255, 0.2);
-		--shine-effect: linear-gradient(
-			var(--shine-degree),
-			transparent,
-			var(--shine-color),
-			transparent
-		);
-		--shine-transition: all 0.4s ease-in-out;
-	}
-
-	.btn::before {
+	button::before {
 		content: "";
 		position: absolute;
 		top: 0;
 		width: 100%;
 		height: 100%;
-		background: var(--shine-effect);
-	}
-
-	.btn-hover::before {
+		background: linear-gradient(
+		120deg,
+			transparent,
+			rgba(255, 255, 255, 0.2),
+			transparent
+		);
 		left: -100%;
-		transition: var(--shine-transition);
-	}
-	.btn-hover:hover {
-		box-shadow: var(--btn-shadow);
-	}
-	.btn-hover:hover::before {
-		left: 100%;
+		transition: all 0.3s ease-in-out;
 	}
 
-	.btn-anim::before {
-		-webkit-animation: shine 2s ease-in-out infinite;
-						animation: shine 2s ease-in-out infinite;
+	button:hover::before {
+		left: 100%;
 	}
 
 	@-webkit-keyframes shine {
@@ -164,13 +157,16 @@ import Base from "../components/base.astro";
 	let endX = 0;
 	let endY = 0;
 
-	const selectionEl = document.getElementById('selection')!;
-	const selectableAreaEl = document.getElementById('selectableArea')!;
-	const recordButtonEl = document.querySelector('.record')!;
+	const selectionEl = document.querySelector('section')!;
+	const selectableAreaEl = document.querySelector('main')!;
+	const buttonEl = document.querySelector('button')!;
+	const buttonWidth = buttonEl.offsetWidth;
+	const buttonHeight = buttonEl.offsetHeight;
 
 	selectableAreaEl.addEventListener('mousedown', (e) => {
 		isSelecting = true;
-		recordButtonEl.classList.add('hidden');
+		buttonEl.classList.add('hidden');
+		selectionEl.classList.remove('hidden');
 		startX = e.clientX - selectableAreaEl.offsetLeft;
 		startY = e.clientY - selectableAreaEl.offsetTop;
 	});
@@ -192,14 +188,19 @@ import Base from "../components/base.astro";
 
 	selectableAreaEl.addEventListener('mouseup', () => {
 		if (isSelecting) {
-			recordButtonEl.style.top = `${endY}px`;
-			recordButtonEl.style.left = `${endX}px`;
-			recordButtonEl.classList.remove('hidden');
+			const buttonX = startX > endX ? endX - buttonWidth : endX;
+			const buttonY = startY > endY ? endY - buttonHeight : endY;
+	
+			buttonEl.style.left = `${buttonX}px`;
+			buttonEl.style.top = `${buttonY}px`;
 		}
+
 		isSelecting = false;
+		buttonEl.classList.remove('hidden');
 	});
 
-	recordButtonEl.addEventListener('click', () => {
+	
+	buttonEl.addEventListener('click', () => {
 		console.log("selected area: ", startX, startY, endX, endY);
 	});
 </script>
