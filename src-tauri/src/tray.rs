@@ -5,39 +5,21 @@ use tauri::{
 };
 
 pub fn build() -> SystemTray {
-    // id, label
-    let menu_items = vec![
-        ("record", "Record"),
-        ("separator", ""),
-        ("feedback", "Give Feedback"),
-        ("about", "About Helmer"),
-        ("quit", "Quit"),
-    ];
-
     let mut tray_menu = SystemTrayMenu::new();
 
-    for item in menu_items {
-        match item.0 {
-            "separator" => {
-                tray_menu = tray_menu.add_native_item(SystemTrayMenuItem::Separator);
-            }
-            _ => {
-                let mut menu_item = CustomMenuItem::new(item.0, item.1);
-
-                match item.0 {
-                    "record" => {
-                        menu_item = menu_item.accelerator("CommandOrControl+Shift+2");
-                    }
-                    "about" => {
-                        menu_item = menu_item.accelerator("CommandOrControl+I");
-                    }
-                    _ => {}
-                }
-
-                tray_menu = tray_menu.add_item(menu_item);
-            }
-        }
-    }
+    tray_menu = tray_menu
+        .add_item(
+            CustomMenuItem::new("record", "Start Recording")
+                .accelerator("CommandOrControl+Shift+2"),
+        )
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(CustomMenuItem::new("show_cursor", "Show Mouse Cursor"))
+        .add_item(CustomMenuItem::new("start_at_login", "Start at Login"))
+        .add_item(CustomMenuItem::new("updates", "Check for Updates"))
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(CustomMenuItem::new("feedback", "Give Feedback"))
+        .add_item(CustomMenuItem::new("about", "About Helmer").accelerator("CommandOrControl+I"))
+        .add_item(CustomMenuItem::new("quit", "Quit"));
 
     return SystemTray::new().with_menu(tray_menu);
 }

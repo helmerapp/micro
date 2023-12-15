@@ -4,13 +4,10 @@ use tauri::{AppHandle, Manager};
 use tokio::sync::Mutex;
 
 #[tauri::command]
-pub async fn start_capturer(area: Vec<u32>, app_handle: AppHandle) -> bool {
-    println!("Rust: Starting capturer");
+pub async fn start_capturer(area: Vec<u32>, app_handle: AppHandle) {
     println!("Capturing Area: {:?}", area);
 
     let recorder = new();
-
-    return true;
 }
 
 pub fn new() -> Recorder {
