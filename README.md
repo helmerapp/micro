@@ -10,7 +10,7 @@
   <a href="https://twitter.com/helmerapp">
     <img src="https://img.shields.io/badge/Twitter-00acee?logo=twitter&logoColor=white" />
   </a>
-  <img src="https://img.shields.io/github/stars/clearlysid/helmer" />
+  <img src="https://img.shields.io/github/stars/clearlysid/helmer-micro" />
 </p>
 
   <p align="center">
