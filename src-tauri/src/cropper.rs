@@ -3,6 +3,7 @@ use tauri::{AppHandle, Manager, PhysicalSize, Position, Size, WindowBuilder, Win
 pub fn init_cropper(app: &AppHandle) {
     // create cropper window
     let cropper_win = WindowBuilder::new(app, "cropper", WindowUrl::App("/cropper".into()))
+        .accept_first_mouse(true)
         .skip_taskbar(true)
         .always_on_top(true)
         .decorations(false)

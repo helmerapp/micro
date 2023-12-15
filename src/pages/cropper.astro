@@ -17,13 +17,10 @@ import Base from "../components/base.astro";
 </Base>
 
 <style>
-	body {
-		/* background: transparent; */
-	}
 	main {
-		width: 100vw;
-		height: 100vh;
-		overflow: hidden;
+		width: 100%;
+		height: 100%;
+ 		overflow: hidden;
 		cursor: crosshair;
 	}
 	section {
@@ -41,7 +38,7 @@ import Base from "../components/base.astro";
 		position: absolute;
 		width: 100%;
 		height: 100vh;
-		background: rgba(0, 0, 0, 0.7);
+		background: rgba(0, 0, 0, 0.4);
 	}
 
 	section::before {
@@ -150,6 +147,8 @@ import Base from "../components/base.astro";
 </style>
 
 <script>
+	import { invoke } from '@tauri-apps/api/tauri'
+
 	// Cropper State
 	let isSelecting = false;
 	let isRecording = false;
@@ -205,5 +204,18 @@ import Base from "../components/base.astro";
 	
 	buttonEl.addEventListener('click', () => {
 		console.log("selected area: ", startX, startY, endX, endY);
+		// validate if selection is valid
+		const isSelectionValid = true
+
+		if (isSelectionValid) {
+			isRecording = true
+
+			// turn button into stop button
+			invoke('start_capturer', {
+				area: [startX, startY, endX, endY]
+			}).then(() => {
+				console.log("recording started")
+			})
+		}
 	});
 </script>
