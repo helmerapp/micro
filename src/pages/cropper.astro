@@ -4,6 +4,7 @@ import Base from "../components/base.astro";
 
 <Base>
 	<main>
+		<h1>yolo</h1>
 		<section class="hidden">
 			<div id="selectionBorder"></div>
 			<div id="selectionInner"></div>
@@ -148,6 +149,7 @@ import Base from "../components/base.astro";
 
 <script>
 	import { invoke } from '@tauri-apps/api/tauri'
+	import { getCurrent } from '@tauri-apps/api/window';
 
 	// Cropper State
 	let isSelecting = false;
@@ -207,6 +209,8 @@ import Base from "../components/base.astro";
 		// validate if selection is valid
 		const isSelectionValid = true
 
+		console.log(isRecording);
+
 		if (isSelectionValid) {
 			isRecording = true
 
@@ -218,4 +222,15 @@ import Base from "../components/base.astro";
 			})
 		}
 	});
+
+	function closeCropper() {
+		const win = getCurrent();
+		win.hide();
+	}
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') {
+			closeCropper();
+		}
+	})
 </script>
