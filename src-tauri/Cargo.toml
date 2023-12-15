@@ -34,6 +34,11 @@ window-shadows = "0.2.1"
 os_info = { version = "3", default-features = false }
 opener = "0.6.1"
 chrono = "0.4.31"
+gifski = { version = "1.12.2", default-features = false, features = [
+	"png",
+	"gifsicle",
+] }
+scap = { git = "https://github.com/clearlysid/scap", commit = "e312969" }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel" }
