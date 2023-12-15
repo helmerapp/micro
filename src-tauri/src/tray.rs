@@ -5,9 +5,7 @@ use tauri::{
 };
 
 pub fn build() -> SystemTray {
-    let mut tray_menu = SystemTrayMenu::new();
-
-    tray_menu = tray_menu
+    let tray_menu = SystemTrayMenu::new()
         .add_item(
             CustomMenuItem::new("record", "Start Recording")
                 .accelerator("CommandOrControl+Shift+2"),
