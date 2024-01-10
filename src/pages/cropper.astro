@@ -23,6 +23,8 @@ import Base from "../components/base.astro";
 		height: 100%;
  		overflow: hidden;
 		cursor: crosshair;
+		position: relative;
+		/* background: rgba(0, 0, 0, 0.4); */
 	}
 	section {
 		position: absolute;
@@ -225,6 +227,11 @@ import Base from "../components/base.astro";
 
 	function closeCropper() {
 		const win = getCurrent();
+		selectionEl.style.width = "0px";
+		selectionEl.style.height = "0px";
+		selectionEl.style.left = "0px";
+		selectionEl.style.top = "0px";
+		buttonEl.classList.add("hidden");
 		win.hide();
 	}
 

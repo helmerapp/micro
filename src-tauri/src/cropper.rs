@@ -2,18 +2,23 @@ use tauri::{AppHandle, Manager, PhysicalSize, Position, Size, WindowBuilder, Win
 
 pub fn init_cropper(app: &AppHandle) {
     // create cropper window
-    let cropper_win = WindowBuilder::new(app, "cropper", WindowUrl::App("/cropper".into()))
+    let mut cropper_win = WindowBuilder::new(app, "cropper", WindowUrl::App("/cropper".into()))
         .accept_first_mouse(true)
         .skip_taskbar(true)
         .always_on_top(true)
         .decorations(false)
-        // .transparent(true)
         .resizable(false)
         .visible(false)
         .focused(false)
-        .center()
-        .build()
-        .expect("Failed to open cropper");
+        .center();
+
+    // set transparent only on windows and linux
+    #[cfg(not(target_os = "macos"))]
+    {
+        cropper_win.transparent(true);
+    }
+
+    let cropper_win = cropper_win.build().expect("Failed to open cropper");
 
     let monitor = cropper_win.primary_monitor().unwrap().unwrap();
 
@@ -31,9 +36,7 @@ pub fn init_cropper(app: &AppHandle) {
     {
         use cocoa::{appkit::NSColor, base::nil, foundation::NSString};
         use objc::{class, msg_send, sel, sel_impl};
-        use tauri_nspanel::WindowExt;
 
-        cropper_win.to_panel().unwrap();
         cropper_win
         .to_owned()
         .run_on_main_thread(move || unsafe {
