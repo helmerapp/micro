@@ -6,7 +6,7 @@ mod cropper;
 mod editor;
 mod tray;
 
-use scap::Recorder;
+use capturer::Recorder;
 use std::sync::Arc;
 use tauri::{GlobalShortcutManager, Manager};
 use tauri_plugin_autostart::MacosLauncher;
@@ -24,16 +24,14 @@ pub enum Status {
 
 pub struct AppState {
     status: Status,
-    // recorder: Arc<Mutex<Recorder>>,
-    recorder: bool,
+    recorder: Arc<Mutex<Recorder>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
             status: Status::Idle,
-            // recorder: Arc::new(Mutex::new(capturer::new())),
-            recorder: false,
+            recorder: Arc::new(Mutex::new(Recorder {})),
         }
     }
 }
@@ -50,7 +48,7 @@ fn main() {
         .plugin(tp_store)
         .plugin(tp_autostart)
         .plugin(tp_single_instance)
-        .plugin(tauri_nspanel::init())
+        // .plugin(tauri_nspanel::init()) -- this is macOS only
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]
