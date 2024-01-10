@@ -7,7 +7,7 @@ pub fn init_cropper(app: &AppHandle) {
         .skip_taskbar(true)
         .always_on_top(true)
         .decorations(false)
-        // .transparent(true)
+        .transparent(true) // this line must run only on windows and linux
         .resizable(false)
         .visible(false)
         .focused(false)
