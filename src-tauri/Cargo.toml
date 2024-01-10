@@ -38,7 +38,6 @@ gifski = { version = "1.12.2", default-features = false, features = [
 	"png",
 	"gifsicle",
 ] }
-scap = { git = "https://github.com/clearlysid/scap", commit = "e312969" }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel" }
