@@ -2,18 +2,23 @@ use tauri::{AppHandle, Manager, PhysicalSize, Position, Size, WindowBuilder, Win
 
 pub fn init_cropper(app: &AppHandle) {
     // create cropper window
-    let cropper_win = WindowBuilder::new(app, "cropper", WindowUrl::App("/cropper".into()))
+    let mut cropper_win = WindowBuilder::new(app, "cropper", WindowUrl::App("/cropper".into()))
         .accept_first_mouse(true)
         .skip_taskbar(true)
         .always_on_top(true)
         .decorations(false)
-        .transparent(true) // this line must run only on windows and linux
         .resizable(false)
         .visible(false)
         .focused(false)
-        .center()
-        .build()
-        .expect("Failed to open cropper");
+        .center();
+
+    // set transparent only on windows and linux
+    #[cfg(not(target_os = "macos"))]
+    {
+        cropper_win.transparent(true);
+    }
+
+    let cropper_win = cropper_win.build().expect("Failed to open cropper");
 
     let monitor = cropper_win.primary_monitor().unwrap().unwrap();
 
