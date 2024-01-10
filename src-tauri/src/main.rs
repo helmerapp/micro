@@ -48,7 +48,6 @@ fn main() {
         .plugin(tp_store)
         .plugin(tp_autostart)
         .plugin(tp_single_instance)
-        // .plugin(tauri_nspanel::init()) -- this is macOS only
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]

@@ -36,9 +36,7 @@ pub fn init_cropper(app: &AppHandle) {
     {
         use cocoa::{appkit::NSColor, base::nil, foundation::NSString};
         use objc::{class, msg_send, sel, sel_impl};
-        use tauri_nspanel::WindowExt;
 
-        cropper_win.to_panel().unwrap();
         cropper_win
         .to_owned()
         .run_on_main_thread(move || unsafe {

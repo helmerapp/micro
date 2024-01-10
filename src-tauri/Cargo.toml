@@ -40,7 +40,6 @@ gifski = { version = "1.12.2", default-features = false, features = [
 ] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
-tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel" }
 cocoa = "0.25.0"
 objc = "0.2.7"
 
