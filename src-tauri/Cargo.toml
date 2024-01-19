@@ -1,8 +1,8 @@
 [package]
 name = "helmer-micro"
-version = "0.0.0"
-description = "A smol app to record GIFs from your desktop."
-authors = ["@clearlysid"]
+version = "0.0.1"
+description = "Rock solid GIFs, straight from your desktop."
+authors = ["Siddharth <siddharth99c@gmail.com>"]
 license = ""
 repository = "https://www.github.com/clearlysid/helmer-micro"
 edition = "2021"
@@ -25,15 +25,10 @@ tauri-plugin-store = { git = "https://github.com/tauri-apps/plugins-workspace", 
 tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tokio = { version = "1", features = ["full"] }
-tempfile = "3.2"
-rand = "0.8"
-regex = "1.5"
-url = "2.2"
 window-vibrancy = "0.4.0"
 window-shadows = "0.2.1"
 os_info = { version = "3", default-features = false }
 opener = "0.6.1"
-chrono = "0.4.31"
 gifski = { version = "1.12.2", default-features = false, features = [
 	"png",
 	"gifsicle",
