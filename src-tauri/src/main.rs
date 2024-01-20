@@ -6,7 +6,7 @@ mod cropper;
 mod editor;
 mod tray;
 
-use capturer::Recorder;
+use scap::capturer::Capturer;
 use std::sync::Arc;
 use tauri::{GlobalShortcutManager, Manager};
 use tauri_plugin_autostart::MacosLauncher;
@@ -24,14 +24,14 @@ pub enum Status {
 
 pub struct AppState {
     status: Status,
-    recorder: Arc<Mutex<Recorder>>,
+    recorder: Option<Arc<Mutex<Capturer>>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
             status: Status::Idle,
-            recorder: Arc::new(Mutex::new(Recorder {})),
+            recorder: None,
         }
     }
 }
