@@ -5,7 +5,17 @@ use tokio::sync::Mutex;
 
 #[tauri::command]
 pub async fn start_capturer(area: Vec<u32>, app_handle: AppHandle) {
-    println!("Capturing Area: {:?}", area);
+    println!("Cropped Area: {:?}", area);
+
+    let capturer = new();
+    capturer.start_capture();
+    println!("Capturer started");
+
+    // wait for 10 seconds
+    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+
+    capturer.stop_capture();
+    println!("Capturer stopped");
 }
 
 pub fn new() -> Capturer {
