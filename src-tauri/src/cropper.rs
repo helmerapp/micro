@@ -15,7 +15,7 @@ pub fn init_cropper(app: &AppHandle) {
     // set transparent only on windows and linux
     #[cfg(not(target_os = "macos"))]
     {
-        cropper_win.transparent(true);
+        cropper_win = cropper_win.transparent(true);
     }
 
     let cropper_win = cropper_win.build().expect("Failed to open cropper");
