@@ -6,6 +6,7 @@ use gifski::{self, Repeat, Settings, progress::NoProgress};
 use imgref::{Img, ImgVec};
 use rgb::RGBA8;
 
+
 static FPS: AtomicU8 = AtomicU8::new(20);
 static QUALITY: AtomicU8 = AtomicU8::new(100);
 
