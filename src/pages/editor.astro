@@ -108,11 +108,13 @@ import Base from "../components/base.astro";
 	form.addEventListener("submit", (event) => {
 		event.preventDefault();
 
+		
 		// log the form data
 		const formData = new FormData(form);
-		for (const [key, value] of formData.entries()) {
-			console.log(key, value);
-		}
+		console.log(...formData)
+		// for (const [key, value] of formData.entries()) {
+		// 	console.log(key, value);
+		// }
 		// console.log(event)
 	})
 
