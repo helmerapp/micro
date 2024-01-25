@@ -3,12 +3,117 @@ import Base from "../components/base.astro";
 ---
 
 <Base>
-	<h1>Editor</h1>
-	<h2>Features to build</h2>
-	<ol>
-		<li>Resolution Slider</li>
-		<li>FPS Slider</li>
-		<li>Loop/Non-loop</li>
-		<li>Export button</li>
-	</ol>
+	<main>
+		<!-- Instead of this Canvas, GIF preview will be here -->
+		<canvas id="canvas" width="640" height="480"></canvas>
+
+		<form id="form" class="panel">
+			<div>
+				<label for="size">Size</label>
+				<select name="size" id="size">
+					<option value="200">200</option>
+					<option value="400">400</option>
+					<option value="800">800</option>
+					<option value="1000" selected>1000</option>
+					<option value="2000">2000</option>
+				</select>
+			</div>
+			<div>
+				<label for="fps">Smoothness</label>
+				<input id="fps" type="number" min="15" max="60" value="30">
+			</div>
+			<div>
+				<label for="speed">Speed</label>
+				<input id="speed" type="range" min="0.5" max="2" value="1" step="0.1">
+			</div>
+			<div>
+				<label for="loop">Loop</label>
+				<input id="loop" type="checkbox">
+			</div>
+			<div>
+				<label for="bounce">Bounce</label>
+				<input id="bounce" type="checkbox" checked>
+			</div>
+			<input id="export" type="submit" value="Export">
+		</form>
+	</main>
 </Base>
+
+<style>
+	* {
+		box-sizing: border-box;
+	}
+
+	main {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		height: 100%;
+		background: black;
+		padding: 2rem;
+		gap: 16px;
+	}
+	canvas {
+		background: rgba(255,255,255, 0.1);
+		border-radius: 20px;
+	}
+
+	.panel {
+		display: flex;
+		align-items: center;
+		background: rgba(255,255,255, 0.1);
+		padding: 1.4rem 2rem;
+		gap: 2rem;
+		border-radius: 8px;
+	}
+
+	.panel div {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	label {
+		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Open Sans', 'Helvetica Neue', sans-serif;
+		color: rgba(255,255,255, 0.5);
+		font-weight: 500;
+		text-transform: uppercase;
+		font-size: 12px;
+		letter-spacing: 0.1px;
+	}
+
+	#export {
+		background: blueviolet;
+		padding: 1rem 2rem;
+		border: none;
+		color: white;
+		font-size: 18px;
+		border-radius: 12px;
+		transition: all 0.2s ease;
+		cursor: pointer;
+	}
+
+	#export:hover {
+		background: rgb(108, 36, 174);
+		transform: translateY(-2px);
+	}
+</style>
+
+
+<script>
+
+	const form = document.getElementById('form') as HTMLFormElement;
+
+	form.addEventListener("submit", (event) => {
+		event.preventDefault();
+
+		// log the form data
+		const formData = new FormData(form);
+		for (const [key, value] of formData.entries()) {
+			console.log(key, value);
+		}
+		// console.log(event)
+	})
+
+</script>
