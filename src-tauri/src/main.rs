@@ -71,7 +71,10 @@ fn main() {
         .manage(Mutex::new(AppState::default()))
         .system_tray(tray::build())
         .on_system_tray_event(tray::events)
-        .invoke_handler(tauri::generate_handler![capturer::start_capturer])
+        .invoke_handler(tauri::generate_handler![
+            capturer::start_capturing,
+            capturer::stop_capturing
+        ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
 }

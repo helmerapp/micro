@@ -4,18 +4,28 @@ use tauri::{AppHandle, Manager};
 use tokio::sync::Mutex;
 
 #[tauri::command]
-pub async fn start_capturer(area: Vec<u32>, app_handle: AppHandle) {
+pub async fn start_capturing(area: Vec<u32>, app_handle: AppHandle) {
     println!("Cropped Area: {:?}", area);
 
-    let capturer = new();
-    capturer.start_capture();
-    println!("Capturer started");
+    //     let capturer = new();
+    //     capturer.start_capture();
 
-    // wait for 10 seconds
-    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+    // TEMP: stop capturing after 5 seconds, so I get get to editor
+    tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 
-    capturer.stop_capture();
+    stop_capturing(app_handle).await;
+}
+
+#[tauri::command]
+pub async fn stop_capturing(app_handle: AppHandle) {
+    // capturer.stop_capture();
     println!("Capturer stopped");
+
+    // TODO: hide cropper and toolbar
+    // TODO: show editor window
+    crate::editor::init_editor(&app_handle);
+
+    // TODO; create editor window here
 }
 
 pub fn new() -> Capturer {
