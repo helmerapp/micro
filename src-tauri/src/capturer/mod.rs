@@ -70,7 +70,7 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
     let mut settings = Settings::default();
     settings.repeat = Repeat::Infinite;
     let (encoder, writer) = gifski::new(settings).unwrap();
-
+    
     let options = capturer::Options {
         fps: 60,
         targets: vec![],
@@ -79,14 +79,12 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
         excluded_targets: None,
         output_type: constants::CAPTURER_OUTPUT_TYPE,
         source_rect: Some(CGRect {
-            origin: CGPoint { x: area[0] as f64, y: area[1] as f64 },
-            size: CGSize { width: (area[2] - area[0]) as f64, height: (area[3] - area[1]) as f64 }
+            origin: CGPoint { x: 0.0, y: 0.0 },
+            size: CGSize { width: 1500.0, height: 1500.0 }
         }),
         ..Default::default()
     };
-
-    let mut recorder = Capturer::new(options);
-    recorder.start_capture();
+    
     
     let gif = match std::fs::File::create("C:\\Users\\Rohan\\OneDrive\\Desktop\\flasher.gif") {
         Ok(file) => file,
@@ -95,10 +93,13 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
             return; 
         }
     };
-
+    let mut recorder = Capturer::new(options);
+    app_handle.tray_handle().set_icon(tauri::Icon::Raw(include_bytes!("..\\..\\icons\\RecordingIcon.png").to_vec())).unwrap();
+    
     let mut no_progress = NoProgress {};
     thread::spawn(move || {
-        for i in 0..10 {
+        recorder.start_capture();
+        for i in 0..5 {
             let frame = match recorder.get_next_frame() {
                 Ok(frame) => frame,
                 Err(err) => {
@@ -106,7 +107,7 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
                     continue;
                 }
             };
-        
+            
             let img_data = match frame {
                 scap::frame::Frame::BGR0(bgr_frame) => bgr_frame,
                 _ => {
@@ -131,6 +132,7 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
             eprintln!("Error writing GIF file: {:?}", err);
         }
         println!("Finished writing");
+        app_handle.tray_handle().set_icon(tauri::Icon::Raw(include_bytes!("..\\..\\icons\\128x128.png").to_vec())).unwrap();
         stop_capture(app_handle);
     });
 

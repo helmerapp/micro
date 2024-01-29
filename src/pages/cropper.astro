@@ -17,226 +17,242 @@ import Base from "../components/base.astro";
 </Base>
 
 <style>
-	main {
-		width: 100%;
-		height: 100%;
- 		overflow: hidden;
-		cursor: crosshair;
-		position: relative;
-		/* background: rgba(0, 0, 0, 0.4); */
-	}
-	section {
-		position: absolute;
-	}
+  main {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    cursor: crosshair;
+    position: relative;
+    background: rgba(0, 0, 0, 0.4);
+  }
+  section {
+    position: absolute;
+  }
 
-	#selectionInner {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-	}
+  #selectionInner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
 
-	section::before, section::after, #selectionInner::before, #selectionInner::after {
-		content: "";
-		position: absolute;
-		width: 100%;
-		height: 100vh;
-		background: rgba(0, 0, 0, 0.4);
-	}
+  section::before,
+  section::after,
+  #selectionInner::before,
+  #selectionInner::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+  }
 
-	section::before {
-		top: 100%;
-	}
+  section::before {
+    top: 100%;
+  }
 
-	section::after {
-		bottom: 100%;
-	}
+  section::after {
+    bottom: 100%;
+  }
 
-	#selectionInner::before, #selectionInner::after {
-		width: 100vw;
-		height: 200vh;
-		top: -100vh;
-		bottom: 0;
-	}
+  #selectionInner::before,
+  #selectionInner::after {
+    width: 100vw;
+    height: 200vh;
+    top: -100vh;
+    bottom: 0;
+  }
 
-	#selectionInner::before {
-		left: 100%;
-	}
+  #selectionInner::before {
+    left: 100%;
+  }
 
-	#selectionInner::after {
-		right: 100%;
-	}
+  #selectionInner::after {
+    right: 100%;
+  }
 
-	#selectionBorder {
-		height: calc(100% - 4px);
-		width: calc(100% - 4px);
-		border: 2px dashed white;
-		display: block;
-	}
+  #selectionBorder {
+    height: calc(100% - 4px);
+    width: calc(100% - 4px);
+    border: 2px dashed white;
+    display: block;
+  }
 
-	button {
-		width: 3rem;
-		height: 3rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: absolute;
-		background: rgb(255, 29, 157);
-		border: 2px solid rgba(0,0,0,0.4);
-		outline: none;
-		border-radius: 50%;
-		/* transition: transform 0.1s ease-out; */
-		transition: transform 0.4s cubic-bezier(.47,1.64,.41,.8);
-		transform: scale(1);
-		overflow: hidden;
-		cursor: pointer;
-		box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0);
-	}
+  button {
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    background: rgb(255, 29, 157);
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    outline: none;
+    border-radius: 50%;
+		color: white;
+		font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    /* transition: transform 0.1s ease-out; */
+    transition: transform 0.4s cubic-bezier(0.47, 1.64, 0.41, 0.8);
+    transform: scale(1);
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0);
+  }
 
-	button:hover {
-		transform: scale(1.05);
-		box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0.2);
-	}
+  button:hover {
+    transform: scale(1.05);
+    box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0.2);
+  }
 
-	button:active {
-		transform: scale(0.95);
-	}
+  button:active {
+    transform: scale(0.95);
+  }
 
-	.hidden {
-		transform: scale(0);
-	}
+  .hidden {
+    transform: scale(0);
+  }
 
-	button::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(
-		120deg,
-			transparent,
-			rgba(255, 255, 255, 0.2),
-			transparent
-		);
-		left: -100%;
-		transition: all 0.3s ease-in-out;
-	}
+  button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    left: -100%;
+    transition: all 0.3s ease-in-out;
+  }
 
-	button:hover::before {
-		left: 100%;
-	}
+  button:hover::before {
+    left: 100%;
+  }
 
-	@-webkit-keyframes shine {
-		0% {
-			left: -100%;
-			transition-property: left;
-		}
-		11.5044247788%, 100% {
-			left: 100%;
-			transition-property: left;
-		}
-	}
+  @-webkit-keyframes shine {
+    0% {
+      left: -100%;
+      transition-property: left;
+    }
+    11.5044247788%,
+    100% {
+      left: 100%;
+      transition-property: left;
+    }
+  }
 
-	@keyframes shine {
-		0% {
-			left: -100%;
-			transition-property: left;
-		}
-		11.5044247788%, 100% {
-			left: 100%;
-			transition-property: left;
-		}
-	}
+  @keyframes shine {
+    0% {
+      left: -100%;
+      transition-property: left;
+    }
+    11.5044247788%,
+    100% {
+      left: 100%;
+      transition-property: left;
+    }
+  }
 </style>
-
 <script>
-	import { invoke } from '@tauri-apps/api/tauri'
-	import { getCurrent } from '@tauri-apps/api/window';
+  import { invoke } from "@tauri-apps/api/tauri";
+  import { getCurrent } from "@tauri-apps/api/window";
+  const selectionEl = document.querySelector("section")!;
+  const selectableAreaEl = document.querySelector("main")!;
+  const buttonEl = document.querySelector("button")!;
+  const buttonWidth = buttonEl.offsetWidth;
+  const buttonHeight = buttonEl.offsetHeight;
 
-	// Cropper State
-	let isSelecting = false;
-	let isRecording = false;
-	let startX = 0;
-	let startY = 0;
-	let endX = 0;
-	let endY = 0;
+  let isSelecting = false;
+  let isRecording = false;
+  let startX = 0;
+  let startY = 0;
+  let endX = 0;
+  let endY = 0;
+	let timer = 3;
 
-	// Constants
-	const selectionEl = document.querySelector('section')!;
-	const selectableAreaEl = document.querySelector('main')!;
-	const buttonEl = document.querySelector('button')!;
-	const buttonWidth = buttonEl.offsetWidth;
-	const buttonHeight = buttonEl.offsetHeight;
+  selectableAreaEl.addEventListener("mousedown", handleMouseDown);
+  selectableAreaEl.addEventListener("mousemove", handleMouseMove);
+  selectableAreaEl.addEventListener("mouseup", handleMouseUp);
+  buttonEl.addEventListener("click", handleButtonClick);
 
-	// Events
-	selectableAreaEl.addEventListener('mousedown', (e) => {
-		isSelecting = true;
-		buttonEl.classList.add('hidden');
-		selectionEl.classList.remove('hidden');
-		startX = e.clientX - selectableAreaEl.offsetLeft;
-		startY = e.clientY - selectableAreaEl.offsetTop;
-	});
+	function handleMouseDown(e: MouseEvent) {
+    isSelecting = true;
+    selectableAreaEl.style.background = "transparent";
+    buttonEl.classList.add("hidden");
+    selectionEl.classList.remove("hidden");
+    startX = e.clientX - selectableAreaEl.offsetLeft;
+    startY = e.clientY - selectableAreaEl.offsetTop;
+  }
 
-	selectableAreaEl.addEventListener('mousemove', (e) => {
-		if (isSelecting) {
-			endX = e.clientX - selectableAreaEl.offsetLeft;
-			endY = e.clientY - selectableAreaEl.offsetTop;
+  function handleMouseMove(e: MouseEvent) {
+    if (isSelecting) {
+      endX = e.clientX - selectableAreaEl.offsetLeft;
+      endY = e.clientY - selectableAreaEl.offsetTop;
 
-			const width = endX - startX;
-			const height = endY - startY;
+      const width = endX - startX;
+      const height = endY - startY;
 
-			selectionEl.style.width = `${Math.abs(width)}px`;
-			selectionEl.style.height = `${Math.abs(height)}px`;
-			selectionEl.style.left = `${width > 0 ? startX : endX}px`;
-			selectionEl.style.top = `${height > 0 ? startY : endY}px`;
-		}
-	});
+      selectionEl.style.width = `${Math.abs(width)}px`;
+      selectionEl.style.height = `${Math.abs(height)}px`;
+      selectionEl.style.left = `${width > 0 ? startX : endX}px`;
+      selectionEl.style.top = `${height > 0 ? startY : endY}px`;
+    }
+  }
 
-	selectableAreaEl.addEventListener('mouseup', () => {
-		if (isSelecting) {
-			const buttonX = startX > endX ? endX - buttonWidth : endX;
-			const buttonY = startY > endY ? endY - buttonHeight : endY;
-	
-			buttonEl.style.left = `${buttonX}px`;
-			buttonEl.style.top = `${buttonY}px`;
-		}
+  function handleMouseUp() {
+    if (isSelecting) {
+      const buttonX = startX > endX ? endX - buttonWidth : endX;
+      const buttonY = startY > endY ? endY - buttonHeight : endY;
 
-		isSelecting = false;
-		buttonEl.classList.remove('hidden');
-	});
+      buttonEl.style.left = `${buttonX}px`;
+      buttonEl.style.top = `${buttonY}px`;
+    }
+    isSelecting = false;
+    buttonEl.classList.remove("hidden");
+  }
 
-	
-	buttonEl.addEventListener('click', () => {
+
+	function handleButtonClick() {
+		if(isRecording) return;
 		console.log("selected area: ", startX, startY, endX, endY);
 		// validate if selection is valid
-		const isSelectionValid = true
+		const isSelectionValid = startX !== endX && startY !== endY;
 
 		console.log(isRecording);
 
 		if (isSelectionValid) {
-			isRecording = true
-
-			// turn button into stop button
-			invoke('start_capture', {
-				area: [startX, startY, endX, endY]
-			}).then(() => {
-				console.log("recording started")
-			})
+			isRecording = true;
+			buttonEl.textContent = `${timer}`;
+			const countdown = setInterval(() => {
+				timer--;
+				buttonEl.textContent = `${timer}`;
+				if (timer === 0) {
+					clearInterval(countdown);
+					invoke("start_capture", {
+						area: [startX, startY, endX, endY],
+					}).then(() => {
+						console.log("recording started");
+					});
+				}
+			}, 1000);
 		}
-	});
-
-	function closeCropper() {
-		const win = getCurrent();
-		selectionEl.style.width = "0px";
-		selectionEl.style.height = "0px";
-		selectionEl.style.left = "0px";
-		selectionEl.style.top = "0px";
-		buttonEl.classList.add("hidden");
-		win.hide();
 	}
 
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape') {
-			closeCropper();
-		}
-	})
+  function closeCropper() {
+    const win = getCurrent();
+    selectionEl.style.width = "0px";
+    selectionEl.style.height = "0px";
+    selectionEl.style.left = "0px";
+    selectionEl.style.top = "0px";
+    buttonEl.classList.add("hidden");
+    win.hide();
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeCropper();
+    }
+  });
 </script>
