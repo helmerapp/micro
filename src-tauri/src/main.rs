@@ -15,6 +15,7 @@ use tokio::sync::Mutex;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 
+#[derive(Debug)]
 pub enum Status {
     Idle,
     Cropper,
@@ -61,6 +62,7 @@ fn main() {
             if !shortcuts.is_registered(SHORTCUT).unwrap() {
                 shortcuts
                     .register(SHORTCUT, move || {
+                        // app_handle.state().
                         cropper::toggle_cropper(&app_handle);
                     })
                     .unwrap();

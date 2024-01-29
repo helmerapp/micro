@@ -1,4 +1,6 @@
+use crate::{AppState, Status};
 use tauri::{AppHandle, Manager, PhysicalSize, Position, Size, WindowBuilder, WindowUrl};
+use tokio::sync::Mutex;
 
 pub fn init_cropper(app: &AppHandle) {
     // create cropper window
@@ -56,11 +58,20 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
-    let cropper_win = app.get_window("cropper").unwrap();
+    // let state_mutex = app.state::<Mutex<AppState>>();
+    // let mut state = state_mutex.blocking_lock();
 
+    // match state.status {
+    //     Status::Idle => {
+    let cropper_win = app.get_window("cropper").unwrap();
     if cropper_win.is_visible().unwrap() {
         cropper_win.hide().unwrap();
+        // state.status = Status::Idle;
     } else {
         cropper_win.show().unwrap();
+        // state.status = Status::Cropper;
     }
+    // }
+    // _ => {}
+    // }
 }
