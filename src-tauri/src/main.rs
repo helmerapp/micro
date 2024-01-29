@@ -5,8 +5,9 @@ mod capturer;
 mod cropper;
 mod editor;
 mod tray;
+mod constants;
 
-use capturer::Recorder;
+use scap::capturer::Capturer;
 use std::sync::Arc;
 use tauri::{GlobalShortcutManager, Manager};
 use tauri_plugin_autostart::MacosLauncher;
@@ -24,14 +25,14 @@ pub enum Status {
 
 pub struct AppState {
     status: Status,
-    recorder: Arc<Mutex<Recorder>>,
+    recorder: Option<Arc<Mutex<Capturer>>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
             status: Status::Idle,
-            recorder: Arc::new(Mutex::new(Recorder {})),
+            recorder: None,
         }
     }
 }
@@ -71,7 +72,10 @@ fn main() {
         .manage(Mutex::new(AppState::default()))
         .system_tray(tray::build())
         .on_system_tray_event(tray::events)
-        .invoke_handler(tauri::generate_handler![capturer::start_capturer])
+        .invoke_handler(tauri::generate_handler![
+            capturer::start_capture,
+            capturer::stop_capture
+        ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
 }
