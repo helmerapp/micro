@@ -15,10 +15,10 @@
 
   <p align="center">
 A smol app to record GIFs from your desktop.<br>
-<a href="https://www.helmer.app"><b>helmer.app/micro ✨</b></a><br><br>
+✨ <a href="https://www.helmer.app/micro"><b>helmer.app/micro</b></a> ✨<br><br>
 </p>
 
-> ⚠️ NOTE: This project is early in its development. New designs, features and technologies are being iterated on. Things can break often, please use at your own risk.
+> ⚠️ NOTE: This project is in early Alpha, and things can break often. Please use at your own risk.
 
 ## Development
 
