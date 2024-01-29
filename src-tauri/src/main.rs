@@ -75,7 +75,8 @@ fn main() {
         .on_system_tray_event(tray::events)
         .invoke_handler(tauri::generate_handler![
             capturer::start_capture,
-            capturer::stop_capture
+            capturer::stop_capture,
+            editor::export_handler
         ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
