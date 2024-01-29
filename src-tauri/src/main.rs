@@ -15,6 +15,7 @@ use tokio::sync::Mutex;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 
+#[derive(Debug)]
 pub enum Status {
     Idle,
     Cropper,
@@ -61,6 +62,7 @@ fn main() {
             if !shortcuts.is_registered(SHORTCUT).unwrap() {
                 shortcuts
                     .register(SHORTCUT, move || {
+                        // app_handle.state().
                         cropper::toggle_cropper(&app_handle);
                     })
                     .unwrap();
@@ -71,7 +73,10 @@ fn main() {
         .manage(Mutex::new(AppState::default()))
         .system_tray(tray::build())
         .on_system_tray_event(tray::events)
-        .invoke_handler(tauri::generate_handler![capturer::start_capturer])
+        .invoke_handler(tauri::generate_handler![
+            capturer::start_capture,
+            capturer::stop_capture
+        ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
 }

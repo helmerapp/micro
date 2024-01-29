@@ -1,7 +1,8 @@
 use crate::cropper::toggle_cropper;
 use opener::open;
 use tauri::{
-    AppHandle, CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+    AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
+    SystemTrayMenuItem,
 };
 
 pub fn build() -> SystemTray {

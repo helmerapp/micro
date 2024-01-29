@@ -1,38 +1,44 @@
-use scap::capturer::{Capturer, Options};
+// use scap::capturer::{Capturer, Options};
+use crate::{AppState, Status};
 use std::sync::Arc;
 use tauri::{AppHandle, Manager};
 use tokio::sync::Mutex;
 
 #[tauri::command]
-pub async fn start_capturer(area: Vec<u32>, app_handle: AppHandle) {
+pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
+    app_handle.emit_all("capture-started", false).unwrap();
+
+    // TODO: initialize scap and start capturing
     println!("Cropped Area: {:?}", area);
 
-    let capturer = new();
-    capturer.start_capture();
-    println!("Capturer started");
+    // Update app state
+    let state_mutex = app_handle.state::<Mutex<AppState>>();
+    let mut state = state_mutex.lock().await;
+    state.status = Status::Recording;
 
-    // wait for 10 seconds
-    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-
-    capturer.stop_capture();
-    println!("Capturer stopped");
+    // TEMP: stop capturing after 5 seconds, to get to editor
+    tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+    stop_capture(app_handle.clone()).await;
+    println!("complete"); // this never runs
 }
 
-pub fn new() -> Capturer {
-    let options = Options::default();
+#[tauri::command]
+pub async fn stop_capture(app_handle: AppHandle) {
+    println!("Capture stopped");
+    app_handle.emit_all("capture-stopped", false).unwrap();
 
-    return Capturer::new(options);
-}
+    // TODO: stop capturing with scap
 
-pub async fn start(capturer: &Arc<Mutex<Capturer>>) {
-    let mut capturer = capturer.lock().await;
-    println!("Starting recorder");
-}
+    // Hide cropper, create editor
+    crate::cropper::toggle_cropper(&app_handle);
+    crate::editor::init_editor(&app_handle);
 
-pub async fn stop(capturer: &Arc<Mutex<Capturer>>) -> String {
-    let mut capturer = capturer.lock().await;
+    // Update app state
+    let state_mutex = app_handle.state::<Mutex<AppState>>();
+    let mut state = state_mutex.lock().await; // TODO: this line is not running
+    println!("Updating app state");
 
-    println!("Stopping recorder");
+    state.status = Status::Editing;
 
-    "".into()
+    println!("Status: {:?}", state.status);
 }
