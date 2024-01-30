@@ -3989,6 +3989,7 @@ dependencies = [
  "pipewire",
  "screencapturekit",
  "screencapturekit-sys",
+ "serde",
  "sysinfo",
  "tao-core-video-sys",
  "windows 0.52.0",

@@ -1,7 +1,7 @@
 
 
 #[cfg(target_os = "windows")]
-pub const CAPTURER_OUTPUT_TYPE: scap::frame::FrameType = scap::frame::FrameType::BGR0;
+pub const CAPTURER_OUTPUT_TYPE: scap::frame::FrameType = scap::frame::FrameType::RGBx;
 
 #[cfg(target_os = "linux")]
 pub const CAPTURER_OUTPUT_TYPE: scap::frame::FrameType = scap::frame::FrameType::RGB;
