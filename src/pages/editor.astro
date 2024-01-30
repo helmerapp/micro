@@ -106,22 +106,36 @@ import GifImage from "C:\\Users\\Rohan\\OneDrive\\Desktop\\flasher.gif";
 	}
 </style>
 
-
 <script>
+	import { invoke } from '@tauri-apps/api/tauri'
+
 
 	const form = document.getElementById('form') as HTMLFormElement;
+	const size = document.getElementById('size') as HTMLSelectElement;
+	const fps = document.getElementById('fps') as HTMLInputElement;
+	const speed = document.getElementById('speed') as HTMLInputElement;
+	const loop = document.getElementById('loop') as HTMLInputElement;
+	const bounce = document.getElementById('bounce') as HTMLInputElement;
 
 	form.addEventListener("submit", (event) => {
-		event.preventDefault();
+    event.preventDefault();
 
-		
-		// log the form data
-		const formData = new FormData(form);
-		console.log(...formData)
-		// for (const [key, value] of formData.entries()) {
-		// 	console.log(key, value);
-		// }
-		// console.log(event)
-	})
+		const options = {
+			size: size.value,
+			fps: fps.value,
+			speed: Number.parseFloat(speed.value),
+			loop_gif: loop.checked,
+			bounce: bounce.checked
+		}
+
+		// send data to server
+		invoke('export_handler', {
+				options
+			}).then(() => {
+				console.log("export started")
+			})
+
+
+	});
 
 </script>
