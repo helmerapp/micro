@@ -6,12 +6,13 @@ use scap::{
     capturer::{self, CGPoint, CGRect, CGSize, Capturer},
     frame::{BGRFrame, RGBxFrame},
 };
-use std::sync::atomic::{AtomicBool, AtomicU8};
+use std::{result, sync::atomic::{AtomicBool, AtomicU8}};
 use std::time::Duration;
 use std::time::Instant;
 use std::{sync::Arc, thread};
 use tauri::{AppHandle, Manager};
 use tokio::sync::Mutex;
+use tokio::runtime::Runtime;
 
 static FPS: AtomicU8 = AtomicU8::new(20);
 static QUALITY: AtomicU8 = AtomicU8::new(100);
@@ -125,10 +126,10 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
         ))
         .unwrap();
     let mut no_progress = NoProgress {};
-    thread::spawn(move || {
+    let result = thread::spawn(move || {
         recorder.start_capture();
         let mut total_time = Duration::new(0, 0);
-        for i in 0..180 {
+        for i in 0..2 {
             let start_time = Instant::now();
 
             let frame = match recorder.get_next_frame() {
@@ -148,10 +149,6 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
             };
             vector_frames.push(img_data);
 
-            // let img = transform_frame(img_data);
-            // encoder.add_frame_rgba(i, img, i as f64 * 0.5).unwrap_or_else(|err| {
-            //     eprintln!("Error adding frame to encoder: {:?}", err);
-            // });
             let end_time = Instant::now();
             let iteration_time = end_time - start_time;
             total_time += iteration_time;
@@ -162,23 +159,16 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
         let average_time = total_time / 180;
         println!("Average time: {:?}", average_time);
         recorder.stop_capture();
-        stop_capture(vector_frames, app_handle);
+        let mut rt = Runtime::new().unwrap();
+        rt.block_on(async {
+            stop_capture(vector_frames, app_handle).await;
+        });
         drop(encoder);
-    });
-
-    // thread::spawn(move || {
-    // println!("Writing GIF file");
-    // let write_result = writer.write(gif, &mut no_progress);
-    // if let Err(err) = write_result {
-    //     eprintln!("Error writing GIF file: {:?}", err);
-    // }
-    // println!("Finished writing");
-    // stop_capture(app_handle);
-    // });
+    }).join();
 }
 
 #[tauri::command]
-pub fn stop_capture(frames: Vec<RGBxFrame>, app_handle: AppHandle) {
+pub async fn stop_capture(frames: Vec<RGBxFrame>, app_handle: AppHandle) {
     println!("Capture stopped");
 
     // TODO: fire event
@@ -197,7 +187,8 @@ pub fn stop_capture(frames: Vec<RGBxFrame>, app_handle: AppHandle) {
     crate::editor::init_editor(&app_handle);
     // let editor_window = app_handle.get_window("editor").unwrap();
     println!("Waiting for editor to be ready");
-    thread::sleep(Duration::from_millis(5000));
+    // tokio sleep for 2 seconds
+    tokio::time::sleep(Duration::from_secs(2)).await;
     println!("Sending frames to editor");
     app_handle.emit_all("captured_frames", &frames).unwrap();
 }

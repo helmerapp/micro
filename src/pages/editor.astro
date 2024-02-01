@@ -109,42 +109,48 @@ import Base from "../components/base.astro";
 	import { invoke } from '@tauri-apps/api/tauri'
 	import { listen } from '@tauri-apps/api/event'
 
-	await listen('captured_frames', (frames:any) => {
-		console.log("frames:",frames.length)
+
+	const unlisten = await listen('captured_frames', (frames:any) => {
+		console.log("frames:",frames)
 		alert("frames captured")
-		const canvas = document.getElementById('canvas_frames') as HTMLCanvasElement;
-		const ctx = canvas.getContext('2d');
+		// const canvas = document.getElementById('canvas_frames') as HTMLCanvasElement;
+		// const ctx = canvas.getContext('2d');
 
-		// Replace the following line with the actual rgbaData array for each frame
-		const framesData = Array.from({ length: 180 }, (_, index) => getFrameData(index));
+		// // Replace the following line with the actual rgbaData array for each frame
+		// const framesData = Array.from({ length: 10 }, (_, index) => getFrameData(index));
 
-		let currentFrame = 0;
+		// let currentFrame = 0;
 
-		function renderFrame() {
-			(ctx as CanvasRenderingContext2D).clearRect(0, 0, canvas.width, canvas.height);
+		// function renderFrame() {
+		// 	(ctx as CanvasRenderingContext2D).clearRect(0, 0, canvas.width, canvas.height);
 
-			const imageData = (ctx as CanvasRenderingContext2D).createImageData(canvas.width, canvas.height);
-			const rgbaData = framesData[currentFrame];
+		// 	const imageData = (ctx as CanvasRenderingContext2D).createImageData(canvas.width, canvas.height);
+		// 	const rgbaData = framesData[currentFrame];
 
-			for (let i = 0; i < rgbaData.length; i++) {
-				imageData.data[i] = rgbaData[i];
-			}
+		// 	for (let i = 0; i < rgbaData.length; i++) {
+		// 		imageData.data[i] = rgbaData[i];
+		// 	}
 
-			(ctx as CanvasRenderingContext2D).putImageData(imageData, 0, 0);
+		// 	(ctx as CanvasRenderingContext2D).putImageData(imageData, 0, 0);
 
-			// Increment current frame and loop back to the beginning
-			currentFrame = (currentFrame + 1) % framesData.length;
+		// 	// Increment current frame and loop back to the beginning
+		// 	currentFrame = (currentFrame + 1) % framesData.length;
 
-			requestAnimationFrame(renderFrame);
-		}
+		// 	requestAnimationFrame(renderFrame);
+		// }
 
-		function getFrameData(frameIndex: number) {
-			const rgbaData = frames[frameIndex].data;
-			return rgbaData;
-		}
-		renderFrame();
+		// function getFrameData(frameIndex: number) {
+		// 	const rgbaData = frames[frameIndex].data;
+		// 	return rgbaData;
+		// }
+		// renderFrame();
 	})
-
+	
+	document.addEventListener('DOMContentLoaded', () => {
+		console.log("Calling unlisten")
+		unlisten();
+		console.log("Called unlisten")
+	})
 
 
 	const form = document.getElementById('form') as HTMLFormElement;

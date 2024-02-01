@@ -14,6 +14,8 @@ pub fn init_editor(app: &AppHandle) {
         .focused(true)
         .center()
         .build();
+
+    editor_win.unwrap().open_devtools();
 }
 
 #[derive(Debug, Serialize, Deserialize)]
