@@ -6,6 +6,7 @@ mod cropper;
 mod editor;
 mod tray;
 mod constants;
+mod recorder;
 
 use scap::capturer::Capturer;
 use std::sync::Arc;
