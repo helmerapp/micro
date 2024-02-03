@@ -78,7 +78,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             capturer::start_capture,
             capturer::stop_capture,
-            editor::export_handler
+            editor::export_handler,
+            recorder::show_recorder_btn
         ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");

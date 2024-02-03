@@ -127,9 +127,13 @@ import Base from "../components/base.astro";
     if (isSelecting) {
       const buttonX = startX > endX ? endX - buttonWidth : endX;
       const buttonY = startY > endY ? endY - buttonHeight : endY;
-
-      buttonEl.style.left = `${buttonX}px`;
-      buttonEl.style.top = `${buttonY}px`;
+      // buttonEl.style.left = `${buttonX}px`;
+      // buttonEl.style.top = `${buttonY}px`;
+      invoke("show_recorder_btn", {
+          coords: [buttonX, buttonY],
+        }).then(() => {
+          console.log("recording started");
+        });
     }
     isSelecting = false;
     buttonEl.classList.remove("hidden");
