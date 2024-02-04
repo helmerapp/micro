@@ -2077,7 +2077,7 @@ checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 [[package]]
 name = "helmer-media"
 version = "0.1.0"
-source = "git+ssh://git@github.com/Pranav2612000/helmer-media.git?branch=master#d40bdea97148c690bed94d01e5d5488e7e972783"
+source = "git+ssh://git@github.com/Pranav2612000/helmer-media.git#c09af3ed572f64f26c94035a834d43da371b9a56"
 dependencies = [
  "ac-ffmpeg",
  "anyhow",
@@ -2092,9 +2092,11 @@ dependencies = [
  "cocoa 0.25.0",
  "gifski",
  "helmer-media",
+ "imgref",
  "objc",
  "opener",
  "os_info",
+ "rgb",
  "scap",
  "serde",
  "serde_json",
