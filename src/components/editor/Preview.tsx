@@ -3,40 +3,52 @@ import { convertFileSrc } from '@tauri-apps/api/tauri'
 import * as Slider from '@radix-ui/react-slider';
 
 export default function Preview() {
-
-	const [previewVideo, setPreviewVideo] = useState<string>();
+	const [totalFrames, setTotalFrames] = useState(0);
 	const [selectedFrames, setSelectedFrames] = useState([0, 200]);
 
 	const previewRef = useRef<HTMLVideoElement>(null);
 
+	const previewFps = 30; // Assume 30 fps for now
+
 	const handleInput = (e: number[]) => {
-		console.log(e)
+
+		// check which number is changing and update the video accordingly
+		if (e[0] !== selectedFrames[0]) {
+			// @ts-expect-error
+			previewRef.current.currentTime = e[0] / previewFps;
+		} else if (e[1] !== selectedFrames[1]) {
+			// @ts-expect-error
+			previewRef.current.currentTime = e[1] / previewFps;
+		}
+
 		setSelectedFrames(e)
 	};
 
-	// TODO: Show the GIF preview here
-
 	useEffect(() => {
-		// We have got the preview video file from query parameters
+		// Extract preview video path from query params
 		const params = new URLSearchParams(window.location.search);
-		const filePath = params.get("file");
-		const assetUrl = convertFileSrc(filePath!);
-		setPreviewVideo(assetUrl);
+		const previewPath = params.get("file");
+		const previewUrl = convertFileSrc(previewPath!);
+
+		// @ts-expect-error — Set the video source to the preview URL
+		previewRef.current.src = previewUrl;
+		// @ts-expect-error
+		previewRef.current.load();
+
+		// Get the duration (in seconds) after the video is loaded
+		// @ts-expect-error
+		previewRef.current.addEventListener('loadedmetadata', () => {
+			// @ts-expect-error
+			const duration = previewRef.current.duration;
+			const frames = Math.floor(duration * previewFps);
+			setTotalFrames(frames);
+			setSelectedFrames([0, frames]);
+		});
+
 	}, []);
 
-	useEffect(() => {
-		if (previewVideo) {
-			previewRef.current?.load()
-			console.log(previewRef.current?.duration);
-		}
-
-	}, [previewVideo])
-
-	// get total frames and map to slider max
-	// on slider change, update preview video to show current frame
-
 	return <div className="w-[95%] h-fit rounded-xl overflow-hidden m-auto mt-0 mb-0 flex flex-col p-4 gap-4">
-		<video src={previewVideo} muted controls={false}
+		<video muted controls={false}
 			className="w-full object-cover rounded-md overflow-hidden h-[380px] border border-neutral-600" width={800} height={480} ref={previewRef}
 		/>
 
@@ -44,7 +56,7 @@ export default function Preview() {
 			className="relative flex items-center select-none touch-none h-5"
 			value={selectedFrames}
 			min={0}
-			max={200}
+			max={totalFrames}
 			step={1}
 			onValueChange={(e) => handleInput(e)}
 		>
