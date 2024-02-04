@@ -1,9 +1,10 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
+import tailwind from "@astrojs/tailwind";
 
-// DOCS: https://astro.build/config
+// https://astro.build/config
 export default defineConfig({
-  integrations: [react()],
+  integrations: [react(), tailwind()],
   server: {
     port: 1420
   },
@@ -13,5 +14,8 @@ export default defineConfig({
         ignored: ['**/target/**']
       }
     }
+  },
+  devToolbar: {
+    enabled: false
   }
 });
