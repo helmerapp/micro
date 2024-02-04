@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import Preview from "./Preview";
 import Controls from "./Controls";
 
 export default function Editor() {
+
+	const [selectedFrames, setSelectedFrames] = useState([0, 200]);
 
 	const exportHandler = (options: {
 		size: number,
@@ -12,7 +15,10 @@ export default function Editor() {
 		bounce: boolean
 	}) => {
 		invoke('export_handler', {
-			options
+			options: {
+				range: selectedFrames,
+				...options,
+			}
 		}).then(() => {
 			console.log("export started")
 		})
@@ -20,8 +26,8 @@ export default function Editor() {
 
 	return (
 		<main className="w-full h-full flex flex-col bg-[#222] p-8 items-center">
-			<Preview />
-			<Controls submitHandler={exportHandler} />
+			<Preview setSelectedFrames={setSelectedFrames} selectedFrames={selectedFrames} />
+			<Controls exportHandler={exportHandler} />
 		</main>
 	);
 }
