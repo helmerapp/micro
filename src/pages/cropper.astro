@@ -8,11 +8,6 @@ import Base from "../components/base.astro";
 			<div id="selectionBorder"></div>
 			<div id="selectionInner"></div>
 		</section>
-		<button class="record hidden">
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-				<circle cx="12" cy="12" r="10"></circle>
-			</svg>
-		</button>
 	</main>
 </Base>
 
@@ -73,7 +68,7 @@ import Base from "../components/base.astro";
 		display: block;
 	}
 
-	button {
+	/* button {
 		width: 3rem;
 		height: 3rem;
 		display: flex;
@@ -84,7 +79,7 @@ import Base from "../components/base.astro";
 		border: 2px solid rgba(0,0,0,0.4);
 		outline: none;
 		border-radius: 50%;
-		/* transition: transform 0.1s ease-out; */
+		// transition: transform 0.1s ease-out; 
 		transition: transform 0.4s cubic-bezier(.47,1.64,.41,.8);
 		transform: scale(1);
 		overflow: hidden;
@@ -100,11 +95,11 @@ import Base from "../components/base.astro";
 	button:active {
 		transform: scale(0.95);
 	}
-
+	*/
 	.hidden {
 		transform: scale(0);
-	}
-
+	} 
+	/* 
 	button::before {
 		content: "";
 		position: absolute;
@@ -145,7 +140,7 @@ import Base from "../components/base.astro";
 			left: 100%;
 			transition-property: left;
 		}
-	}
+	} */
 </style>
 
 <script>
@@ -154,7 +149,8 @@ import Base from "../components/base.astro";
 
 	// Cropper State
 	let isSelecting = false;
-	let isRecording = false;
+	let isToolbarVisible = false;
+	// let isRecording = false;
 	let startX = 0;
 	let startY = 0;
 	let endX = 0;
@@ -163,17 +159,24 @@ import Base from "../components/base.astro";
 	// Constants
 	const selectionEl = document.querySelector('section')!;
 	const selectableAreaEl = document.querySelector('main')!;
-	const buttonEl = document.querySelector('button')!;
-	const buttonWidth = buttonEl.offsetWidth;
-	const buttonHeight = buttonEl.offsetHeight;
+	// const buttonEl = document.querySelector('button')!;
+	// const buttonWidth = buttonEl.offsetWidth;
+	// const buttonHeight = buttonEl.offsetHeight;
 
 	// Events
 	selectableAreaEl.addEventListener('mousedown', (e) => {
 		isSelecting = true;
-		buttonEl.classList.add('hidden');
+		// buttonEl.classList.add('hidden');
 		selectionEl.classList.remove('hidden');
 		startX = e.clientX - selectableAreaEl.offsetLeft;
 		startY = e.clientY - selectableAreaEl.offsetTop;
+		if (isToolbarVisible){
+			console.log("invoking hide toolbar")
+			invoke('hide_toolbar').then(() => {
+				console.log("hide toolbar")
+			})
+			isToolbarVisible = false;
+		}
 	});
 
 	selectableAreaEl.addEventListener('mousemove', (e) => {
@@ -193,36 +196,43 @@ import Base from "../components/base.astro";
 
 	selectableAreaEl.addEventListener('mouseup', () => {
 		if (isSelecting) {
-			const buttonX = startX > endX ? endX - buttonWidth : endX;
-			const buttonY = startY > endY ? endY - buttonHeight : endY;
+			const buttonX = startX > endX ? endX - 24 : endX;
+			const buttonY = startY > endY ? endY - 24 : endY;
 	
-			buttonEl.style.left = `${buttonX}px`;
-			buttonEl.style.top = `${buttonY}px`;
-		}
-
-		isSelecting = false;
-		buttonEl.classList.remove('hidden');
-	});
-
-	
-	buttonEl.addEventListener('click', () => {
-		console.log("selected area: ", startX, startY, endX, endY);
-		// validate if selection is valid
-		const isSelectionValid = true
-
-		console.log(isRecording);
-
-		if (isSelectionValid) {
-			isRecording = true
-
-			// turn button into stop button
-			invoke('start_capture', {
+			// buttonEl.style.left = `${buttonX}px`;
+			// buttonEl.style.top = `${buttonY}px`;			
+			isToolbarVisible = true;
+			invoke('show_toolbar', {
+				buttonCoords: [buttonX, buttonY],
 				area: [startX, startY, endX, endY]
 			}).then(() => {
-				console.log("recording started")
+				console.log("mouse up is registered")
 			})
 		}
+		isSelecting = false;
+
+		// buttonEl.classList.remove('hidden');
 	});
+
+	
+	// buttonEl.addEventListener('click', () => {
+	// 	console.log("selected area: ", startX, startY, endX, endY);
+	// 	// validate if selection is valid
+	// 	const isSelectionValid = true
+
+	// 	console.log(isRecording);
+
+	// 	if (isSelectionValid) {
+	// 		isRecording = true
+
+	// 		// turn button into stop button
+	// 		invoke('start_capture', {
+	// 			area: [startX, startY, endX, endY]
+	// 		}).then(() => {
+	// 			console.log("recording started")
+	// 		})
+	// 	}
+	// });
 
 	function closeCropper() {
 		const win = getCurrent();
@@ -230,7 +240,7 @@ import Base from "../components/base.astro";
 		selectionEl.style.height = "0px";
 		selectionEl.style.left = "0px";
 		selectionEl.style.top = "0px";
-		buttonEl.classList.add("hidden");
+		// buttonEl.classList.add("hidden");
 		win.hide();
 	}
 
