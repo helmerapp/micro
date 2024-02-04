@@ -14,5 +14,8 @@ export default defineConfig({
         ignored: ['**/target/**']
       }
     }
+  },
+  devToolbar: {
+    enabled: false
   }
 });
