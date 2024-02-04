@@ -24,6 +24,17 @@ export default function Preview() {
 		setSelectedFrames(e)
 	};
 
+	const handlePlayPause = () => {
+		// @ts-expect-error
+		if (previewRef.current.paused) {
+			// @ts-expect-error
+			previewRef.current.play();
+		} else {
+			// @ts-expect-error
+			previewRef.current.pause();
+		}
+	}
+
 	useEffect(() => {
 		// Extract preview video path from query params
 		const params = new URLSearchParams(window.location.search);
@@ -50,6 +61,7 @@ export default function Preview() {
 	return <div className="w-[95%] h-fit rounded-xl overflow-hidden m-auto mt-0 mb-0 flex flex-col p-4 gap-4">
 		<video muted controls={false}
 			className="w-full object-cover rounded-md overflow-hidden h-[380px] border border-neutral-600" width={800} height={480} ref={previewRef}
+			onClick={handlePlayPause}
 		/>
 
 		<Slider.Root
