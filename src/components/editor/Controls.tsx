@@ -21,9 +21,9 @@ export default function Controls({ submitHandler }: {
 	const [loop, setLoop] = useState(false);
 	const [bounce, setBounce] = useState(false);
 
-	return <form className="flex bg-[#111] p-6 rounded-lg gap-8 align-middle justify-center w-fit">
+	return <form className="flex p-6 rounded-lg gap-8 align-middle justify-center w-fit">
 		<Label text="Size">
-			<select name="size"
+			<select className="rounded-lg p-2 bg-black"
 				defaultValue={"1000"}
 				onChange={(e) => {
 					setSize(Number.parseFloat(e.target.value))
@@ -36,32 +36,33 @@ export default function Controls({ submitHandler }: {
 			</select>
 		</Label>
 		<Label text="Smoothness">
-			<input type="range" min="15" max="60" defaultValue="30"
+			<input type="range" min="15" max="60" value={fps}
 				onChange={e => setFps(Number(e.target.value))}
 			/>
 		</Label>
 		<Label text="Speed">
-			<input type="range" min="0.5" max="2" defaultValue="1" step="0.1"
+			<input type="range" min="0.5" max="2"
+				value={speed} step="0.1"
 				onChange={e => setSpeed(Number(e.target.value))} />
 		</Label>
 		<Label text="Loop">
 			<Switch.Root
-				className="w-[42px] h-[25px] bg-blackA6 rounded-full relative shadow-[0_2px_10px] shadow-blackA4 focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
+				className="w-[42px] h-[25px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
 				id="loop"
 				checked={loop}
 				onCheckedChange={e => setLoop(e)}
 			>
-				<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full shadow-[0_2px_2px] shadow-blackA4 transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
+				<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
 			</Switch.Root>
 		</Label>
 		<Label text="Bounce">
 			<Switch.Root
-				className="w-[42px] h-[25px] bg-blackA6 rounded-full relative shadow-[0_2px_10px] shadow-blackA4 focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
+				className="w-[42px] h-[25px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
 				id="bounce"
 				checked={bounce}
 				onCheckedChange={e => setBounce(e)}
 			>
-				<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full shadow-[0_2px_2px] shadow-blackA4 transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
+				<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
 			</Switch.Root>
 		</Label>
 		<input type="submit" value="Export"
