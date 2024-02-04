@@ -3,11 +3,11 @@ import * as Slider from '@radix-ui/react-slider';
 
 export default function Preview() {
 
-	const [startFrame, setStartFrame] = useState(0);
-	const [endFrame, setEndFrame] = useState(120);
+	const [selectedFrames, setSelectedFrames] = useState([0, 200]);
+
 	const handleInput = (e) => {
-		setStartFrame(e.minValue);
-		setEndFrame(e.maxValue);
+		console.log(e)
+		setSelectedFrames(e)
 	};
 
 	// TODO: Show the GIF preview here
@@ -16,16 +16,16 @@ export default function Preview() {
 	// on slider change, update start and end frame
 	// on slider change, update preview video to show current frame
 
-
 	return <div className="bg-[#111111] w-[80%] h-fit rounded-xl overflow-hidden m-auto mt-0 mb-10 flex flex-col p-4 gap-4">
 		<img src="http://placekitten.com/1000/600" alt="" className="w-full" />
 
 		<Slider.Root
 			className="relative flex items-center select-none touch-none h-5"
-			defaultValue={[0, 120]}
+			value={selectedFrames}
 			min={0}
 			max={200}
 			step={1}
+			onValueChange={(e) => handleInput(e)}
 		>
 			<Slider.Track className="bg-blackA7 relative grow rounded-full h-[3px] w-full">
 				<Slider.Range className="absolute bg-[yellow] rounded-full h-full" />
