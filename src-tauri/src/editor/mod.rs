@@ -18,8 +18,8 @@ pub fn init_editor(app: &AppHandle) {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExportOptions {
-    size: String,
-    fps: String,
+    size: u32,
+    fps: u32,
     speed: f32,
     loop_gif: bool,
     bounce: bool,

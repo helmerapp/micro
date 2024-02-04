@@ -4,7 +4,13 @@ import Controls from "./Controls";
 
 export default function Editor() {
 
-	const exportHandler = (options) => {
+	const exportHandler = (options: {
+		size: number,
+		fps: number,
+		speed: number,
+		loop_gif: boolean,
+		bounce: boolean
+	}) => {
 		invoke('export_handler', {
 			options
 		}).then(() => {
