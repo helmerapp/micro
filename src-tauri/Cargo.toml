@@ -34,6 +34,7 @@ gifski = { version = "1.12.2", default-features = false, features = [
 	"png",
 	"gifsicle",
 ] }
+helmer-media = { git = "ssh://git@github.com/Pranav2612000/helmer-media.git", branch = "master" }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.25.0"
