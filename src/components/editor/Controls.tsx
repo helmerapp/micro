@@ -1,63 +1,65 @@
-import { useEffect } from "react";
-import { invoke } from '@tauri-apps/api/tauri'
+import React, { useState } from "react";
 
-export default function Controls() {
-	useEffect(() => {
-		const form = document.getElementById('form') as HTMLFormElement;
-		const size = document.getElementById('size') as HTMLSelectElement;
-		const fps = document.getElementById('fps') as HTMLInputElement;
-		const speed = document.getElementById('speed') as HTMLInputElement;
-		const loop = document.getElementById('loop') as HTMLInputElement;
-		const bounce = document.getElementById('bounce') as HTMLInputElement;
+const Label = ({ text, children }: {
+	text: string,
+	children: React.ReactNode
+}) => {
+	return <label className="flex flex-col items-center gap-2">
+		<span>{text}</span>
+		{children}
+	</label>
+}
 
-		form.addEventListener("submit", (event) => {
-			event.preventDefault();
+export default function Controls({
+	submitHandler: any
+}) {
 
-			const options = {
-				size: size.value,
-				fps: fps.value,
-				speed: Number.parseFloat(speed.value),
-				loop_gif: loop.checked,
-				bounce: bounce.checked
-			}
+	const [size, setSize] = useState(1000);
+	const [fps, setFps] = useState(30);
+	const [speed, setSpeed] = useState(1);
+	const [loop, setLoop] = useState(true);
+	const [bounce, setBounce] = useState(true);
 
-			// send data to server
-			invoke('export_handler', {
-				options
-			}).then(() => {
-				console.log("export started")
-			})
-		});
-	}, [])
-
-	return <form id="form" className="panel">
-		<div>
-			<label htmlFor="size">Size</label>
-			<select name="size" id="size">
+	return <form id="form"
+		className="flex bg-[#111] p-6 rounded-lg gap-4 align-middle justify-center w-fit">
+		<Label text="Size">
+			<select name="size" id="size" onChange={(e) => {
+				setSize(Number.parseFloat(e.target.value))
+			}}>
 				<option value="200">200</option>
 				<option value="400">400</option>
 				<option value="800">800</option>
 				<option value="1000" selected>1000</option>
 				<option value="2000">2000</option>
 			</select>
-		</div>
-		<div>
-			<label htmlFor="fps">Smoothness</label>
-			<input id="fps" type="number" min="15" max="60" value="30" />
-		</div>
-		<div>
-			<label htmlFor="speed">Speed</label>
-			<input id="speed" type="range" min="0.5" max="2" value="1" step="0.1" />
-		</div>
-		<div>
-			<label htmlFor="loop">Loop</label>
+		</Label>
+		<Label text="Smoothness">
+			<input id="fps" type="range" min="15" max="60" defaultValue="30"
+			// onChange={e => setFps(e.target.value)}
+			/>
+		</Label>
+		<Label text="Speed">
+			<input id="speed" type="range" min="0.5" max="2" defaultValue="1" step="0.1" />
+		</Label>
+		<Label text="Loop">
 			<input id="loop" type="checkbox" />
-		</div>
-		<div>
-			<label htmlFor="bounce">Bounce</label>
-			<input id="bounce" type="checkbox" checked />
-		</div>
-		<input id="export" type="submit" value="Export" />
+		</Label>
+		<Label text="Bounce">
+			<input id="bounce" type="checkbox" />
+		</Label>
+		<input type="submit" value="Export"
+			className="bg-[#444] text-white rounded-lg p-2"
+			onClick={e => {
+				e.preventDefault();
+				submitHandler({
+					size,
+					fps,
+					speed,
+					loop,
+					bounce
+				})
+			}}
+		/>
 	</form>
 
 
