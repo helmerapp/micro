@@ -27,6 +27,7 @@ pub fn init_editor(app: &AppHandle, video_file: String) {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExportOptions {
+    range: Vec<u32>,
     size: u32,
     fps: u32,
     speed: f32,

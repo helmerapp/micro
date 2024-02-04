@@ -2,9 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { convertFileSrc } from '@tauri-apps/api/tauri'
 import * as Slider from '@radix-ui/react-slider';
 
-export default function Preview() {
+export default function Preview({ selectedFrames, setSelectedFrames }: {
+	selectedFrames: number[],
+	setSelectedFrames: (e: number[]) => void
+}) {
 	const [totalFrames, setTotalFrames] = useState(0);
-	const [selectedFrames, setSelectedFrames] = useState([0, 200]);
+
 
 	const previewRef = useRef<HTMLVideoElement>(null);
 
