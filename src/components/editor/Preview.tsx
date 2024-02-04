@@ -1,6 +1,7 @@
-
-
-// Instead of this Canvas, GIF preview will be here
 export default function Preview() {
-	return <canvas id="canvas" width="640" height="480"></canvas>
+
+	// Show the GIF preview here
+	return <div className="bg-[#111111] w-[80%] h-auto rounded-xl overflow-hidden m-auto">
+		<img src="http://placekitten.com/1240" alt="" className="w-full" />
+	</div>
 }
