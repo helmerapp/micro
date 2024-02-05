@@ -11,8 +11,8 @@ const Label = ({ text, children }: {
 	</label>
 }
 
-export default function Controls({ submitHandler }: {
-	submitHandler: (data: { size: number, fps: number, speed: number, loop_gif: boolean, bounce: boolean }) => void
+export default function Controls({ exportHandler }: {
+	exportHandler: (data: { size: number, fps: number, speed: number, loop_gif: boolean, bounce: boolean }) => void
 }) {
 
 	const [size, setSize] = useState(1000);
@@ -69,7 +69,7 @@ export default function Controls({ submitHandler }: {
 			className="bg-[#444] text-white rounded-lg p-2"
 			onClick={e => {
 				e.preventDefault();
-				submitHandler({ size, fps, speed, loop_gif: loop, bounce })
+				exportHandler({ size, fps, speed, loop_gif: loop, bounce })
 			}}
 		/>
 	</form>

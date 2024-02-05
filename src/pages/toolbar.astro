@@ -158,6 +158,9 @@ import Base from "../components/base.astro";
 			</svg>`;
 			stopwatchEl?.classList.add("hidden");
 			clearInterval(timer);
+			seconds = 0;
+			minutes = 0;
+			updateDisplay();
 			invoke('stop_capture', {}).then(() => {
 				console.log("recording stopped");
 			});
