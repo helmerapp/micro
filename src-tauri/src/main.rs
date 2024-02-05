@@ -15,7 +15,7 @@ use tokio::sync::Mutex;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Status {
     Idle,
     Cropper,
@@ -25,7 +25,8 @@ pub enum Status {
 
 pub struct AppState {
     status: Status,
-    recorder: Option<Arc<Mutex<Capturer>>>,
+    recorder: Option<scap::capturer::Capturer>,
+    frames: Vec<scap::frame::Frame>,
 }
 
 impl Default for AppState {
@@ -33,6 +34,7 @@ impl Default for AppState {
         Self {
             status: Status::Idle,
             recorder: None,
+            frames: Vec::new(),
         }
     }
 }

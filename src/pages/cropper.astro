@@ -213,14 +213,20 @@ import Base from "../components/base.astro";
 		console.log(isRecording);
 
 		if (isSelectionValid) {
-			isRecording = true
+			if (isRecording) {
+				invoke('stop_capture').then(() => {
+					console.log("recording stopped")
+				})
+			} else {
+				isRecording = true
 
-			// turn button into stop button
-			invoke('start_capture', {
-				area: [startX, startY, endX, endY]
-			}).then(() => {
-				console.log("recording started")
-			})
+				// turn button into stop button
+				invoke('start_capture', {
+					area: [startX, startY, endX, endY]
+				}).then(() => {
+					console.log("recording started")
+				})
+			}
 		}
 	});
 
