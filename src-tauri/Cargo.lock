@@ -3973,7 +3973,7 @@ dependencies = [
 [[package]]
 name = "scap"
 version = "0.0.3"
-source = "git+https://github.com/clearlysid/scap/?branch=v0.0.1/main#692b7e62f40a4bc1e9f7d539d71caad997471276"
+source = "git+https://github.com/helmerapp/scap/?branch=v0.0.1/main#ebefb19413049a5565afb82c0448f0ab940be882"
 dependencies = [
  "apple-sys",
  "ashpd",

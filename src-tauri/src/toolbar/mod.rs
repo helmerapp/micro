@@ -47,7 +47,7 @@ pub async fn show_toolbar(button_coords: Vec<u32>, area: Vec<u32>, app: AppHandl
     }
     println!("Coordinates {:?}", button_coords);
     let toolbar_win = app.get_window("toolbar").unwrap();
-    let pos = Position::Physical((button_coords[0], button_coords[1]).into());
+    let pos = Position::Logical((button_coords[0], button_coords[1]).into());
     toolbar_win.set_position(pos).unwrap();
     toolbar_win.show().unwrap();
     toolbar_win.set_focus().unwrap();
