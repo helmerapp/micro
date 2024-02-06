@@ -6,8 +6,8 @@ mod cropper;
 mod editor;
 mod tray;
 
-use scap::capturer::Capturer;
-use std::sync::Arc;
+use scap::{capturer::Capturer, frame::Frame};
+use std::path::PathBuf;
 use tauri::{GlobalShortcutManager, Manager};
 use tauri_plugin_autostart::MacosLauncher;
 use tokio::sync::Mutex;
@@ -25,16 +25,18 @@ pub enum Status {
 
 pub struct AppState {
     status: Mutex<Status>,
-    recorder: Mutex<Option<scap::capturer::Capturer>>,
-    frames: Mutex<Vec<scap::frame::Frame>>,
+    frames: Mutex<Vec<Frame>>,
+    recorder: Mutex<Option<Capturer>>,
+    preview_path: Mutex<Option<PathBuf>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
             status: Mutex::new(Status::Idle),
-            recorder: Mutex::new(None),
             frames: Mutex::new(Vec::new()),
+            recorder: Mutex::new(None),
+            preview_path: Mutex::new(None),
         }
     }
 }
