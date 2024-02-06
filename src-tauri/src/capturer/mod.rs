@@ -29,6 +29,9 @@ pub async fn stop_capture(app_handle: AppHandle) {
 
     // TODO: stop capturing with scap
 
+    // Hide cropper, create editor
+    crate::cropper::toggle_cropper(&app_handle);
+    crate::toolbar::toggle_toolbar(&app_handle);
     // INFO: assume we have a video file path that can be used as preview
     // Currently I have hardcoded this to "Preview.mov" on desktop for testing.
     let preview_file = String::from(desktop_dir().unwrap().join("Preview.mov").to_str().unwrap());
