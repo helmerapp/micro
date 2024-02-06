@@ -1,36 +1,44 @@
-// use scap::capturer::{Capturer, Options};
 use crate::{AppState, Status};
 use helmer_media::encoder;
+use rand::Rng;
+use scap::{
+    capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
+    frame::FrameType,
+};
 use tauri::{AppHandle, Manager};
-use tokio::sync::Mutex;
+use tempfile::NamedTempFile;
 
-const FRAME_TYPE: scap::frame::FrameType = scap::frame::FrameType::BGR0;
+const FRAME_TYPE: FrameType = FrameType::BGR0;
+
+fn get_random_id() -> String {
+    let random_number: u64 = rand::thread_rng().gen();
+    let id = format!("{:x}", random_number);
+    id.chars().take(13).collect()
+}
 
 #[tauri::command]
 pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
-    app_handle.emit_all("capture-started", false).unwrap();
-
-    // Update app state
+    // Update state to recording
     let state = app_handle.state::<AppState>();
-
     let mut status = state.status.lock().await;
     *status = Status::Recording;
     drop(status);
 
-    // TODO: initialize scap and start capturing
+    // TODO: Calculate capture area
     println!("Cropped Area: {:?}", area);
 
-    let options = scap::capturer::Options {
+    // Initialize scap
+    let options = Options {
         fps: 60,
         targets: Vec::new(),
         show_cursor: true,
         show_highlight: true,
         excluded_targets: None,
         output_type: FRAME_TYPE,
-        output_resolution: scap::capturer::Resolution::_480p,
-        source_rect: Some(scap::capturer::CGRect {
-            origin: scap::capturer::CGPoint { x: 0.0, y: 0.0 },
-            size: scap::capturer::CGSize {
+        output_resolution: Resolution::_480p,
+        source_rect: Some(CGRect {
+            origin: CGPoint { x: 0.0, y: 0.0 },
+            size: CGSize {
                 width: 1280.0,
                 height: 720.0,
             },
@@ -39,15 +47,13 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
     };
 
     let mut recorder = state.recorder.lock().await;
-    *recorder = Some(scap::capturer::Capturer::new(options));
-    // let mut recorder = scap::capturer::Capturer::new(options);
+    *recorder = Some(Capturer::new(options));
     (*recorder).as_mut().unwrap().start_capture();
     drop(recorder);
 
+    // Start capturing frames
     println!("Capturing frames...");
     let mut frames = state.frames.lock().await;
-    // let
-    // let mut frames: Vec<scap::frame::Frame> = Vec::new();
 
     loop {
         let status = state.status.lock().await;
@@ -68,36 +74,41 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
     }
 
     println!("Recording stopped");
-    // for _ in 0..200 {
-    //     let frame = recorder.get_next_frame().expect("Error");
-    //     frames.push(frame);
-    // }
 }
 
 #[tauri::command]
 pub async fn stop_capture(app_handle: AppHandle) {
     println!("Capture stopped");
-    app_handle.emit_all("capture-stopped", false).unwrap();
 
-    // Update app state
+    // Update app state to editing
     let state = app_handle.state::<AppState>();
-
-    // TODO: stop capturing with scap
     let mut status = state.status.lock().await;
     *status = Status::Editing;
     drop(status);
 
+    // Stop capturing frames
     let mut recorder = state.recorder.lock().await;
     (*recorder).as_mut().unwrap().stop_capture();
-    println!("All frames captured");
-
     let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
     drop(recorder);
+    println!("All frames captured");
+
+    // Create file in temp directory
+    let preview_file = format!("HM-{}.mp4", get_random_id());
+    let mut preview_path = state.preview_path.lock().await;
+    *preview_path = Some(
+        NamedTempFile::new()
+            .unwrap()
+            .into_temp_path()
+            .with_file_name(&preview_file),
+    );
+
+    println!("Preview path: {:?}", preview_path);
 
     // Create Encoder
     let mut encoder = encoder::Encoder::new(encoder::Options {
         output: encoder::Output::FileOutput(encoder::FileOutput {
-            output_filename: "/Users/siddharth/Desktop/dummy.mp4".to_owned(),
+            output_filename: preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
         }),
         input: encoder::InputOptions {
             width: output_width as usize,
