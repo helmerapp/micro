@@ -5,6 +5,7 @@ use scap::{
     capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
     frame::FrameType,
 };
+use std::fs::File;
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
 
@@ -132,6 +133,10 @@ pub async fn stop_capture(app_handle: AppHandle) {
     encoder.done();
     drop(encoder);
     println!("Encoding completed");
+
+    // TODO: graceful encoding
+    // open encoded file
+    File::open(preview_path.as_ref().unwrap()).unwrap();
 
     // Hide cropper, create editor
     crate::cropper::toggle_cropper(&app_handle);
