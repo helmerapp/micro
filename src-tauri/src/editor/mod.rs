@@ -48,8 +48,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("TODO: export with options: {:?}", options);
 
     //  get frames from the app state
-    let state_mutex = app_handle.state::<Mutex<AppState>>();
-    let mut state = state_mutex.lock().await;
+    let state = app_handle.state::<AppState>();
 
     // TODO: use the options to export GIF with Gifski
     // Starting GIF creation
@@ -79,9 +78,10 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
         println!("Finished writing");
     });
 
+    let mut frames = state.frames.lock().await;
     let mut i = 0;
     println!("Encoding frames to gif");
-    for frame in state.frames.iter_mut() {
+    for frame in (*frames).iter_mut() {
         match frame {
             scap::frame::Frame::BGR0(bgr_frame) => {
                 let img = transform_frame_bgr0(bgr_frame);

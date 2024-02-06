@@ -11,10 +11,11 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
     app_handle.emit_all("capture-started", false).unwrap();
 
     // Update app state
-    let state_mutex = app_handle.state::<Mutex<AppState>>();
-    let mut state = state_mutex.lock().await;
+    let state = app_handle.state::<AppState>();
 
-    state.status = Status::Recording;
+    let mut status = state.status.lock().await;
+    *status = Status::Recording;
+    drop(status);
 
     // TODO: initialize scap and start capturing
     println!("Cropped Area: {:?}", area);
@@ -26,7 +27,7 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
         show_highlight: true,
         excluded_targets: None,
         output_type: FRAME_TYPE,
-        output_resolution: scap::capturer::Resolution::_720p,
+        output_resolution: scap::capturer::Resolution::_480p,
         source_rect: Some(scap::capturer::CGRect {
             origin: scap::capturer::CGPoint { x: 0.0, y: 0.0 },
             size: scap::capturer::CGSize {
@@ -37,22 +38,33 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
         ..Default::default()
     };
 
-    state.recorder = Some(scap::capturer::Capturer::new(options));
+    let mut recorder = state.recorder.lock().await;
+    *recorder = Some(scap::capturer::Capturer::new(options));
     // let mut recorder = scap::capturer::Capturer::new(options);
-    state.recorder.as_mut().unwrap().start_capture();
+    (*recorder).as_mut().unwrap().start_capture();
+    drop(recorder);
 
     println!("Capturing frames...");
+    let mut frames = state.frames.lock().await;
     // let
     // let mut frames: Vec<scap::frame::Frame> = Vec::new();
 
-    while state.status == Status::Recording {
-        let frame = state
-            .recorder
+    loop {
+        let status = state.status.lock().await;
+        if *status != Status::Recording {
+            break;
+        }
+        drop(status);
+
+        let mut recorder = state.recorder.lock().await;
+        let frame = (*recorder)
             .as_mut()
             .unwrap()
             .get_next_frame()
             .expect("Error");
-        state.frames.push(frame);
+        (*frames).push(frame);
+        println!("Frame captured");
+        drop(recorder);
     }
 
     println!("Recording stopped");
@@ -68,15 +80,19 @@ pub async fn stop_capture(app_handle: AppHandle) {
     app_handle.emit_all("capture-stopped", false).unwrap();
 
     // Update app state
-    let state_mutex = app_handle.state::<Mutex<AppState>>();
-    let mut state = state_mutex.lock().await;
+    let state = app_handle.state::<AppState>();
 
     // TODO: stop capturing with scap
-    state.status = Status::Editing;
-    state.recorder.as_mut().unwrap().stop_capture();
+    let mut status = state.status.lock().await;
+    *status = Status::Editing;
+    drop(status);
+
+    let mut recorder = state.recorder.lock().await;
+    (*recorder).as_mut().unwrap().stop_capture();
     println!("All frames captured");
 
-    let [output_width, output_height] = state.recorder.as_mut().unwrap().get_output_frame_size();
+    let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
+    drop(recorder);
 
     // Create Encoder
     let mut encoder = encoder::Encoder::new(encoder::Options {
@@ -90,11 +106,13 @@ pub async fn stop_capture(app_handle: AppHandle) {
         },
     });
 
+    let mut frames = state.frames.lock().await;
+
     let time_base = helmer_media::TimeBase::new(1, 25);
     let mut frame_idx = 0;
     let mut frame_timestamp = helmer_media::Timestamp::new(frame_idx, time_base);
     println!("Encoding frames...");
-    for frame in state.frames.iter_mut() {
+    for frame in (*frames).iter_mut() {
         encoder.ingest_next_video_frame(frame, frame_timestamp);
 
         frame_idx += 1;

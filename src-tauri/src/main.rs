@@ -24,17 +24,17 @@ pub enum Status {
 }
 
 pub struct AppState {
-    status: Status,
-    recorder: Option<scap::capturer::Capturer>,
-    frames: Vec<scap::frame::Frame>,
+    status: Mutex<Status>,
+    recorder: Mutex<Option<scap::capturer::Capturer>>,
+    frames: Mutex<Vec<scap::frame::Frame>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
-            status: Status::Idle,
-            recorder: None,
-            frames: Vec::new(),
+            status: Mutex::new(Status::Idle),
+            recorder: Mutex::new(None),
+            frames: Mutex::new(Vec::new()),
         }
     }
 }
@@ -72,7 +72,7 @@ fn main() {
 
             Ok(())
         })
-        .manage(Mutex::new(AppState::default()))
+        .manage(AppState::default())
         .system_tray(tray::build())
         .on_system_tray_event(tray::events)
         .invoke_handler(tauri::generate_handler![
