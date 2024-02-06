@@ -7,25 +7,35 @@ use std::thread;
 use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
 use tokio::sync::Mutex;
 
-pub fn init_editor(app: &AppHandle) {
-    let editor_win = WindowBuilder::new(app, "editor", WindowUrl::App("/editor".into()))
+pub fn init_editor(app: &AppHandle, video_file: String) {
+    let editor_url = format!("/editor?file={}", video_file);
+
+    let mut editor_win = WindowBuilder::new(app, "editor", WindowUrl::App(editor_url.into()))
         .title("Helmer Micro")
         .accept_first_mouse(true)
         .inner_size(800.0, 800.0)
-        .skip_taskbar(true)
         .always_on_top(true)
         .decorations(true)
         .resizable(false)
         .visible(true)
         .focused(true)
-        .center()
-        .build();
+        .center();
+
+    #[cfg(target_os = "macos")]
+    {
+        editor_win = editor_win
+            .title_bar_style(tauri::TitleBarStyle::Overlay)
+            .hidden_title(true);
+    }
+
+    editor_win.build().expect("Failed to build editor window");
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExportOptions {
-    size: String,
-    fps: String,
+    range: Vec<u32>,
+    size: u32,
+    fps: u32,
     speed: f32,
     loop_gif: bool,
     bounce: bool,

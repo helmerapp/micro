@@ -11,7 +11,20 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true
+      "all": true,
+      "fs": {
+        "scope": [
+          "$TEMP/**",
+          "$DESKTOP/**"
+        ]
+      },
+      "protocol": {
+        "all": false,
+        "asset": true,
+        "assetScope": [
+          "**"
+        ]
+      }
     },
     "bundle": {
       "active": true,

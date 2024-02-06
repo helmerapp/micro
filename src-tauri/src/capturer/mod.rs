@@ -135,5 +135,8 @@ pub async fn stop_capture(app_handle: AppHandle) {
 
     // Hide cropper, create editor
     crate::cropper::toggle_cropper(&app_handle);
-    crate::editor::init_editor(&app_handle);
+    crate::editor::init_editor(
+        &app_handle,
+        preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
+    );
 }
