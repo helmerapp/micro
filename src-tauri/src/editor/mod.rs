@@ -4,8 +4,7 @@ use rgb::RGBA;
 use scap::frame;
 use serde::{Deserialize, Serialize};
 use std::thread;
-use tauri::{AppHandle, Manager};
-use tauri::{WindowBuilder, WindowUrl};
+use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
 use tokio::sync::Mutex;
 
 pub fn init_editor(app: &AppHandle) {
@@ -47,7 +46,6 @@ fn transform_frame_bgr0(frame: &frame::BGRFrame) -> Img<Vec<RGBA<u8>>> {
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("TODO: export with options: {:?}", options);
 
-    //  get frames from the app state
     let state = app_handle.state::<AppState>();
 
     // TODO: use the options to export GIF with Gifski
@@ -61,7 +59,10 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
 
     let (gif_encoder, gif_writer) = gifski::new(settings).unwrap();
 
-    let gif = match std::fs::File::create("/Users/siddharth/Desktop/final.gif") {
+    let gif_name = chrono::Local::now().format("HM-%y%m%d-%I%M%p").to_string();
+    let gif_path = desktop_dir().unwrap().join(format!("{}.gif", gif_name));
+
+    let gif = match std::fs::File::create(gif_path) {
         Ok(file) => file,
         Err(err) => {
             eprintln!("Error creating GIF file: {:?}", err);
@@ -78,6 +79,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
         println!("Finished writing");
     });
 
+    //  Get frames from app state
     let mut frames = state.frames.lock().await;
     let mut i = 0;
     println!("Encoding frames to gif");
