@@ -15,7 +15,7 @@ import Base from "../components/base.astro";
 	main {
 		width: 100%;
 		height: 100%;
- 		overflow: hidden;
+		overflow: hidden;
 		cursor: crosshair;
 		position: relative;
 		/* background: rgba(0, 0, 0, 0.4); */
@@ -30,7 +30,10 @@ import Base from "../components/base.astro";
 		height: 100%;
 	}
 
-	section::before, section::after, #selectionInner::before, #selectionInner::after {
+	section::before,
+	section::after,
+	#selectionInner::before,
+	#selectionInner::after {
 		content: "";
 		position: absolute;
 		width: 100%;
@@ -46,7 +49,8 @@ import Base from "../components/base.astro";
 		bottom: 100%;
 	}
 
-	#selectionInner::before, #selectionInner::after {
+	#selectionInner::before,
+	#selectionInner::after {
 		width: 100vw;
 		height: 200vh;
 		top: -100vh;
@@ -69,12 +73,12 @@ import Base from "../components/base.astro";
 	}
 	.hidden {
 		transform: scale(0);
-	} 
+	}
 </style>
 
 <script>
-	import { invoke } from '@tauri-apps/api/tauri'
-	import { getCurrent } from '@tauri-apps/api/window';
+	import { invoke } from "@tauri-apps/api/tauri";
+	import { getCurrent } from "@tauri-apps/api/window";
 
 	let isSelecting = false;
 	let isToolbarVisible = false;
@@ -84,25 +88,25 @@ import Base from "../components/base.astro";
 	let endY = 0;
 
 	// Constants
-	const selectionEl = document.querySelector('section')!;
-	const selectableAreaEl = document.querySelector('main')!;
+	const selectionEl = document.querySelector("section")!;
+	const selectableAreaEl = document.querySelector("main")!;
 
 	// Events
-	selectableAreaEl.addEventListener('mousedown', (e) => {
+	selectableAreaEl.addEventListener("mousedown", (e) => {
 		isSelecting = true;
-		selectionEl.classList.remove('hidden');
+		selectionEl.classList.remove("hidden");
 		startX = e.clientX - selectableAreaEl.offsetLeft;
 		startY = e.clientY - selectableAreaEl.offsetTop;
-		if (isToolbarVisible){
-			console.log("invoking hide toolbar")
-			invoke('hide_toolbar').then(() => {
-				console.log("hide toolbar")
-			})
+		if (isToolbarVisible) {
+			console.log("invoking hide toolbar");
+			invoke("hide_toolbar").then(() => {
+				console.log("hide toolbar");
+			});
 			isToolbarVisible = false;
 		}
 	});
 
-	selectableAreaEl.addEventListener('mousemove', (e) => {
+	selectableAreaEl.addEventListener("mousemove", (e) => {
 		if (isSelecting) {
 			endX = e.clientX - selectableAreaEl.offsetLeft;
 			endY = e.clientY - selectableAreaEl.offsetTop;
@@ -117,45 +121,20 @@ import Base from "../components/base.astro";
 		}
 	});
 
-	selectableAreaEl.addEventListener('mouseup', () => {
+	selectableAreaEl.addEventListener("mouseup", () => {
 		if (isSelecting) {
 			const buttonX = startX > endX ? endX - 24 : endX;
 			const buttonY = startY > endY ? endY - 24 : endY;
-	
-			buttonEl.style.left = `${buttonX}px`;
-			buttonEl.style.top = `${buttonY}px`;
-		}
 
-		isSelecting = false;
-		buttonEl.classList.remove('hidden');
-	});
-
-	
-	buttonEl.addEventListener('click', () => {
-		console.log("selected area: ", startX, startY, endX, endY);
-		// validate if selection is valid
-		const isSelectionValid = true
-
-		console.log(isRecording);
-
-		if (isSelectionValid) {
-			if (isRecording) {
-				invoke('stop_capture').then(() => {
-					console.log("recording stopped")
-				})
-			} else {
-				isRecording = true
-
-				// turn button into stop button
-				invoke('start_capture', {
-					area: [startX, startY, endX, endY]
-				}).then(() => {
-					console.log("recording started")
-				})
-			}
+			isToolbarVisible = true;
+			invoke("show_toolbar", {
+				buttonCoords: [buttonX, buttonY],
+				area: [startX, startY, endX, endY],
+			}).then(() => {
+				console.log("mouse up is registered");
+			});
 		}
 		isSelecting = false;
-
 	});
 
 	function closeCropper() {
@@ -167,9 +146,9 @@ import Base from "../components/base.astro";
 		win.hide();
 	}
 
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape') {
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") {
 			closeCropper();
 		}
-	})
+	});
 </script>
