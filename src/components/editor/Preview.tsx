@@ -40,6 +40,9 @@ export default function Preview({
 		const previewPath = params.get("file");
 		const previewUrl = convertFileSrc(previewPath!);
 
+		console.log("previewPath", previewPath);
+		console.log("previewUrl", previewUrl);
+
 		// Set the source to the preview URL
 		videoRef.current.src = previewUrl;
 		videoRef.current.load();
