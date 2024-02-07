@@ -8,7 +8,7 @@ use scap::{
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
 
-const FRAME_TYPE: FrameType = FrameType::YUVFrame;
+const FRAME_TYPE: FrameType = FrameType::RGB;
 
 fn get_random_id() -> String {
     let random_number: u64 = rand::thread_rng().gen();
@@ -35,12 +35,12 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
         show_highlight: true,
         excluded_targets: None,
         output_type: FRAME_TYPE,
-        output_resolution: Resolution::_480p,
+        output_resolution: Resolution::_1080p,
         source_rect: Some(CGRect {
             origin: CGPoint { x: 0.0, y: 0.0 },
             size: CGSize {
-                width: 1280.0,
-                height: 720.0,
+                width: 1920.0,
+                height: 1080.0,
             },
         }),
         ..Default::default()
@@ -117,12 +117,16 @@ pub async fn stop_capture(app_handle: AppHandle) {
         },
     });
 
+    // print output_width and height
+    println!("output_width: {}", output_width);
+    println!("output_height: {}", output_height);
+
     let mut frames = state.frames.lock().await;
 
     let time_base = helmer_media::TimeBase::new(1, 25);
     let mut frame_idx = 0;
     let mut frame_timestamp = helmer_media::Timestamp::new(frame_idx, time_base);
-    println!("Encoding frames...");
+    println!("Encoding preview...");
     for frame in (*frames).iter_mut() {
         encoder.ingest_next_video_frame(frame, frame_timestamp);
 
@@ -131,12 +135,11 @@ pub async fn stop_capture(app_handle: AppHandle) {
     }
     encoder.done();
     drop(encoder);
-    println!("Encoding completed");
-
-    // TODO: handle encoding for RGB frames
+    println!("Preview encoding complete");
 
     // Hide cropper, create editor
     crate::cropper::toggle_cropper(&app_handle);
+    crate::toolbar::toggle_toolbar(&app_handle);
     crate::editor::init_editor(
         &app_handle,
         preview_path.as_ref().unwrap().to_str().unwrap().to_string(),

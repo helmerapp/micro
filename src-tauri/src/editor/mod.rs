@@ -1,7 +1,7 @@
 use crate::AppState;
 use imgref::Img;
 use rgb::RGBA;
-use scap::frame;
+use scap::frame::{BGRFrame, Frame, RGBFrame};
 use serde::{Deserialize, Serialize};
 use std::thread;
 use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
@@ -41,7 +41,7 @@ pub struct ExportOptions {
     bounce: bool,
 }
 
-fn transform_frame_bgr0(frame: &frame::BGRFrame) -> Img<Vec<RGBA<u8>>> {
+fn transform_frame_bgr0(frame: &BGRFrame) -> Img<Vec<RGBA<u8>>> {
     let frame_data = &frame.data;
     let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
 
@@ -52,11 +52,21 @@ fn transform_frame_bgr0(frame: &frame::BGRFrame) -> Img<Vec<RGBA<u8>>> {
     Img::new(rgba_data, frame.width as usize, frame.height as usize)
 }
 
+fn transform_frame_rgb(frame: &RGBFrame) -> Img<Vec<RGBA<u8>>> {
+    let frame_data = &frame.data;
+    let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
+
+    for src in frame_data.chunks_exact(3) {
+        rgba_data.push(RGBA::new(src[0], src[1], src[2], 255))
+    }
+
+    Img::new(rgba_data, frame.width as usize, frame.height as usize)
+}
+
 #[tauri::command]
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("TODO: export with options: {:?}", options);
     println!("TOFIX: export not working with YUV frames yet");
-    return;
 
     let state = app_handle.state::<AppState>();
 
@@ -97,10 +107,20 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("Encoding frames to gif");
     for frame in (*frames).iter_mut() {
         match frame {
-            scap::frame::Frame::BGR0(bgr_frame) => {
+            Frame::BGR0(bgr_frame) => {
                 let img = transform_frame_bgr0(bgr_frame);
                 gif_encoder
                     .add_frame_rgba(i, img, i as f64 * 0.5)
+                    .unwrap_or_else(|err| {
+                        eprintln!("Error adding frame to encoder: {:?}", err);
+                    });
+
+                i += 1;
+            }
+            Frame::RGB(rgb_frame) => {
+                let img = transform_frame_rgb(rgb_frame);
+                gif_encoder
+                    .add_frame_rgba(i, img, i as f64 / 60.0)
                     .unwrap_or_else(|err| {
                         eprintln!("Error adding frame to encoder: {:?}", err);
                     });
