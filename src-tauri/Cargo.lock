@@ -2084,6 +2084,7 @@ dependencies = [
  "ac-ffmpeg",
  "anyhow",
  "itertools",
+ "rgb2yuv420",
  "scap",
 ]
 
@@ -3932,6 +3933,12 @@ checksum = "05aaa8004b64fd573fc9d002f4e632d51ad4f026c2b5ba95fcb6c2f32c2c47d8"
 dependencies = [
  "bytemuck",
 ]
+
+[[package]]
+name = "rgb2yuv420"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4cf3ad431593a2bb204ed1c609814aa9f95b169f8cef6b811b03261097f2453b"
 
 [[package]]
 name = "rustc-demangle"

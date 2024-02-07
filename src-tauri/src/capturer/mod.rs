@@ -27,6 +27,13 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
     // TODO: Calculate capture area
     println!("Cropped Area: {:?}", area);
 
+    // area is of the form [x1, y1, x2, y2]
+    // we need it of the form [0,0, x2-x1, y2-y1]
+    let crop_area = vec![
+        area[2] as f64 - area[0] as f64,
+        area[3] as f64 - area[1] as f64,
+    ];
+
     // Initialize scap
     let options = Options {
         fps: 60,
@@ -35,12 +42,12 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
         show_highlight: true,
         excluded_targets: None,
         output_type: FRAME_TYPE,
-        output_resolution: Resolution::_1080p,
+        output_resolution: Resolution::_1080p, // TODO: doesn't respect aspect ratio yet
         source_rect: Some(CGRect {
             origin: CGPoint { x: 0.0, y: 0.0 },
             size: CGSize {
-                width: 1920.0,
-                height: 1080.0,
+                width: crop_area[0],
+                height: crop_area[1],
             },
         }),
         ..Default::default()
