@@ -93,11 +93,13 @@ pub async fn stop_capture(app_handle: AppHandle) {
     *status = Status::Editing;
     drop(status);
 
-    // Stop capturing frames
+    // Stop capturing frames and drop recorder
     let mut recorder = state.recorder.lock().await;
     (*recorder).as_mut().unwrap().stop_capture();
     let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
+    recorder.take();
     drop(recorder);
+
     println!("All frames captured");
 
     // Create file in temp directory
