@@ -55,6 +55,8 @@ fn transform_frame_bgr0(frame: &frame::BGRFrame) -> Img<Vec<RGBA<u8>>> {
 #[tauri::command]
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("TODO: export with options: {:?}", options);
+    println!("TOFIX: export not working with YUV frames yet");
+    return;
 
     let state = app_handle.state::<AppState>();
 

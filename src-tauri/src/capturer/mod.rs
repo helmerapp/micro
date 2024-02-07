@@ -5,11 +5,10 @@ use scap::{
     capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
     frame::FrameType,
 };
-use std::fs::File;
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
 
-const FRAME_TYPE: FrameType = FrameType::BGR0;
+const FRAME_TYPE: FrameType = FrameType::YUVFrame;
 
 fn get_random_id() -> String {
     let random_number: u64 = rand::thread_rng().gen();
@@ -134,9 +133,7 @@ pub async fn stop_capture(app_handle: AppHandle) {
     drop(encoder);
     println!("Encoding completed");
 
-    // TODO: graceful encoding
-    // open encoded file
-    File::open(preview_path.as_ref().unwrap()).unwrap();
+    // TODO: handle encoding for RGB frames
 
     // Hide cropper, create editor
     crate::cropper::toggle_cropper(&app_handle);
