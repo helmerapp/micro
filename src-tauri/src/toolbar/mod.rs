@@ -1,6 +1,4 @@
-use tauri::{
-    AppHandle, LogicalSize, Manager, PhysicalSize, Position, Size, WindowBuilder, WindowUrl,
-};
+use tauri::{AppHandle, LogicalSize, Manager, Position, Size, WindowBuilder, WindowUrl};
 
 pub fn init_toolbar(app: &AppHandle) {
     println!("toolbar created");
