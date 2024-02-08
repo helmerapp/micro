@@ -1,7 +1,6 @@
 use tauri::{AppHandle, LogicalSize, Manager, Position, Size, WindowBuilder, WindowUrl};
 
 pub fn init_toolbar(app: &AppHandle) {
-    println!("toolbar created");
     let mut toolbar_win = WindowBuilder::new(app, "toolbar", WindowUrl::App("/toolbar".into()))
         .always_on_top(true)
         .decorations(false)
@@ -61,11 +60,10 @@ pub fn toggle_toolbar(app: &AppHandle) {
 
 #[tauri::command]
 pub async fn show_toolbar(button_coords: Vec<u32>, area: Vec<u32>, app: AppHandle) {
-    println!("show_toolbar here!");
     if app.get_window("toolbar").is_none() {
         crate::toolbar::init_toolbar(&app);
     }
-    println!("Coordinates {:?}", button_coords);
+    println!("Toolbar created at {:?}", button_coords);
     let toolbar_win = app.get_window("toolbar").unwrap();
     let pos = Position::Logical((button_coords[0], button_coords[1]).into());
     toolbar_win.set_position(pos).unwrap();
@@ -76,7 +74,6 @@ pub async fn show_toolbar(button_coords: Vec<u32>, area: Vec<u32>, app: AppHandl
 
 #[tauri::command]
 pub async fn hide_toolbar(app: AppHandle) {
-    println!("hide_toolbar here!");
     let toolbar_win = app.get_window("toolbar").unwrap();
     toolbar_win.hide().unwrap();
 }
