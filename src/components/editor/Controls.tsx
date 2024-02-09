@@ -26,26 +26,36 @@ export default function Controls({ exportHandler, exporting }: {
 		{
 			exporting ?
 				<span id="loader"><style>
-					{`#loader {
-						width: 42px;
-						height: 42px;
-						border: 5px solid #FFF;
-						border-bottom-color: transparent;
+					{`
+					#loader {
+						width: 12px;
+						height: 12px;
 						border-radius: 50%;
-						display: inline-block;
+						display: block;
+						margin:15px auto;
+						position: relative;
+						color: #FFF;
 						box-sizing: border-box;
-						animation: rotation 1s linear infinite;
-						opacity: 0.3;
+						animation: animloader 2s linear infinite;
 					}
-
-					@keyframes rotation {
+					
+					@keyframes animloader {
 						0% {
-								transform: rotate(0deg);
+							box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
+						}
+						25% {
+							box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 2px;
+						}
+						50% {
+							box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 2px,  -38px 0 0 -2px;
+						}
+						75% {
+							box-shadow: 14px 0 0 2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
 						}
 						100% {
-								transform: rotate(360deg);
+							box-shadow: 14px 0 0 -2px,  38px 0 0 2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
 						}
-					} 
+					}
 		`}
 				</style></span>
 				: <>
