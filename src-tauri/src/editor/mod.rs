@@ -5,7 +5,6 @@ use scap::frame::{BGRFrame, Frame, RGBFrame};
 use serde::{Deserialize, Serialize};
 use std::thread;
 use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
-use tokio::sync::Mutex;
 
 pub fn init_editor(app: &AppHandle, video_file: String) {
     let editor_url = format!("/editor?file={}", video_file);
@@ -23,9 +22,7 @@ pub fn init_editor(app: &AppHandle, video_file: String) {
 
     #[cfg(target_os = "macos")]
     {
-        editor_win = editor_win
-            .title_bar_style(tauri::TitleBarStyle::Overlay)
-            .hidden_title(true);
+        editor_win = editor_win.title_bar_style(tauri::TitleBarStyle::Overlay);
     }
 
     editor_win.build().expect("Failed to build editor window");
@@ -66,13 +63,8 @@ fn transform_frame_rgb(frame: &RGBFrame) -> Img<Vec<RGBA<u8>>> {
 #[tauri::command]
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("TODO: export with options: {:?}", options);
-    println!("TOFIX: export not working with YUV frames yet");
 
     let state = app_handle.state::<AppState>();
-
-    // TODO: use the options to export GIF with Gifski
-    // Starting GIF creation
-    println!("Starting Gif creation");
 
     let mut settings = gifski::Settings::default();
     settings.repeat = gifski::Repeat::Infinite;
@@ -104,13 +96,13 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     //  Get frames from app state
     let mut frames = state.frames.lock().await;
     let mut i = 0;
-    println!("Encoding frames to gif");
+    println!("Encoding frames to GIF");
     for frame in (*frames).iter_mut() {
         match frame {
             Frame::BGR0(bgr_frame) => {
                 let img = transform_frame_bgr0(bgr_frame);
                 gif_encoder
-                    .add_frame_rgba(i, img, i as f64 * 0.5)
+                    .add_frame_rgba(i, img, i as f64 / options.fps as f64)
                     .unwrap_or_else(|err| {
                         eprintln!("Error adding frame to encoder: {:?}", err);
                     });
@@ -120,7 +112,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
             Frame::RGB(rgb_frame) => {
                 let img = transform_frame_rgb(rgb_frame);
                 gif_encoder
-                    .add_frame_rgba(i, img, i as f64 / 60.0)
+                    .add_frame_rgba(i, img, i as f64 / options.fps as f64)
                     .unwrap_or_else(|err| {
                         eprintln!("Error adding frame to encoder: {:?}", err);
                     });
@@ -128,15 +120,15 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
                 i += 1;
             }
             _ => {
-                panic!("This frame type is not supported on BGR0 yet");
+                panic!("This frame type is not supported yet");
             }
         }
     }
     drop(gif_encoder);
-    println!("Encoding to gif completed");
+    println!("GIF Encoded");
 
-    handle.join();
-    println!("writing to a GIF completed");
+    handle.join().unwrap();
+    println!("GIF Written to file");
 
-    println!("complete");
+    println!("Completed");
 }
