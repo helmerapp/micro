@@ -2080,6 +2080,7 @@ checksum = "95505c38b4572b2d910cecb0281560f54b440a19336cbbcb27bf6ce6adc6f5a8"
 [[package]]
 name = "helmer-media"
 version = "0.1.0"
+source = "git+ssh://git@github.com/helmerapp/helmer-media.git#11b4a0ac002b1e57e4cf94e103f0535504fe50fc"
 dependencies = [
  "ac-ffmpeg",
  "anyhow",

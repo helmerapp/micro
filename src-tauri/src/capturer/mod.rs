@@ -123,6 +123,7 @@ pub async fn stop_capture(app_handle: AppHandle) {
             width: output_width as usize,
             height: output_height as usize,
             frame_type: FRAME_TYPE,
+            base_timestamp: None,
         },
     });
 
@@ -137,7 +138,7 @@ pub async fn stop_capture(app_handle: AppHandle) {
     let mut frame_timestamp = helmer_media::Timestamp::new(frame_idx, time_base);
     println!("Encoding preview...");
     for frame in (*frames).iter_mut() {
-        encoder.ingest_next_video_frame(frame, frame_timestamp);
+        encoder.ingest_next_video_frame(frame);
 
         frame_idx += 1;
         frame_timestamp = helmer_media::Timestamp::new(frame_idx, time_base);
