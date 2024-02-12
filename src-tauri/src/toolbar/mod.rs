@@ -1,4 +1,6 @@
 use tauri::{AppHandle, LogicalSize, Manager, Position, Size, WindowBuilder, WindowUrl};
+use tokio::sync::Mutex;
+use crate::AppState;
 
 pub fn init_toolbar(app: &AppHandle) {
     let mut toolbar_win = WindowBuilder::new(app, "toolbar", WindowUrl::App("/toolbar".into()))
@@ -60,20 +62,29 @@ pub fn toggle_toolbar(app: &AppHandle) {
 
 #[tauri::command]
 pub async fn show_toolbar(button_coords: Vec<u32>, area: Vec<u32>, app: AppHandle) {
+    println!("Showing toolbar");
     if app.get_window("toolbar").is_none() {
+        println!("creating new toolbar window");
         crate::toolbar::init_toolbar(&app);
     }
-    println!("Toolbar created at {:?}", button_coords);
+    println!("Toolbar at {:?}", button_coords);
     let toolbar_win = app.get_window("toolbar").unwrap();
     let pos = Position::Logical((button_coords[0], button_coords[1]).into());
     toolbar_win.set_position(pos).unwrap();
     toolbar_win.show().unwrap();
     toolbar_win.set_focus().unwrap();
-    toolbar_win.emit("capturing_area", area).unwrap();
+
+    println!("I ran");
+    let state_mutex = app.state::<Mutex<AppState>>();
+    let mut state = state_mutex.lock().await;
+    state.cropped_area = area;
+    println!("Cropped area: {:?}", state.cropped_area);
+    drop(state);
 }
 
 #[tauri::command]
 pub async fn hide_toolbar(app: AppHandle) {
+    println!("Hiding toolbar");
     let toolbar_win = app.get_window("toolbar").unwrap();
     toolbar_win.hide().unwrap();
 }

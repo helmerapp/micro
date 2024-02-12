@@ -4,28 +4,28 @@ use tauri::{api::path::desktop_dir, AppHandle, Manager};
 use tokio::sync::Mutex;
 
 #[tauri::command]
-pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
+pub async fn start_capture(app_handle: AppHandle) {
     app_handle.emit_all("capture-started", false).unwrap();
 
     // TODO: initialize scap and start capturing
-    println!("Cropped Area: {:?}", area);
-
+    
     // Update app state
     let state_mutex = app_handle.state::<Mutex<AppState>>();
     let mut state = state_mutex.lock().await;
     state.status = Status::Recording;
+    drop(state);
 
     // TEMP: stop capturing after 5 seconds, to get to editor
-    tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+    tokio::time::sleep(tokio::time::Duration::from_secs(20)).await;
     stop_capture(app_handle.clone()).await;
-    println!("complete"); // this never runs
+    println!("complete");
 }
 
 #[tauri::command]
 pub async fn stop_capture(app_handle: AppHandle) {
     println!("Capture stopped");
     app_handle.emit_all("capture-stopped", false).unwrap();
-    crate::cropper::toggle_cropper(&app_handle);
+    // crate::cropper::toggle_cropper(&app_handle);
 
     // TODO: stop capturing with scap
 
@@ -45,6 +45,6 @@ pub async fn stop_capture(app_handle: AppHandle) {
     println!("Updating app state");
 
     state.status = Status::Editing;
-
     println!("Status: {:?}", state.status);
+    drop(state);
 }

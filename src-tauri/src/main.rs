@@ -27,6 +27,7 @@ pub enum Status {
 pub struct AppState {
     status: Status,
     recorder: Option<Arc<Mutex<Capturer>>>,
+    cropped_area: Vec<u32>,
 }
 
 impl Default for AppState {
@@ -34,6 +35,7 @@ impl Default for AppState {
         Self {
             status: Status::Idle,
             recorder: None,
+            cropped_area: Vec::new(),
         }
     }
 }
