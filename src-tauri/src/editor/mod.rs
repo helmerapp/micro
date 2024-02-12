@@ -96,13 +96,25 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     //  Get frames from app state
     let mut frames = state.frames.lock().await;
     let mut i = 0;
+
+    // Get the timestamp of the first frame
+    let mut base_ts;
+    const TIMEBASE:f64 = 1000000000.0; // TODO: Verify for windows. This value may be different
+    match &frames[0] {
+        Frame::BGR0(f) => base_ts = f.display_time,
+        Frame::RGB(f) => base_ts = f.display_time,
+        _ => {
+            base_ts = 0;
+        }
+    }
+
     println!("Encoding frames to GIF");
     for frame in (*frames).iter_mut() {
         match frame {
             Frame::BGR0(bgr_frame) => {
                 let img = transform_frame_bgr0(bgr_frame);
                 gif_encoder
-                    .add_frame_rgba(i, img, i as f64 / options.fps as f64)
+                    .add_frame_rgba(i, img,  (bgr_frame.display_time - base_ts) as f64/TIMEBASE)
                     .unwrap_or_else(|err| {
                         eprintln!("Error adding frame to encoder: {:?}", err);
                     });
@@ -112,7 +124,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
             Frame::RGB(rgb_frame) => {
                 let img = transform_frame_rgb(rgb_frame);
                 gif_encoder
-                    .add_frame_rgba(i, img, i as f64 / options.fps as f64)
+                    .add_frame_rgba(i, img, (rgb_frame.display_time - base_ts) as f64/TIMEBASE)
                     .unwrap_or_else(|err| {
                         eprintln!("Error adding frame to encoder: {:?}", err);
                     });
