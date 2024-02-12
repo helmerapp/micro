@@ -67,7 +67,11 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let state = app_handle.state::<AppState>();
 
     let mut settings = gifski::Settings::default();
-    settings.repeat = gifski::Repeat::Infinite;
+
+    match options.loop_gif {
+        true => settings.repeat = gifski::Repeat::Infinite,
+        false => settings.repeat = gifski::Repeat::Finite(0),
+    }
 
     let mut no_progress = gifski::progress::NoProgress {};
 
