@@ -30,7 +30,7 @@ pub fn init_editor(app: &AppHandle, video_file: String) {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExportOptions {
-    range: Vec<u32>,
+    range: Vec<f64>,
     size: u32,
     fps: u32,
     speed: f32,
@@ -67,6 +67,9 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let state = app_handle.state::<AppState>();
 
     let mut settings = gifski::Settings::default();
+
+    let frame_start_time= options.range[0] as f64;
+    let frame_end_time = options.range[1] as f64;
 
     match options.loop_gif {
         true => settings.repeat = gifski::Repeat::Infinite,
@@ -112,7 +115,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
         }
     }
 
-    println!("Encoding frames to GIF");
+    println!("Encoding frames to GIF {}", frames.len());
     for frame in (*frames).iter_mut() {
         match frame {
             Frame::BGR0(bgr_frame) => {
@@ -127,8 +130,15 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
             }
             Frame::RGB(rgb_frame) => {
                 let img = transform_frame_rgb(rgb_frame);
+                let frame_pts = (rgb_frame.display_time - base_ts) as f64/TIMEBASE;
+
+                if (frame_start_time > frame_pts || frame_pts > frame_end_time) {
+                    println!("Ignoring frame {} with t {}", i, frame_pts);
+                    continue;
+                }
+
                 gif_encoder
-                    .add_frame_rgba(i, img, (rgb_frame.display_time - base_ts) as f64/TIMEBASE)
+                    .add_frame_rgba(i, img, frame_pts)
                     .unwrap_or_else(|err| {
                         eprintln!("Error adding frame to encoder: {:?}", err);
                     });
