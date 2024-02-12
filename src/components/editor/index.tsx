@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import Preview from "./Preview";
 import Controls from "./Controls";
+import CONSTANTS from '../../constants';
 
+const previewFps = CONSTANTS.previewFps;
 export default function Editor() {
 
 	const [selectedFrames, setSelectedFrames] = useState([0, 200]);
@@ -18,7 +20,9 @@ export default function Editor() {
 		setExporting(true);
 		invoke('export_handler', {
 			options: {
-				range: selectedFrames,
+				// We pass the range as time because the frame count here
+				// does not match the frame count in rust
+				range: [selectedFrames[0]/previewFps, selectedFrames[1]/previewFps],
 				...options,
 			}
 		}).then(() => {

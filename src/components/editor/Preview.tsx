@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { convertFileSrc } from '@tauri-apps/api/tauri'
 import * as Slider from '@radix-ui/react-slider';
+import CONSTANTS from "../../constants";
 
 export default function Preview({
 	selectedFrames,
@@ -9,7 +10,7 @@ export default function Preview({
 	selectedFrames: number[],
 	setSelectedFrames: (e: number[]) => void
 }) {
-	const previewFps = 30; // Assume preview is 30 fps for now
+	const previewFps = CONSTANTS.previewFps;
 	const videoRef = useRef<HTMLVideoElement>(null) as React.MutableRefObject<HTMLVideoElement>;
 	const [totalFrames, setTotalFrames] = useState(0);
 
@@ -39,9 +40,6 @@ export default function Preview({
 		const params = new URLSearchParams(window.location.search);
 		const previewPath = params.get("file");
 		const previewUrl = convertFileSrc(previewPath!);
-
-		console.log("previewPath", previewPath);
-		console.log("previewUrl", previewUrl);
 
 		// Set the source to the preview URL
 		videoRef.current.src = previewUrl;
