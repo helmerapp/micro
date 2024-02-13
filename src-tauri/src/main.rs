@@ -7,8 +7,8 @@ mod editor;
 mod tray;
 mod toolbar;
 
-use scap::capturer::Capturer;
-use std::sync::Arc;
+use scap::{capturer::Capturer, frame::Frame};
+use std::path::PathBuf;
 use tauri::{GlobalShortcutManager, Manager};
 use tauri_plugin_autostart::MacosLauncher;
 use tokio::sync::Mutex;
@@ -16,7 +16,7 @@ use tokio::sync::Mutex;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Status {
     Idle,
     Cropper,
@@ -25,15 +25,19 @@ pub enum Status {
 }
 
 pub struct AppState {
-    status: Status,
-    recorder: Option<Arc<Mutex<Capturer>>>,
+    status: Mutex<Status>,
+    frames: Mutex<Vec<Frame>>,
+    recorder: Mutex<Option<Capturer>>,
+    preview_path: Mutex<Option<PathBuf>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
-            status: Status::Idle,
-            recorder: None,
+            status: Mutex::new(Status::Idle),
+            frames: Mutex::new(Vec::new()),
+            recorder: Mutex::new(None),
+            preview_path: Mutex::new(None),
         }
     }
 }
@@ -71,7 +75,7 @@ fn main() {
 
             Ok(())
         })
-        .manage(Mutex::new(AppState::default()))
+        .manage(AppState::default())
         .system_tray(tray::build())
         .on_system_tray_event(tray::events)
         .invoke_handler(tauri::generate_handler![

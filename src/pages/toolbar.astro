@@ -5,7 +5,17 @@ import Base from "../components/base.astro";
 <Base>
 	<main>
 		<button class="record">
-			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="white"
+				stroke-width="4"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
 				<circle cx="12" cy="12" r="10"></circle>
 			</svg>
 		</button>
@@ -14,8 +24,7 @@ import Base from "../components/base.astro";
 </Base>
 
 <style>
-
-	#stopwatch{
+	#stopwatch {
 		font-size: 2rem;
 		position: relative;
 		left: 60px;
@@ -32,15 +41,15 @@ import Base from "../components/base.astro";
 		justify-content: center;
 		position: absolute;
 		background: rgb(255, 29, 157);
-		border: 2px solid rgba(0,0,0,0.4);
+		border: 2px solid rgba(0, 0, 0, 0.4);
 		outline: none;
 		border-radius: 50%;
 		/* transition: transform 0.1s ease-out; */
-		transition: transform 0.4s cubic-bezier(.47,1.64,.41,.8);
+		transition: transform 0.4s cubic-bezier(0.47, 1.64, 0.41, 0.8);
 		transform: scale(1);
 		overflow: hidden;
 		cursor: pointer;
-		margin: .2em;
+		margin: 0.2em;
 		box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0);
 	}
 
@@ -64,7 +73,7 @@ import Base from "../components/base.astro";
 		width: 100%;
 		height: 100%;
 		background: linear-gradient(
-		120deg,
+			120deg,
 			transparent,
 			rgba(255, 255, 255, 0.2),
 			transparent
@@ -82,7 +91,8 @@ import Base from "../components/base.astro";
 			left: -100%;
 			transition-property: left;
 		}
-		11.5044247788%, 100% {
+		11.5044247788%,
+		100% {
 			left: 100%;
 			transition-property: left;
 		}
@@ -93,7 +103,8 @@ import Base from "../components/base.astro";
 			left: -100%;
 			transition-property: left;
 		}
-		11.5044247788%, 100% {
+		11.5044247788%,
+		100% {
 			left: 100%;
 			transition-property: left;
 		}
@@ -101,12 +112,12 @@ import Base from "../components/base.astro";
 </style>
 
 <script>
-	import { getAll } from '@tauri-apps/api/window';
-	import { invoke } from '@tauri-apps/api/tauri';
-	import { listen } from '@tauri-apps/api/event';
+	import { getAll } from "@tauri-apps/api/window";
+	import { invoke } from "@tauri-apps/api/tauri";
+	import { listen } from "@tauri-apps/api/event";
 
-	const buttonEl = document.querySelector('.record');
-	const stopwatchEl = document.getElementById('stopwatch');
+	const buttonEl = document.querySelector(".record");
+	const stopwatchEl = document.getElementById("stopwatch");
 
 	let isRecording = false;
 	let area: number[];
@@ -135,54 +146,52 @@ import Base from "../components/base.astro";
 	}
 
 	function closeAllWindows() {
-	getAll().forEach(win => win.hide());
+		getAll().forEach((win) => win.hide());
 	}
 
-	document.addEventListener('keydown', (e) => {
-	if (e.key === 'Escape') {
-		closeAllWindows();
-	}
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") {
+			closeAllWindows();
+		}
 	});
 
-	listen('capturing_area', (event) => {
+	listen("capturing_area", (event) => {
 		console.log("Capturing Area ", event);
 		area = event.payload as number[];
 	});
 
 	if (buttonEl) {
-	buttonEl.addEventListener('click', () => {
-		if (isRecording) {
-			isRecording = false;
-			buttonEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+		buttonEl.addEventListener("click", () => {
+			if (isRecording) {
+				isRecording = false;
+				buttonEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
 				<circle cx="12" cy="12" r="10"></circle>
 			</svg>`;
-			stopwatchEl?.classList.add("hidden");
-			clearInterval(timer);
-			seconds = 0;
-			minutes = 0;
-			updateDisplay();
-			invoke('stop_capture', {}).then(() => {
-				console.log("recording stopped");
-			});
-			return;
-		}
+				stopwatchEl?.classList.add("hidden");
+				clearInterval(timer);
+				seconds = 0;
+				minutes = 0;
+				updateDisplay();
+				invoke("stop_capture", {}).then(() => {
+					console.log("recording stopped");
+				});
+				return;
+			}
 
-		console.log("selected area: ", area);
-		const isSelectionValid = true;
-		console.log(isRecording);
-		if (isSelectionValid) {
-			isRecording = true;
-			buttonEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+			console.log("selected area: ", area);
+			const isSelectionValid = true;
+			console.log(isRecording);
+			if (isSelectionValid) {
+				isRecording = true;
+				buttonEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
 				<rect x="2" y="2" width="20" height="20"></rect>
 			</svg>`;
-			stopwatchEl?.classList.remove("hidden");
-			timer = setInterval(updateTime, 1000);
-			invoke('start_capture', { area: area }).then(() => {
-				console.log("recording started");
-			});
-		}
-	});
+				stopwatchEl?.classList.remove("hidden");
+				timer = setInterval(updateTime, 1000);
+				invoke("start_capture", { area: area }).then(() => {
+					console.log("recording started");
+				});
+			}
+		});
 	}
-
-
 </script>

@@ -14,8 +14,7 @@
       "all": true,
       "fs": {
         "scope": [
-          "$TEMP/**",
-          "$DESKTOP/**"
+          "**/**"
         ]
       },
       "protocol": {
