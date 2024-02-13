@@ -8,13 +8,14 @@ import useInterval from "../../utils/useInterval";
 const RECORDING_LIMIT = 20;
 
 const ToolbarReact = () => {
-  const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(RECORDING_LIMIT);
-  const [time, setTime] = useState(
-    `${minutes <= 9 ? "0" : ""}${minutes}:${seconds <= 9 ? "0" : ""}${seconds}`
-  );
   const [isVisible, setIsVisible] = useState(false);
-  const [timer, setTimer] = useState<any>(null);
+
+  useInterval(() => {
+    if (isVisible && seconds > 0) {
+      setSeconds((prevSeconds) => prevSeconds - 1);
+    }
+  }, 1000);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -29,57 +30,23 @@ const ToolbarReact = () => {
     };
   }, []);
 
-  useEffect(() => {
-    setTime(
-      `${minutes <= 9 ? "0" : ""}${minutes}:${
-        seconds <= 9 ? "0" : ""
-      }${seconds}`
-    );
-  }, [minutes, seconds]);
-
-  const updateSeconds = () => {
-    if (seconds === 0) {
-      stopTimer();
-      setSeconds(RECORDING_LIMIT);
-    } else {
-      setSeconds(seconds - 1);
-    }
-  };
-
   const startTimer = () => {
     setIsVisible(true);
-    const interval = useInterval(updateSeconds, 1000);
-    console.log("interval", interval);
-    setTimer(interval);
   };
 
   const stopTimer = () => {
     setIsVisible(false);
-    clearInterval(timer);
+    setSeconds(RECORDING_LIMIT);
   };
 
-  const onStartRecording = async () => {
-    try {
-      startTimer();
-      await invoke("start_capture");
-    } catch (error) {
-      console.error("Error starting recording:", error);
-    }
+  const onStartRecording = () => {
+    invoke("start_capture");
+    startTimer();
   };
 
-  const onStopRecording = async () => {
-    try {
-      await invoke("stop_capture", {});
-      stopTimer();
-      setSeconds(RECORDING_LIMIT);
-      setTime(
-        `${minutes <= 9 ? "0" : ""}${minutes}:${
-          seconds <= 9 ? "0" : ""
-        }${seconds}`
-      );
-    } catch (error) {
-      console.error("Error stopping recording:", error);
-    }
+  const onStopRecording = () => {
+    invoke("stop_capture", {});
+    stopTimer();
   };
 
   return (

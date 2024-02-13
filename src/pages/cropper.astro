@@ -15,7 +15,7 @@ import Base from "../components/base.astro";
 	main {
 		width: 100%;
 		height: 100%;
- 		overflow: hidden;
+		overflow: hidden;
 		cursor: crosshair;
 		position: relative;
 		/* background: rgba(0, 0, 0, 0.4); */
@@ -30,7 +30,10 @@ import Base from "../components/base.astro";
 		height: 100%;
 	}
 
-	section::before, section::after, #selectionInner::before, #selectionInner::after {
+	section::before,
+	section::after,
+	#selectionInner::before,
+	#selectionInner::after {
 		content: "";
 		position: absolute;
 		width: 100%;
@@ -46,7 +49,8 @@ import Base from "../components/base.astro";
 		bottom: 100%;
 	}
 
-	#selectionInner::before, #selectionInner::after {
+	#selectionInner::before,
+	#selectionInner::after {
 		width: 100vw;
 		height: 200vh;
 		top: -100vh;
@@ -97,17 +101,15 @@ import Base from "../components/base.astro";
 	if (!selectionEl || !selectableAreaEl) {
 		console.error("Unable to find necessary elements.");
 	}
-
 	// Listen for events from the Rust side
 	listen('capture-started', () => {
-		console.log("Capture started");
-		document.body.classList.add("recording");
+		selectableAreaEl!.classList.add("recording");
 	});
 
 	listen('capture-stopped', () => {
-		console.log("Capture stopped");
-		document.body.classList.remove("recording");
+		selectableAreaEl!.classList.remove("recording");
 	});
+
 
 	selectableAreaEl!.addEventListener('mousedown', (e) => {
 		isSelecting = true;
@@ -129,7 +131,6 @@ import Base from "../components/base.astro";
 		if (isSelecting) {
 			const buttonX = startX > endX ? endX - 24 : endX;
 			const buttonY = startY > endY ? endY - 24 : endY;
-			isToolbarVisible = true;
 			showToolbar(buttonX, buttonY);
 		}
 		isSelecting = false;
@@ -147,29 +148,16 @@ import Base from "../components/base.astro";
 	}
 
 	function hideToolbar() {
-		console.log("Hiding toolbar");
 		invoke('hide_toolbar')
-			.then(() => {
-				console.log("Toolbar hidden");
-			})
-			.catch(err => {
-				console.error("Error hiding toolbar:", err);
-			});
 		isToolbarVisible = false;
 	}
 
 	function showToolbar(buttonX: number, buttonY: number) {
-		console.log("Showing toolbar");
 		invoke('show_toolbar', {
 			buttonCoords: [buttonX, buttonY],
 			area: [startX, startY, endX, endY]
 		})
-		.then(() => {
-			console.log("Toolbar shown");
-		})
-		.catch(err => {
-			console.error("Error showing toolbar:", err);
-		});
+		isToolbarVisible = true;
 	}
 
 	function closeCropper() {
@@ -181,8 +169,8 @@ import Base from "../components/base.astro";
 		win.hide();
 	}
 
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape') {
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") {
 			closeCropper();
 		}
 	});

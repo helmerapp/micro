@@ -4,7 +4,6 @@ const RecordingButton = ({ onStartRecording, onStopRecording }: { onStartRecordi
     const [isRecording, setIsRecording] = useState(false);
 
     const handleClick = () => {
-        console.log({isRecording});
         if (isRecording) {
             onStopRecording();
         } else {
