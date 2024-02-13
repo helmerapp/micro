@@ -31,10 +31,11 @@ pub async fn start_capture(app_handle: AppHandle) {
     drop(status);
 
     // TODO: Calculate capture area
-    println!("Cropped Area: {:?}", area);
+    println!("Cropped Area: {:?}", state.cropped_area);
 
     // area is of the form [x1, y1, x2, y2]
     // we need it of the form [0,0, x2-x1, y2-y1]
+    let area = state.cropped_area.lock().await.clone();
     let crop_area = vec![
         area[2] as f64 - area[0] as f64,
         area[3] as f64 - area[1] as f64,
