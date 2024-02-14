@@ -73,12 +73,18 @@ import Base from "../components/base.astro";
 	}
 	.hidden {
 		transform: scale(0);
+	} 
+	
+	.recording{
+		pointer-events: none;
 	}
+
 </style>
 
 <script>
-	import { invoke } from "@tauri-apps/api/tauri";
-	import { getCurrent } from "@tauri-apps/api/window";
+	import { invoke } from '@tauri-apps/api/tauri';
+	import { listen } from '@tauri-apps/api/event';
+	import { getCurrent } from '@tauri-apps/api/window';
 
 	let isSelecting = false;
 	let isToolbarVisible = false;
@@ -88,61 +94,78 @@ import Base from "../components/base.astro";
 	let endY = 0;
 
 	// Constants
-	const selectionEl = document.querySelector("section")!;
-	const selectableAreaEl = document.querySelector("main")!;
+	const selectionEl = document.querySelector('section');
+	const selectableAreaEl = document.querySelector('main');
 
-	// Events
-	selectableAreaEl.addEventListener("mousedown", (e) => {
+	// Check if elements are found
+	if (!selectionEl || !selectableAreaEl) {
+		console.error("Unable to find necessary elements.");
+	}
+	// Listen for events from the Rust side
+	listen('capture-started', () => {
+		selectableAreaEl!.classList.add("recording");
+	});
+
+	listen('capture-stopped', () => {
+		selectableAreaEl!.classList.remove("recording");
+	});
+
+
+	selectableAreaEl!.addEventListener('mousedown', (e) => {
 		isSelecting = true;
-		selectionEl.classList.remove("hidden");
-		startX = e.clientX - selectableAreaEl.offsetLeft;
-		startY = e.clientY - selectableAreaEl.offsetTop;
+		selectionEl!.classList.remove('hidden');
+		startX = e.clientX - selectableAreaEl!.offsetLeft;
+		startY = e.clientY - selectableAreaEl!.offsetTop;
 		if (isToolbarVisible) {
-			console.log("invoking hide toolbar");
-			invoke("hide_toolbar").then(() => {
-				console.log("hide toolbar");
-			});
-			isToolbarVisible = false;
+			hideToolbar();
 		}
 	});
 
-	selectableAreaEl.addEventListener("mousemove", (e) => {
+	selectableAreaEl!.addEventListener('mousemove', (e) => {
 		if (isSelecting) {
-			endX = e.clientX - selectableAreaEl.offsetLeft;
-			endY = e.clientY - selectableAreaEl.offsetTop;
-
-			const width = endX - startX;
-			const height = endY - startY;
-
-			selectionEl.style.width = `${Math.abs(width)}px`;
-			selectionEl.style.height = `${Math.abs(height)}px`;
-			selectionEl.style.left = `${width > 0 ? startX : endX}px`;
-			selectionEl.style.top = `${height > 0 ? startY : endY}px`;
+			updateSelection(e);
 		}
 	});
 
-	selectableAreaEl.addEventListener("mouseup", () => {
+	selectableAreaEl!.addEventListener('mouseup', () => {
 		if (isSelecting) {
 			const buttonX = startX > endX ? endX - 24 : endX;
 			const buttonY = startY > endY ? endY - 24 : endY;
-
-			isToolbarVisible = true;
-			invoke("show_toolbar", {
-				buttonCoords: [buttonX, buttonY],
-				area: [startX, startY, endX, endY],
-			}).then(() => {
-				console.log("mouse up is registered");
-			});
+			showToolbar(buttonX, buttonY);
 		}
 		isSelecting = false;
 	});
 
+	function updateSelection(e: any) {
+		endX = e.clientX - selectableAreaEl!.offsetLeft;
+		endY = e.clientY - selectableAreaEl!.offsetTop;
+		const width = endX - startX;
+		const height = endY - startY;
+		selectionEl!.style.width = `${Math.abs(width)}px`;
+		selectionEl!.style.height = `${Math.abs(height)}px`;
+		selectionEl!.style.left = `${width > 0 ? startX : endX}px`;
+		selectionEl!.style.top = `${height > 0 ? startY : endY}px`;
+	}
+
+	function hideToolbar() {
+		invoke('hide_toolbar')
+		isToolbarVisible = false;
+	}
+
+	function showToolbar(buttonX: number, buttonY: number) {
+		invoke('show_toolbar', {
+			buttonCoords: [buttonX, buttonY],
+			area: [startX, startY, endX, endY]
+		})
+		isToolbarVisible = true;
+	}
+
 	function closeCropper() {
 		const win = getCurrent();
-		selectionEl.style.width = "0px";
-		selectionEl.style.height = "0px";
-		selectionEl.style.left = "0px";
-		selectionEl.style.top = "0px";
+		selectionEl!.style.width = "0px";
+		selectionEl!.style.height = "0px";
+		selectionEl!.style.left = "0px";
+		selectionEl!.style.top = "0px";
 		win.hide();
 	}
 

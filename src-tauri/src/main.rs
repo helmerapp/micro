@@ -25,6 +25,7 @@ pub enum Status {
 }
 
 pub struct AppState {
+    cropped_area: Mutex<Vec<u32>>,
     status: Mutex<Status>,
     frames: Mutex<Vec<Frame>>,
     recorder: Mutex<Option<Capturer>>,
@@ -34,6 +35,7 @@ pub struct AppState {
 impl Default for AppState {
     fn default() -> Self {
         Self {
+            cropped_area: Mutex::new(Vec::new()),
             status: Mutex::new(Status::Idle),
             frames: Mutex::new(Vec::new()),
             recorder: Mutex::new(None),

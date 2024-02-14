@@ -1,11 +1,11 @@
-use crate::{AppState, Status};
+use crate::{cropper, AppState, Status};
 use helmer_media::encoder;
 use rand::Rng;
 use scap::{
     capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
     frame::FrameType,
 };
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Event, Manager};
 use tempfile::NamedTempFile;
 
 const FRAME_TYPE: FrameType = FrameType::RGB;
@@ -17,7 +17,13 @@ fn get_random_id() -> String {
 }
 
 #[tauri::command]
-pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
+pub async fn start_capture(app_handle: AppHandle) {
+    let cropper_win = app_handle.get_window("cropper").unwrap();
+    cropper_win.set_ignore_cursor_events(true).unwrap();
+    cropper_win.emit("capture-started", ()).unwrap();
+    // // tokio sleep 
+    // tokio::time::sleep(std::time::Duration::from_secs(20)).await;
+    // stop_capture(app_handle).await;
     // Update state to recording
     let state = app_handle.state::<AppState>();
     let mut status = state.status.lock().await;
@@ -25,10 +31,11 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
     drop(status);
 
     // TODO: Calculate capture area
-    println!("Cropped Area: {:?}", area);
+    println!("Cropped Area: {:?}", state.cropped_area);
 
     // area is of the form [x1, y1, x2, y2]
     // we need it of the form [0,0, x2-x1, y2-y1]
+    let area = state.cropped_area.lock().await.clone();
     let crop_area = vec![
         area[2] as f64 - area[0] as f64,
         area[3] as f64 - area[1] as f64,
@@ -85,7 +92,10 @@ pub async fn start_capture(area: Vec<u32>, app_handle: AppHandle) {
 
 #[tauri::command]
 pub async fn stop_capture(app_handle: AppHandle) {
-    println!("Capture stopped");
+    let cropper_win = app_handle.get_window("cropper").unwrap();
+    cropper_win.set_ignore_cursor_events(false).unwrap();
+    cropper_win.emit("capture-stopped", ()).unwrap();
+    // crate::cropper::toggle_cropper(&app_handle);
 
     // Update app state to editing
     let state = app_handle.state::<AppState>();
