@@ -70,6 +70,8 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
 
     let frame_start_time= options.range[0] as f64;
     let frame_end_time = options.range[1] as f64;
+    let speed = options.speed;
+    let fps = options.fps;
 
     match options.loop_gif {
         true => settings.repeat = gifski::Repeat::Infinite,
@@ -115,8 +117,9 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
         }
     }
 
-    println!("Encoding frames to GIF {}", frames.len());
-    for frame in (*frames).iter_mut() {
+    let step = ((60.0 * speed) / fps as f32).floor() as usize;
+    println!("Encoding frames to GIF {} by step {}", frames.len(), step);
+    for frame in (*frames).iter_mut().step_by(step) {
         match frame {
             Frame::BGR0(bgr_frame) => {
                 let img = transform_frame_bgr0(bgr_frame);
@@ -138,7 +141,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
                 }
 
                 gif_encoder
-                    .add_frame_rgba(i, img, frame_pts)
+                    .add_frame_rgba(i, img, frame_pts/(speed as f64))
                     .unwrap_or_else(|err| {
                         eprintln!("Error adding frame to encoder: {:?}", err);
                     });
