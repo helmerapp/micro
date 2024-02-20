@@ -12,8 +12,12 @@ const ToolbarReact = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useInterval(() => {
-    if (isVisible && seconds > 0) {
-      setSeconds((prevSeconds) => prevSeconds - 1);
+    if (isVisible && seconds >= 0) {
+      if(seconds === 0) {
+        onStopRecording();
+      } else {
+        setSeconds((prevSeconds) => prevSeconds - 1);
+      }
     }
   }, 1000);
 
@@ -22,6 +26,7 @@ const ToolbarReact = () => {
       if (event.key === "Escape" || event.key === "Esc") {
         // TODO implement hide cropper window!
         invoke("hide_toolbar");
+        onStopRecording();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
