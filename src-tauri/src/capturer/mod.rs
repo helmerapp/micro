@@ -34,9 +34,11 @@ pub async fn start_capture(app_handle: AppHandle) {
     println!("Cropped Area: {:?}", state.cropped_area);
 
     // area is of the form [x1, y1, x2, y2]
-    // we need it of the form [0,0, x2-x1, y2-y1]
+    // we need it of the form [x1, y1, x2-x1, y2-y1]
     let area = state.cropped_area.lock().await.clone();
     let crop_area = vec![
+        area[0] as f64,
+        area[1] as f64,
         area[2] as f64 - area[0] as f64,
         area[3] as f64 - area[1] as f64,
     ];
@@ -51,10 +53,10 @@ pub async fn start_capture(app_handle: AppHandle) {
         output_type: FRAME_TYPE,
         output_resolution: Resolution::_1080p, // TODO: doesn't respect aspect ratio yet
         source_rect: Some(CGRect {
-            origin: CGPoint { x: 0.0, y: 0.0 },
+            origin: CGPoint { x:  crop_area[0], y: crop_area[1] },
             size: CGSize {
-                width: crop_area[0],
-                height: crop_area[1],
+                width: crop_area[2],
+                height: crop_area[3],
             },
         }),
         ..Default::default()
