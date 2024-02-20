@@ -68,6 +68,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
 
     let mut settings = gifski::Settings::default();
 
+    let width = options.size;
     let frame_start_time= options.range[0] as f64;
     let frame_end_time = options.range[1] as f64;
 
@@ -75,6 +76,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
         true => settings.repeat = gifski::Repeat::Infinite,
         false => settings.repeat = gifski::Repeat::Finite(0),
     }
+    settings.width = Some(width);
 
     let mut no_progress = gifski::progress::NoProgress {};
 
