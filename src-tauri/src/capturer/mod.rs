@@ -69,6 +69,10 @@ pub async fn start_capture(app_handle: AppHandle) {
     println!("Capturing frames...");
     let mut frames = state.frames.lock().await;
 
+    // Reset frames to empty array to allow user to
+    // record multiple gifs without restarting the app
+    *frames = Vec::new();
+
     loop {
         let status = state.status.lock().await;
         if *status != Status::Recording {
