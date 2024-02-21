@@ -11,9 +11,6 @@
   <img src="https://img.shields.io/github/stars/clearlysid/helmer-micro" />
 </p>
 
-A smol app to record GIFs from your desktop.<br>
-✨ <a href="https://www.helmer.app/micro"><b>helmer.app/micro</b></a> ✨
-
 > ⚠️ NOTE: This project is in early Alpha and things break often. Please use at your own risk.
 
 ## Installation
