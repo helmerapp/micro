@@ -1,21 +1,17 @@
 # Helmer Micro
 
-<p>
-  <img src="https://img.shields.io/static/v1?label=Stage&message=Alpha&color=2BB4AB" />
-  <a href="https://www.gnu.org/licenses/agpl-3.0">
-    <img src="https://img.shields.io/static/v1?label=Licence&message=AGPL%20v3&color=000" />
-  </a>
-  <a href="https://twitter.com/helmerapp">
-    <img src="https://img.shields.io/badge/Twitter-00acee?logo=twitter&logoColor=white" />
-  </a>
-  <img src="https://img.shields.io/github/stars/clearlysid/helmer-micro" />
-</p>
+![Stage: Alpha](https://img.shields.io/static/v1?label=Stage&message=Alpha&color=2BB4AB)
+[![License: AGPL3.0](https://img.shields.io/static/v1?label=Licence&message=AGPL%20v3&color=000)](https://www.gnu.org/licenses/agpl-3.0)
+[![Twitter: @HelmerApp](https://img.shields.io/badge/Twitter-00acee?logo=twitter&logoColor=white)](https://twitter.com/helmerapp)
+![Github Stars](https://img.shields.io/github/stars/helmerapp/helmer-micro)
 
-> ⚠️ NOTE: This project is in early Alpha and things break often. Please use at your own risk.
+> ⚠️ This project is in Alpha and things break often. Please use at your own risk.
 
 ## Installation
 
-Helmer Micro is being developed as COSS: Commercial Open-source Software. It's source code is kept up-to-date and made available to everyone through this Github Repo. If you'd like to support our work, we request you to buy a license via [our website](https://www.helmer.app/micro) and share your GIFs online with a `#MadeWithMicro` hashtag that will allow us to find it online too!
+Helmer Micro is being developed as COSS: Commercial Open-source Software. It's source code is kept up-to-date and made available to everyone through this Github Repo.
+
+If you'd like to support our work, we request you to buy a license via [our website](https://www.helmer.app/micro) and share your GIFs online with a `#MadeWithMicro` hashtag that will allow us to find it online too!
 
 ## Development
 
