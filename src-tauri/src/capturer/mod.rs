@@ -130,6 +130,14 @@ pub async fn stop_capture(app_handle: AppHandle) {
 
     println!("Preview path: {:?}", preview_path);
 
+    // Hide cropper, create editor
+    crate::cropper::toggle_cropper(&app_handle);
+    crate::toolbar::toggle_toolbar(&app_handle);
+    crate::editor::init_editor(
+        &app_handle,
+        preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
+    );
+
     // Create Encoder
     let mut encoder = encoder::Encoder::new(encoder::Options {
         output: encoder::Output::FileOutput(encoder::FileOutput {
@@ -163,11 +171,7 @@ pub async fn stop_capture(app_handle: AppHandle) {
     drop(encoder);
     println!("Preview encoding complete");
 
-    // Hide cropper, create editor
-    crate::cropper::toggle_cropper(&app_handle);
-    crate::toolbar::toggle_toolbar(&app_handle);
-    crate::editor::init_editor(
-        &app_handle,
-        preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
-    );
+    let editor_win = app_handle.get_window("editor").unwrap();
+    editor_win.emit("preview-ready", ()).unwrap();
+
 }
