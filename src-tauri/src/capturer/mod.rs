@@ -21,7 +21,7 @@ pub async fn start_capture(app_handle: AppHandle) {
     let cropper_win = app_handle.get_window("cropper").unwrap();
     cropper_win.set_ignore_cursor_events(true).unwrap();
     cropper_win.emit("capture-started", ()).unwrap();
-    // // tokio sleep 
+    // // tokio sleep
     // tokio::time::sleep(std::time::Duration::from_secs(20)).await;
     // stop_capture(app_handle).await;
     // Update state to recording
@@ -53,7 +53,10 @@ pub async fn start_capture(app_handle: AppHandle) {
         output_type: FRAME_TYPE,
         output_resolution: Resolution::_1080p, // TODO: doesn't respect aspect ratio yet
         source_rect: Some(CGRect {
-            origin: CGPoint { x:  crop_area[0], y: crop_area[1] },
+            origin: CGPoint {
+                x: crop_area[0],
+                y: crop_area[1],
+            },
             size: CGSize {
                 width: crop_area[2],
                 height: crop_area[3],
@@ -98,25 +101,11 @@ pub async fn start_capture(app_handle: AppHandle) {
 
 #[tauri::command]
 pub async fn stop_capture(app_handle: AppHandle) {
-    let cropper_win = app_handle.get_window("cropper").unwrap();
-    cropper_win.set_ignore_cursor_events(false).unwrap();
-    cropper_win.emit("capture-stopped", ()).unwrap();
-    // crate::cropper::toggle_cropper(&app_handle);
-
     // Update app state to editing
     let state = app_handle.state::<AppState>();
     let mut status = state.status.lock().await;
     *status = Status::Editing;
     drop(status);
-
-    // Stop capturing frames and drop recorder
-    let mut recorder = state.recorder.lock().await;
-    (*recorder).as_mut().unwrap().stop_capture();
-    let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
-    recorder.take();
-    drop(recorder);
-
-    println!("All frames captured");
 
     // Create file in temp directory
     let preview_file = format!("HM-{}.mp4", get_random_id());
@@ -137,6 +126,20 @@ pub async fn stop_capture(app_handle: AppHandle) {
         &app_handle,
         preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
     );
+
+    // let cropper_win = app_handle.get_window("cropper").unwrap();
+    // cropper_win.set_ignore_cursor_events(false).unwrap();
+    // cropper_win.emit("capture-stopped", ()).unwrap();
+    // crate::cropper::toggle_cropper(&app_handle);
+
+    // Stop capturing frames and drop recorder
+    let mut recorder = state.recorder.lock().await;
+    (*recorder).as_mut().unwrap().stop_capture();
+    let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
+    recorder.take();
+    drop(recorder);
+
+    println!("All frames captured");
 
     // Create Encoder
     let mut encoder = encoder::Encoder::new(encoder::Options {
@@ -173,5 +176,4 @@ pub async fn stop_capture(app_handle: AppHandle) {
 
     let editor_win = app_handle.get_window("editor").unwrap();
     editor_win.emit("preview-ready", ()).unwrap();
-
 }
