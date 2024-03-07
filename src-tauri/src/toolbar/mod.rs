@@ -1,9 +1,10 @@
+use crate::AppState;
 use tauri::{AppHandle, LogicalSize, Manager, Position, Size, WindowBuilder, WindowUrl};
 use tokio::sync::Mutex;
-use crate::AppState;
 
 pub fn init_toolbar(app: &AppHandle) {
     let mut toolbar_win = WindowBuilder::new(app, "toolbar", WindowUrl::App("/toolbar".into()))
+        .accept_first_mouse(true)
         .always_on_top(true)
         .decorations(false)
         .resizable(false)
