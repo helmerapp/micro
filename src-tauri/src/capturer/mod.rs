@@ -8,7 +8,7 @@ use scap::{
 use tauri::{AppHandle, Event, Manager};
 use tempfile::NamedTempFile;
 
-const FRAME_TYPE: FrameType = FrameType::RGB;
+const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
 
 fn get_random_id() -> String {
     let random_number: u64 = rand::thread_rng().gen();

@@ -1,7 +1,7 @@
 use crate::AppState;
 use imgref::Img;
 use rgb::RGBA;
-use scap::frame::{BGRFrame, Frame, RGBFrame};
+use scap::frame::{BGRFrame, Frame, RGBFrame, BGRAFrame};
 use serde::{Deserialize, Serialize};
 use std::thread;
 use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
@@ -43,6 +43,17 @@ fn transform_frame_bgr0(frame: &BGRFrame) -> Img<Vec<RGBA<u8>>> {
     let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
 
     for src in frame_data.chunks_exact(3) {
+        rgba_data.push(RGBA::new(src[2], src[1], src[0], 255))
+    }
+
+    Img::new(rgba_data, frame.width as usize, frame.height as usize)
+}
+
+fn transform_frame_bgra(frame: &BGRAFrame) -> Img<Vec<RGBA<u8>>> {
+    let frame_data = &frame.data;
+    let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
+
+    for src in frame_data.chunks_exact(4) {
         rgba_data.push(RGBA::new(src[2], src[1], src[0], 255))
     }
 
@@ -127,6 +138,16 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
                 let img = transform_frame_bgr0(bgr_frame);
                 gif_encoder
                     .add_frame_rgba(i, img,  (bgr_frame.display_time - base_ts) as f64/TIMEBASE)
+                    .unwrap_or_else(|err| {
+                        eprintln!("Error adding frame to encoder: {:?}", err);
+                    });
+
+                i += 1;
+            }
+            Frame::BGRA(bgra_frame) => {
+                let img = transform_frame_bgra(bgra_frame);
+                gif_encoder
+                    .add_frame_rgba(i, img,  (bgra_frame.display_time - base_ts) as f64/TIMEBASE)
                     .unwrap_or_else(|err| {
                         eprintln!("Error adding frame to encoder: {:?}", err);
                     });
