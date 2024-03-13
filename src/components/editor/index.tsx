@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/tauri'
 import Preview from "./Preview";
 import Controls from "./Controls";
+import Loader from './Loader';
 import CONSTANTS from '../../constants';
 import { listen } from '@tauri-apps/api/event';
 
@@ -24,7 +25,7 @@ export default function Editor() {
 			options: {
 				// We pass the range as time because the frame count here
 				// does not match the frame count in rust
-				range: [selectedFrames[0]/previewFps, selectedFrames[1]/previewFps],
+				range: [selectedFrames[0] / previewFps, selectedFrames[1] / previewFps],
 				...options,
 			}
 		}).then(() => {
@@ -33,7 +34,7 @@ export default function Editor() {
 	}
 
 	useEffect(() => {
-		
+
 		const previewListener = listen("preview-ready", () => {
 			setIsPreviewLoading(false);
 		});
@@ -45,47 +46,14 @@ export default function Editor() {
 	}, []);
 
 	return (
-		<main className="w-full h-full flex flex-col bg-[#222] p-8 items-center">
+		<main className="w-full h-full flex flex-col bg-[#222] p-8 items-center justify-center">
 			{
-				isPreviewLoading ? 
-				<span id="loader"><style>
-					{`
-						#loader {
-							width: 12px;
-							height: 12px;
-							border-radius: 50%;
-							display: block;
-							margin:15px auto;
-							position: relative;
-							color: #FFF;
-							box-sizing: border-box;
-							animation: animloader 2s linear infinite;
-						}
-						
-						@keyframes animloader {
-							0% {
-								box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
-							}
-							25% {
-								box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 2px;
-							}
-							50% {
-								box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 2px,  -38px 0 0 -2px;
-							}
-							75% {
-								box-shadow: 14px 0 0 2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
-							}
-							100% {
-								box-shadow: 14px 0 0 -2px,  38px 0 0 2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
-							}
-						}
-					`}
-				</style></span>
-				:
-				<>
-					<Preview setSelectedFrames={setSelectedFrames} selectedFrames={selectedFrames} />
-					<Controls exportHandler={exportHandler} exporting={exporting} />
-				</>
+				isPreviewLoading
+					? <Loader />
+					: <>
+						<Preview setSelectedFrames={setSelectedFrames} selectedFrames={selectedFrames} />
+						<Controls exportHandler={exportHandler} exporting={exporting} />
+					</>
 			}
 		</main>
 	);
