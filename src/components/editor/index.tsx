@@ -52,9 +52,9 @@ export default function Editor() {
 					? <Loader />
 					: <>
 						<Preview setSelectedFrames={setSelectedFrames} selectedFrames={selectedFrames} />
-						<Controls exportHandler={exportHandler} exporting={exporting} />
 					</>
 			}
+			<Controls exportHandler={exportHandler} exporting={exporting} />
 		</main>
 	);
 }

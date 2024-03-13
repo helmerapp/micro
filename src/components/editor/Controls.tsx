@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
+import Knob from "./Knob";
 
 const Label = ({ text, children }: {
 	text: string,
@@ -112,7 +113,8 @@ export default function Controls({ exportHandler, exporting }: {
 							e.preventDefault();
 							exportHandler({ size, fps, speed, loop_gif: loop, bounce })
 						}}
-					/>
+					/><Knob />
+
 				</>
 
 		}
