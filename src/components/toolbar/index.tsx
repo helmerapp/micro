@@ -50,8 +50,8 @@ const ToolbarReact = () => {
   };
 
   const onStopRecording = () => {
-    invoke("stop_capture", {});
     stopTimer();
+    invoke("stop_capture", {});
   };
 
   return (
