@@ -34,7 +34,7 @@ gifski = { version = "1.12.2", default-features = false, features = [
 	"png",
 	"gifsicle",
 ] }
-helmer-media = { git = "https://github.com/helmerapp/helmer-media.git", branch = "master" }
+helmer-media = { git = "ssh://git@github.com/helmerapp/helmer-media.git" }
 imgref = "1.10.0"
 rgb = "0.8.37"
 rand = "0.8.5"
