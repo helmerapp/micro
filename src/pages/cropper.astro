@@ -155,7 +155,7 @@ import Base from "../components/base.astro";
 	function showToolbar(buttonX: number, buttonY: number) {
 		invoke('show_toolbar', {
 			buttonCoords: [buttonX, buttonY],
-			area: [startX, startY, endX, endY]
+			area: [startX + 2, startY + 2 , endX - 7, endY - 7] // added these number using trial and error to remove border from the captured frame
 		})
 		isToolbarVisible = true;
 	}
