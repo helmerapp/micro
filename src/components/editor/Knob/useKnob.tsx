@@ -1,22 +1,4 @@
-import Knob from "./Knob";
-
-const activeKnobs = {};
-
-function getPlatform() {
-	// 2022 way of detecting. Note : this userAgentData feature is available only in secure contexts (HTTPS)
-	if (typeof navigator.userAgentData !== 'undefined' && navigator.userAgentData != null) {
-		return navigator.userAgentData.platform;
-	}
-	// Deprecated but still works for most of the browser
-	if (typeof navigator.platform !== 'undefined') {
-		if (typeof navigator.userAgent !== 'undefined' && /android/.test(navigator.userAgent.toLowerCase())) {
-			// android device’s navigator.platform is often set as 'linux', so let’s use userAgent for them
-			return 'android';
-		}
-		return navigator.platform;
-	}
-	return 'unknown';
-}
+import { useState, useEffect, useRef } from 'react';
 
 function setupKnob(knob, container) {
 
@@ -131,53 +113,17 @@ function setupKnob(knob, container) {
 	}
 }
 
-export const KnobHelper = {
-	createKnobCSS: function (inputEl, containerClass, callback) {
-		const knob = new Knob(inputEl,
-			function (knob, indicator) {
-				KnobHelper.drawKnobCSS(knob, indicator);
-				callback(knob.__value);
-			}),
+function useKnob(inputEl, containerClass, callback) {
+	const [knob, setKnob] = useState(null);
+	const containerRef = useRef(null);
 
-			container = document.createElement('div'),
-			body = document.createElement('div'),
-			indicator = document.createElement('div');
-
-		container.classList.add('ui-knob-container', containerClass);
-		body.classList.add('ui-knob', 'ui-knob-shadow');
-		indicator.classList.add('ui-knob-indicator');
-
-		container.appendChild(body);
-		container.appendChild(indicator);
-
-		inputEl.style.display = 'none';
-		inputEl.parentNode.insertBefore(container, inputEl);
-		container.appendChild(inputEl);
-
-		// center knob in container
-		body.style.marginTop = -body.offsetHeight / 2 + 'px';
-		body.style.marginLeft = -body.offsetWidth / 2 + 'px';
-
-		setupKnob(knob, container);
-
-		return knob;
-
-	},
-
-	drawKnobCSS: function (knob, indicator) {
-		const container = knob.element.closest('.ui-knob-container');
-		if (container) {
-			const indicatorEl = container.querySelector('.ui-knob-indicator');
-			if (indicatorEl) {
-				indicatorEl.style.left = indicator.x - indicatorEl.offsetWidth / 2 + 'px';
-				indicatorEl.style.top = indicator.y - indicatorEl.offsetHeight / 2 + 'px';
-
-				const rotateText = `rotate(${(-indicator.angle)}deg)`;
-				indicatorEl.style.transform = rotateText;
-				indicatorEl.style.webkitTransform = rotateText;
-				indicatorEl.style.mozTransform = rotateText;
-				indicatorEl.style.oTransform = rotateText;
-			}
+	useEffect(() => {
+		if (containerRef.current) {
+			const knobInstance = setupKnob(inputEl, containerRef.current);
+			setKnob(knobInstance);
+			callback(knobInstance.__value);
 		}
-	}
-};
+	}, [containerRef, inputEl, callback]);
+
+	return { knob, containerRef };
+}
