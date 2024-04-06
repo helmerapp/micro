@@ -1,10 +1,12 @@
 use crate::AppState;
 use imgref::Img;
 use rgb::RGBA;
-use scap::frame::{BGRFrame, Frame, RGBFrame, BGRAFrame};
+use scap::frame::{BGRAFrame, BGRFrame, Frame, RGBFrame};
 use serde::{Deserialize, Serialize};
-use std::thread;
+use std::{sync::Arc, thread};
 use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
+
+const TIMEBASE: f64 = 1000000000.0; // TODO: Verify for windows. This value may be different
 
 pub fn init_editor(app: &AppHandle, video_file: String) {
     let editor_url = format!("/editor?file={}", video_file);
@@ -80,7 +82,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let mut settings = gifski::Settings::default();
 
     let width = options.size;
-    let frame_start_time= options.range[0] as f64;
+    let frame_start_time = options.range[0] as f64;
     let frame_end_time = options.range[1] as f64;
     let speed = options.speed;
     let fps = options.fps;
@@ -94,6 +96,8 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let mut no_progress = gifski::progress::NoProgress {};
 
     let (gif_encoder, gif_writer) = gifski::new(settings).unwrap();
+
+    let gif_encoder = Arc::new(gif_encoder);
 
     let gif_name = chrono::Local::now().format("HM-%y%m%d-%I%M%p").to_string();
     let gif_path = desktop_dir().unwrap().join(format!("{}.gif", gif_name));
@@ -120,8 +124,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let mut i = 0;
 
     // Get the timestamp of the first frame
-    let mut base_ts;
-    const TIMEBASE:f64 = 1000000000.0; // TODO: Verify for windows. This value may be different
+    let base_ts;
     match &frames[0] {
         Frame::BGR0(f) => base_ts = f.display_time,
         Frame::RGB(f) => base_ts = f.display_time,
@@ -133,48 +136,16 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let step = ((60.0 * speed) / fps as f32).floor() as usize;
     println!("Encoding frames to GIF {} by step {}", frames.len(), step);
     for frame in (*frames).iter_mut().step_by(step) {
-        match frame {
-            Frame::BGR0(bgr_frame) => {
-                let img = transform_frame_bgr0(bgr_frame);
-                gif_encoder
-                    .add_frame_rgba(i, img,  (bgr_frame.display_time - base_ts) as f64/TIMEBASE)
-                    .unwrap_or_else(|err| {
-                        eprintln!("Error adding frame to encoder: {:?}", err);
-                    });
-
-                i += 1;
-            }
-            Frame::BGRA(bgra_frame) => {
-                let img = transform_frame_bgra(bgra_frame);
-                gif_encoder
-                    .add_frame_rgba(i, img,  (bgra_frame.display_time - base_ts) as f64/TIMEBASE)
-                    .unwrap_or_else(|err| {
-                        eprintln!("Error adding frame to encoder: {:?}", err);
-                    });
-
-                i += 1;
-            }
-            Frame::RGB(rgb_frame) => {
-                let img = transform_frame_rgb(rgb_frame);
-                let frame_pts = (rgb_frame.display_time - base_ts) as f64/TIMEBASE;
-
-                if (frame_start_time > frame_pts || frame_pts > frame_end_time) {
-                    println!("Ignoring frame {} with t {}", i, frame_pts);
-                    continue;
-                }
-
-                gif_encoder
-                    .add_frame_rgba(i, img, frame_pts/(speed as f64))
-                    .unwrap_or_else(|err| {
-                        eprintln!("Error adding frame to encoder: {:?}", err);
-                    });
-
-                i += 1;
-            }
-            _ => {
-                panic!("This frame type is not supported yet");
-            }
-        }
+        unit_frame_handler(
+            frame,
+            gif_encoder.clone(),
+            i,
+            base_ts,
+            frame_start_time,
+            frame_end_time,
+            speed,
+        );
+        i += 1;
     }
     drop(gif_encoder);
     println!("GIF Encoded");
@@ -183,4 +154,55 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("GIF Written to file");
 
     println!("Completed");
+}
+
+pub fn unit_frame_handler(
+    frame: &mut Frame,
+    gif_encoder: Arc<gifski::Collector>,
+    i: usize,
+    base_ts: u64,
+    frame_start_time: f64,
+    frame_end_time: f64,
+    speed: f32,
+) {
+    match frame {
+        Frame::BGR0(bgr_frame) => {
+            let img = transform_frame_bgr0(bgr_frame);
+            gif_encoder
+                .add_frame_rgba(i, img, (bgr_frame.display_time - base_ts) as f64 / TIMEBASE)
+                .unwrap_or_else(|err| {
+                    eprintln!("Error adding frame to encoder: {:?}", err);
+                });
+        }
+        Frame::BGRA(bgra_frame) => {
+            let img = transform_frame_bgra(bgra_frame);
+            gif_encoder
+                .add_frame_rgba(
+                    i,
+                    img,
+                    (bgra_frame.display_time - base_ts) as f64 / TIMEBASE,
+                )
+                .unwrap_or_else(|err| {
+                    eprintln!("Error adding frame to encoder: {:?}", err);
+                });
+        }
+        Frame::RGB(rgb_frame) => {
+            let img = transform_frame_rgb(rgb_frame);
+            let frame_pts = (rgb_frame.display_time - base_ts) as f64 / TIMEBASE;
+
+            if frame_start_time > frame_pts || frame_pts > frame_end_time {
+                println!("Ignoring frame {} with t {}", i, frame_pts);
+                return;
+            }
+
+            gif_encoder
+                .add_frame_rgba(i, img, frame_pts / (speed as f64))
+                .unwrap_or_else(|err| {
+                    eprintln!("Error adding frame to encoder: {:?}", err);
+                });
+        }
+        _ => {
+            panic!("This frame type is not supported yet");
+        }
+    }
 }
