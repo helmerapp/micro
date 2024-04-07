@@ -1,7 +1,8 @@
 use crate::AppState;
+
 use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
-use std::{sync::Arc, thread};
+use std::{sync::Arc, thread, time::SystemTime};
 use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
 
 mod frame_encoder;
@@ -41,6 +42,7 @@ pub struct ExportOptions {
 
 #[tauri::command]
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
+    let time = SystemTime::now();
     println!("TODO: export with options: {:?}", options);
 
     let mut settings = gifski::Settings::default();
@@ -134,7 +136,8 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     handle.join().unwrap();
     println!("GIF Written to file");
 
-    println!("Completed");
+    let time_elapsed = time.elapsed().unwrap();
+    println!("Completed in {:?} seconds", time_elapsed.as_secs());
 }
 
 pub fn unit_frame_handler(
@@ -146,7 +149,6 @@ pub fn unit_frame_handler(
     end_ts: f64,
     speed: f32,
 ) {
-    println!(">>>>>> Encoding Frame {}", index);
     let frame_encoder = FrameEncoder::new(gif_encoder.clone(), index, base_ts);
     match frame {
         Frame::BGR0(bgr_frame) => frame_encoder.encode_bgr(bgr_frame),
