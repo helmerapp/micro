@@ -43,8 +43,6 @@ pub struct ExportOptions {
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("TODO: export with options: {:?}", options);
 
-    let state = app_handle.state::<AppState>();
-
     let mut settings = gifski::Settings::default();
 
     let width = options.size;
@@ -85,12 +83,16 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
         println!("Finished writing");
     });
 
-    //  Get frames from app state
-    let mut frames = state.frames.lock().await;
     let mut i = 0;
-
     // Get the timestamp of the first frame
     let base_ts;
+
+    // Get AppState from AppHandle
+    let state = app_handle.state::<AppState>();
+    //  Get frames from app state
+    let mut frames = state.frames.lock().await;
+    let frames: Vec<Frame> = frames.drain(..).collect();
+
     match &frames[0] {
         Frame::BGR0(f) => base_ts = f.display_time,
         Frame::RGB(f) => base_ts = f.display_time,
@@ -100,19 +102,32 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     }
 
     let step = ((60.0 * speed) / fps as f32).floor() as usize;
-    println!("Encoding frames to GIF {} by step {}", frames.len(), step);
-    for frame in (*frames).iter_mut().step_by(step) {
-        unit_frame_handler(
-            frame,
-            gif_encoder.clone(),
-            i,
-            base_ts,
-            frame_start_time,
-            frame_end_time,
-            speed,
-        );
+    println!("Encoding {} frames to GIF by step {}", frames.len(), step);
+
+    let mut handles = vec![];
+    let l = frames.len();
+    for frame in frames.into_iter().step_by(step).collect::<Vec<Frame>>() {
+        let gif_encoder_clone = gif_encoder.clone();
+
+        handles.push(tokio::task::spawn(async move {
+            // Remove the `frame` argument
+            unit_frame_handler(
+                &frame,
+                gif_encoder_clone,
+                i,
+                base_ts,
+                frame_start_time,
+                frame_end_time,
+                speed,
+            );
+        }));
         i += 1;
     }
+
+    for handle in handles {
+        handle.await.unwrap();
+    }
+
     drop(gif_encoder);
     println!("GIF Encoded");
 
@@ -123,15 +138,16 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
 }
 
 pub fn unit_frame_handler(
-    frame: &mut Frame,
+    frame: &Frame,
     gif_encoder: Arc<gifski::Collector>,
-    i: usize,
+    index: usize,
     base_ts: u64,
     start_ts: f64,
     end_ts: f64,
     speed: f32,
 ) {
-    let frame_encoder = FrameEncoder::new(gif_encoder.clone(), i, base_ts);
+    println!(">>>>>> Encoding Frame {}", index);
+    let frame_encoder = FrameEncoder::new(gif_encoder.clone(), index, base_ts);
     match frame {
         Frame::BGR0(bgr_frame) => frame_encoder.encode_bgr(bgr_frame),
         Frame::BGRA(bgra_frame) => frame_encoder.encode_bgra(bgra_frame),
@@ -140,4 +156,5 @@ pub fn unit_frame_handler(
             panic!("This frame type is not supported yet");
         }
     }
+    println!("Frame {} Encoded", index)
 }
