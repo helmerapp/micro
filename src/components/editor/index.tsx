@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri'
+import { invoke } from '@tauri-apps/api/core'
 import Preview from "./Preview";
 import Controls from "./Controls";
 import CONSTANTS from '../../constants';

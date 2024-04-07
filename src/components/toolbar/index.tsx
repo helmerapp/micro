@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 import RecordingButton from "./RecordingButton";
 import TimerDisplay from "./TimerDisplay";
 import "./toolbar.css";
@@ -13,7 +13,7 @@ const ToolbarReact = () => {
 
   useInterval(() => {
     if (isVisible && seconds >= 0) {
-      if(seconds === 0) {
+      if (seconds === 0) {
         onStopRecording();
       } else {
         setSeconds((prevSeconds) => prevSeconds - 1);
