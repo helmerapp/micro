@@ -5,7 +5,7 @@ use std::{sync::Arc, thread};
 use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
 
 mod frame_encoder;
-use frame_encoder::{bgr_frame_encoder, bgra_frame_encoder, rgb_frame_encoder};
+use frame_encoder::FrameEncoder;
 
 pub fn init_editor(app: &AppHandle, video_file: String) {
     let editor_url = format!("/editor?file={}", video_file);
@@ -127,22 +127,15 @@ pub fn unit_frame_handler(
     gif_encoder: Arc<gifski::Collector>,
     i: usize,
     base_ts: u64,
-    frame_start_time: f64,
-    frame_end_time: f64,
+    start_ts: f64,
+    end_ts: f64,
     speed: f32,
 ) {
+    let frame_encoder = FrameEncoder::new(gif_encoder.clone(), i, base_ts);
     match frame {
-        Frame::BGR0(bgr_frame) => bgr_frame_encoder(gif_encoder.clone(), i, bgr_frame, base_ts),
-        Frame::BGRA(bgra_frame) => bgra_frame_encoder(gif_encoder.clone(), i, bgra_frame, base_ts),
-        Frame::RGB(rgb_frame) => rgb_frame_encoder(
-            gif_encoder.clone(),
-            i,
-            rgb_frame,
-            base_ts,
-            speed,
-            frame_start_time,
-            frame_end_time,
-        ),
+        Frame::BGR0(bgr_frame) => frame_encoder.encode_bgr(bgr_frame),
+        Frame::BGRA(bgra_frame) => frame_encoder.encode_bgra(bgra_frame),
+        Frame::RGB(rgb_frame) => frame_encoder.encode_rgb(rgb_frame, speed, start_ts, end_ts),
         _ => {
             panic!("This frame type is not supported yet");
         }
