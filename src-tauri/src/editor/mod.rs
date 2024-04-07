@@ -1,12 +1,11 @@
 use crate::AppState;
-use imgref::Img;
-use rgb::RGBA;
-use scap::frame::{BGRAFrame, BGRFrame, Frame, RGBFrame};
+use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, thread};
 use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
 
-const TIMEBASE: f64 = 1000000000.0; // TODO: Verify for windows. This value may be different
+mod frame_encoder;
+use frame_encoder::{bgr_frame_encoder, bgra_frame_encoder, rgb_frame_encoder};
 
 pub fn init_editor(app: &AppHandle, video_file: String) {
     let editor_url = format!("/editor?file={}", video_file);
@@ -38,39 +37,6 @@ pub struct ExportOptions {
     speed: f32,
     loop_gif: bool,
     bounce: bool,
-}
-
-fn transform_frame_bgr0(frame: &BGRFrame) -> Img<Vec<RGBA<u8>>> {
-    let frame_data = &frame.data;
-    let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
-
-    for src in frame_data.chunks_exact(3) {
-        rgba_data.push(RGBA::new(src[2], src[1], src[0], 255))
-    }
-
-    Img::new(rgba_data, frame.width as usize, frame.height as usize)
-}
-
-fn transform_frame_bgra(frame: &BGRAFrame) -> Img<Vec<RGBA<u8>>> {
-    let frame_data = &frame.data;
-    let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
-
-    for src in frame_data.chunks_exact(4) {
-        rgba_data.push(RGBA::new(src[2], src[1], src[0], 255))
-    }
-
-    Img::new(rgba_data, frame.width as usize, frame.height as usize)
-}
-
-fn transform_frame_rgb(frame: &RGBFrame) -> Img<Vec<RGBA<u8>>> {
-    let frame_data = &frame.data;
-    let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
-
-    for src in frame_data.chunks_exact(3) {
-        rgba_data.push(RGBA::new(src[0], src[1], src[2], 255))
-    }
-
-    Img::new(rgba_data, frame.width as usize, frame.height as usize)
 }
 
 #[tauri::command]
@@ -166,41 +132,17 @@ pub fn unit_frame_handler(
     speed: f32,
 ) {
     match frame {
-        Frame::BGR0(bgr_frame) => {
-            let img = transform_frame_bgr0(bgr_frame);
-            gif_encoder
-                .add_frame_rgba(i, img, (bgr_frame.display_time - base_ts) as f64 / TIMEBASE)
-                .unwrap_or_else(|err| {
-                    eprintln!("Error adding frame to encoder: {:?}", err);
-                });
-        }
-        Frame::BGRA(bgra_frame) => {
-            let img = transform_frame_bgra(bgra_frame);
-            gif_encoder
-                .add_frame_rgba(
-                    i,
-                    img,
-                    (bgra_frame.display_time - base_ts) as f64 / TIMEBASE,
-                )
-                .unwrap_or_else(|err| {
-                    eprintln!("Error adding frame to encoder: {:?}", err);
-                });
-        }
-        Frame::RGB(rgb_frame) => {
-            let img = transform_frame_rgb(rgb_frame);
-            let frame_pts = (rgb_frame.display_time - base_ts) as f64 / TIMEBASE;
-
-            if frame_start_time > frame_pts || frame_pts > frame_end_time {
-                println!("Ignoring frame {} with t {}", i, frame_pts);
-                return;
-            }
-
-            gif_encoder
-                .add_frame_rgba(i, img, frame_pts / (speed as f64))
-                .unwrap_or_else(|err| {
-                    eprintln!("Error adding frame to encoder: {:?}", err);
-                });
-        }
+        Frame::BGR0(bgr_frame) => bgr_frame_encoder(gif_encoder.clone(), i, bgr_frame, base_ts),
+        Frame::BGRA(bgra_frame) => bgra_frame_encoder(gif_encoder.clone(), i, bgra_frame, base_ts),
+        Frame::RGB(rgb_frame) => rgb_frame_encoder(
+            gif_encoder.clone(),
+            i,
+            rgb_frame,
+            base_ts,
+            speed,
+            frame_start_time,
+            frame_end_time,
+        ),
         _ => {
             panic!("This frame type is not supported yet");
         }
