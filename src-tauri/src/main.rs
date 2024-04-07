@@ -9,8 +9,8 @@ mod toolbar;
 
 use scap::{capturer::Capturer, frame::Frame};
 use std::path::PathBuf;
-use tauri::{GlobalShortcutManager, Manager};
-use tauri_plugin_autostart::MacosLauncher;
+use tauri::Manager;
+use tauri_plugin_global_shortcut::GlobalShortcutExt;
 use tokio::sync::Mutex;
 
 #[cfg(target_os = "macos")]
@@ -50,36 +50,33 @@ fn main() {
     // Set up Tauri Plugins
     let tp_store = tauri_plugin_store::Builder::default().build();
     let tp_single_instance = tauri_plugin_single_instance::init(|_, _, _| {});
-    let tp_autostart = tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None);
 
     tauri::Builder::default()
         .plugin(tp_store)
-        .plugin(tp_autostart)
         .plugin(tp_single_instance)
+        // .plugin(tauri_plugin_global_shortcut::Builder::with_handler(
+        //     _,
+        //     |app, shortcut| {
+        //         let app_handle = app.app_handle();
+        //         cropper::toggle_cropper(app_handle);
+        //     },
+        // ))
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]
             app.set_activation_policy(ActivationPolicy::Accessory);
 
+            // app.global_shortcut()
+            //     .register(SHORTCUT)
+            //     .expect("failed to register shortcut");
+
             let app_handle = app.app_handle();
-
+            tray::build(&app_handle);
             cropper::init_cropper(&app_handle);
-
-            let mut shortcuts = app_handle.global_shortcut_manager();
-            if !shortcuts.is_registered(SHORTCUT).unwrap() {
-                shortcuts
-                    .register(SHORTCUT, move || {
-                        // app_handle.state().
-                        cropper::toggle_cropper(&app_handle);
-                    })
-                    .unwrap();
-            }
 
             Ok(())
         })
         .manage(AppState::default())
-        .system_tray(tray::build())
-        .on_system_tray_event(tray::events)
         .invoke_handler(tauri::generate_handler![
             capturer::start_capture,
             capturer::stop_capture,
