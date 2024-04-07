@@ -1,47 +1,32 @@
 {
+  "productName": "Helmer Micro",
+  "version": "../package.json",
+  "identifier": "com.helmermicro.dev",
   "build": {
     "beforeDevCommand": "yarn dev",
+    "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "yarn build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist"
+    "frontendDist": "../dist"
   },
-  "package": {
-    "productName": "Helmer Micro",
-    "version": "../package.json"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": true,
-      "fs": {
-        "scope": [
-          "**/**"
-        ]
-      },
-      "protocol": {
-        "all": false,
-        "asset": true,
-        "assetScope": [
-          "**"
-        ]
-      }
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.helmermicro.dev",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    },
+  "app": {
+    "withGlobalTauri": false,
     "security": {
-      "csp": null
+      "csp": null,
+      "assetProtocol": {}
     },
-    "systemTray": {
+    "trayIcon": {
       "iconPath": "icons/128x128.png"
     }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   }
 }
