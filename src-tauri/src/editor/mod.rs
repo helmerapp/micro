@@ -46,6 +46,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     println!("TODO: export with options: {:?}", options);
 
     let mut settings = gifski::Settings::default();
+    settings.fast = true;
 
     let width = options.size;
     let frame_start_time = options.range[0] as f64;
@@ -95,6 +96,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let mut frames = state.frames.lock().await;
     let frames: Vec<Frame> = frames.drain(..).collect();
 
+    // TODO: ask about logic
     match &frames[0] {
         Frame::BGR0(f) => base_ts = f.display_time,
         Frame::RGB(f) => base_ts = f.display_time,
