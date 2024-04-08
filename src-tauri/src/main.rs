@@ -4,13 +4,13 @@
 mod capturer;
 mod cropper;
 mod editor;
-mod tray;
 mod toolbar;
+mod tray;
 
 use scap::{capturer::Capturer, frame::Frame};
 use std::path::PathBuf;
 use tauri::Manager;
-use tauri_plugin_global_shortcut::GlobalShortcutExt;
+use tauri_plugin_global_shortcut;
 use tokio::sync::Mutex;
 
 #[cfg(target_os = "macos")]
@@ -54,21 +54,20 @@ fn main() {
     tauri::Builder::default()
         .plugin(tp_store)
         .plugin(tp_single_instance)
-        // .plugin(tauri_plugin_global_shortcut::Builder::with_handler(
-        //     _,
-        //     |app, shortcut| {
-        //         let app_handle = app.app_handle();
-        //         cropper::toggle_cropper(app_handle);
-        //     },
-        // ))
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]
             app.set_activation_policy(ActivationPolicy::Accessory);
 
-            // app.global_shortcut()
-            //     .register(SHORTCUT)
-            //     .expect("failed to register shortcut");
+            app.handle().plugin(
+                tauri_plugin_global_shortcut::Builder::new()
+                    .with_shortcut(SHORTCUT)?
+                    .with_handler(|app, shortcut| {
+                        cropper::toggle_cropper(app);
+                        println!("Shortcut pressed: {:?}", shortcut);
+                    })
+                    .build(),
+            )?;
 
             let app_handle = app.app_handle();
             tray::build(&app_handle);
