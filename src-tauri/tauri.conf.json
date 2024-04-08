@@ -13,9 +13,6 @@
     "security": {
       "csp": null,
       "assetProtocol": {}
-    },
-    "trayIcon": {
-      "iconPath": "icons/128x128.png"
     }
   },
   "bundle": {
