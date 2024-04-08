@@ -8,7 +8,6 @@ use tauri::{
 };
 
 pub fn build(app: &AppHandle) {
-    println!("Building tray");
     let tray_menu = MenuBuilder::new(app)
         .items(&[
             &MenuItemBuilder::with_id("record", "Start Recording")

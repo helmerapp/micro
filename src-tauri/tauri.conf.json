@@ -11,8 +11,12 @@
   "app": {
     "withGlobalTauri": false,
     "security": {
-      "csp": null,
-      "assetProtocol": {}
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "**/**"
+        ]
+      }
     }
   },
   "bundle": {
