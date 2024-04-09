@@ -1,11 +1,13 @@
 use crate::{cropper, AppState, Status};
-use helmer_media::encoder;
+
+mod encoder;
+
 use rand::Rng;
 use scap::{
     capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
     frame::FrameType,
 };
-use tauri::{AppHandle, Event, Manager};
+use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
 
 const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
@@ -18,7 +20,7 @@ fn get_random_id() -> String {
 
 #[tauri::command]
 pub async fn start_capture(app_handle: AppHandle) {
-    let cropper_win = app_handle.get_window("cropper").unwrap();
+    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
     cropper_win.set_ignore_cursor_events(true).unwrap();
     cropper_win.emit("capture-started", ()).unwrap();
     // // tokio sleep
@@ -127,7 +129,7 @@ pub async fn stop_capture(app_handle: AppHandle) {
         preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
     );
 
-    // let cropper_win = app_handle.get_window("cropper").unwrap();
+    // let cropper_win = app_handle.get_webview_window("cropper").unwrap();
     // cropper_win.set_ignore_cursor_events(false).unwrap();
     // cropper_win.emit("capture-stopped", ()).unwrap();
     // crate::cropper::toggle_cropper(&app_handle);
@@ -160,20 +162,20 @@ pub async fn stop_capture(app_handle: AppHandle) {
 
     let mut frames = state.frames.lock().await;
 
-    let time_base = helmer_media::TimeBase::new(1, 25);
+    let time_base = encoder::TimeBase::new(1, 25);
     let mut frame_idx = 0;
-    let mut frame_timestamp = helmer_media::Timestamp::new(frame_idx, time_base);
+    let mut frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
     println!("Encoding preview...");
     for frame in (*frames).iter_mut() {
         encoder.ingest_next_video_frame(frame);
 
         frame_idx += 1;
-        frame_timestamp = helmer_media::Timestamp::new(frame_idx, time_base);
+        frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
     }
     encoder.done();
     drop(encoder);
     println!("Preview encoding complete");
 
-    let editor_win = app_handle.get_window("editor").unwrap();
+    let editor_win = app_handle.get_webview_window("editor").unwrap();
     editor_win.emit("preview-ready", ()).unwrap();
 }

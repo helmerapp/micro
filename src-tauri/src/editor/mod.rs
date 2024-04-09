@@ -1,9 +1,8 @@
 use crate::AppState;
-
 use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, thread, time::SystemTime};
-use tauri::{api::path::desktop_dir, AppHandle, Manager, WindowBuilder, WindowUrl};
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
 mod frame_encoder;
 use frame_encoder::FrameEncoder;
@@ -11,16 +10,17 @@ use frame_encoder::FrameEncoder;
 pub fn init_editor(app: &AppHandle, video_file: String) {
     let editor_url = format!("/editor?file={}", video_file);
 
-    let mut editor_win = WindowBuilder::new(app, "editor", WindowUrl::App(editor_url.into()))
-        .title("Helmer Micro")
-        .accept_first_mouse(true)
-        .inner_size(800.0, 800.0)
-        .always_on_top(true)
-        .decorations(true)
-        .resizable(false)
-        .visible(true)
-        .focused(true)
-        .center();
+    let mut editor_win =
+        WebviewWindowBuilder::new(app, "editor", WebviewUrl::App(editor_url.into()))
+            .title("Helmer Micro")
+            .accept_first_mouse(true)
+            .inner_size(800.0, 800.0)
+            .always_on_top(true)
+            .decorations(true)
+            .resizable(false)
+            .visible(true)
+            .focused(true)
+            .center();
 
     #[cfg(target_os = "macos")]
     {
@@ -67,7 +67,11 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let gif_encoder = Arc::new(gif_encoder);
 
     let gif_name = chrono::Local::now().format("HM-%y%m%d-%I%M%p").to_string();
-    let gif_path = desktop_dir().unwrap().join(format!("{}.gif", gif_name));
+    let gif_path = app_handle
+        .path()
+        .desktop_dir()
+        .unwrap()
+        .join(format!("{}.gif", gif_name));
 
     let gif = match std::fs::File::create(gif_path) {
         Ok(file) => file,
@@ -87,8 +91,6 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     });
 
     let mut i = 0;
-    // Get the timestamp of the first frame
-    let base_ts;
 
     // Get AppState from AppHandle
     let state = app_handle.state::<AppState>();
@@ -96,7 +98,8 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let mut frames = state.frames.lock().await;
     let frames: Vec<Frame> = frames.drain(..).collect();
 
-    // TODO: ask about logic
+    // Get the timestamp of the first frame
+    let base_ts;
     match &frames[0] {
         Frame::BGR0(f) => base_ts = f.display_time,
         Frame::RGB(f) => base_ts = f.display_time,
@@ -108,7 +111,6 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let step = ((60.0 * speed) / fps as f32).floor() as usize;
     println!("Encoding {} frames to GIF by step {}", frames.len(), step);
 
-    let l = frames.len();
     for frame in frames.into_iter().step_by(step).collect::<Vec<Frame>>() {
         let gif_encoder_clone = gif_encoder.clone();
 
