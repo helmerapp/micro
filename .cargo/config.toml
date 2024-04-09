@@ -1,6 +1,5 @@
 [env]
 
-# These values are Windows-specific
-# For Mac/Linux, a global FFMpeg installation will suffice for dev.
-FFMPEG_INCLUDE_DIR_X86_64-PC-WINDOWS_MSVC = { value = "ext/ffmpeg-5.1-full_build-shared/include/", relative = true}
-FFMPEG_LIB_DIR_X86_64-PC-WINDOWS_MSVC = { value = "ext/ffmpeg-5.1-full_build-shared/include/", relative = true}
+# Windows-specific values. Global FFMpeg installation will suffice for Mac/Linux dev.
+FFMPEG_INCLUDE_DIR_X86_64_PC_WINDOWS_MSVC = { value = "ext/ffmpeg-5.1-full_build-shared/include/", relative = true}
+FFMPEG_LIB_DIR_X86_64_PC_WINDOWS_MSVC = { value = "ext/ffmpeg-5.1-full_build-shared/lib/", relative = true}
