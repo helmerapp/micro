@@ -1,9 +1,0 @@
-{
-	"tauri": {
-		"systemTray": {
-			"iconPath": "icons/mac/TrayIdleTemplate@3x.png",
-			"iconAsTemplate": true,
-			"menuOnLeftClick": false
-		}
-	}
-}
