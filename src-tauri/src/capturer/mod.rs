@@ -1,5 +1,7 @@
 use crate::{cropper, AppState, Status};
-use helmer_media::encoder;
+
+mod encoder;
+
 use rand::Rng;
 use scap::{
     capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
@@ -160,15 +162,15 @@ pub async fn stop_capture(app_handle: AppHandle) {
 
     let mut frames = state.frames.lock().await;
 
-    let time_base = helmer_media::TimeBase::new(1, 25);
+    let time_base = encoder::TimeBase::new(1, 25);
     let mut frame_idx = 0;
-    let mut frame_timestamp = helmer_media::Timestamp::new(frame_idx, time_base);
+    let mut frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
     println!("Encoding preview...");
     for frame in (*frames).iter_mut() {
         encoder.ingest_next_video_frame(frame);
 
         frame_idx += 1;
-        frame_timestamp = helmer_media::Timestamp::new(frame_idx, time_base);
+        frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
     }
     encoder.done();
     drop(encoder);
