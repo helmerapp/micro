@@ -55,11 +55,32 @@ export default function Preview({
 
 	}, []);
 
-	return <div className="w-[95%] h-fit rounded-xl overflow-hidden m-auto mt-0 mb-0 flex flex-col p-4 gap-4">
+	return <div className="w-[95%] h-fit rounded-xl overflow-hidden m-auto mt-0 mb-0 flex flex-col p-4 gap-2">
 		<video muted controls={false}
 			className="w-full object-cover rounded-md overflow-hidden h-[380px] border border-neutral-600" width={800} height={480} ref={videoRef}
 			onClick={handlePlayPause}
 		/>
+		<div className="w-full h-4 flex justify-between items-end">
+			{Array.from({ length: totalFrames }, (_, i) => {
+
+				let color = "bg-[rgba(255,255,255,0.3)]"
+
+				// if i is included in selected frames
+				if (i >= selectedFrames[0] && i <= selectedFrames[1]) {
+					color = "bg-[orange]"
+				}
+
+				if (i % previewFps === 0) {
+					return (
+						<div key={i} className={`w-[2px] h-full ${color}`} />
+					)
+				} else {
+					return (
+						<div key={i} className={`w-[2px] h-1/2 ${color}`} />
+					)
+				}
+			})}
+		</div>
 
 		<Slider.Root
 			min={0}
@@ -69,15 +90,15 @@ export default function Preview({
 			className="relative flex items-center select-none touch-none h-5"
 			onValueChange={(e) => handleInput(e)}
 		>
-			<Slider.Track className="bg-black relative grow rounded-full h-[3px] w-full">
-				<Slider.Range className="absolute bg-[aqua] rounded-full h-full" />
+			<Slider.Track className="bg-[transparent] relative grow rounded-full h-[3px] w-full">
+				<Slider.Range className="absolute bg-[transparent] rounded-full h-full" />
 			</Slider.Track>
 			<Slider.Thumb
-				className="block w-5 h-5 bg-white shadow-[0_2px_10px] shadow-blackA4 rounded-[10px] hover:bg-violet3 focus:outline-none focus:shadow-[0_0_0_5px] focus:shadow-blackA5"
+				className="block w-5 h-6 bg-[orange] rounded-2xl rounded-ss-3xl rounded-se-3xl translate-x-[-10px]"
 				aria-label="Start Frame"
 			/>
 			<Slider.Thumb
-				className="block w-5 h-5 bg-white shadow-[0_2px_10px] shadow-blackA4 rounded-[10px] hover:bg-violet3 focus:outline-none focus:shadow-[0_0_0_5px] focus:shadow-blackA5"
+				className="block w-5 h-6 bg-[orange] rounded-2xl rounded-ss-3xl rounded-se-3xl translate-x-[10px]"
 				aria-label="End Frame"
 			/>
 		</Slider.Root>
