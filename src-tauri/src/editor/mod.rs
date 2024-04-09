@@ -108,28 +108,21 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let step = ((60.0 * speed) / fps as f32).floor() as usize;
     println!("Encoding {} frames to GIF by step {}", frames.len(), step);
 
-    let mut handles = vec![];
     let l = frames.len();
     for frame in frames.into_iter().step_by(step).collect::<Vec<Frame>>() {
         let gif_encoder_clone = gif_encoder.clone();
 
-        handles.push(tokio::task::spawn(async move {
-            // Remove the `frame` argument
-            unit_frame_handler(
-                &frame,
-                gif_encoder_clone,
-                i,
-                base_ts,
-                frame_start_time,
-                frame_end_time,
-                speed,
-            );
-        }));
+        // Remove the `frame` argument
+        unit_frame_handler(
+            &frame,
+            gif_encoder_clone,
+            i,
+            base_ts,
+            frame_start_time,
+            frame_end_time,
+            speed,
+        );
         i += 1;
-    }
-
-    for handle in handles {
-        handle.await.unwrap();
     }
 
     drop(gif_encoder);
