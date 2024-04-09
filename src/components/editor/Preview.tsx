@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { convertFileSrc } from '@tauri-apps/api/tauri'
+import { convertFileSrc } from '@tauri-apps/api/core'
 import * as Slider from '@radix-ui/react-slider';
 import CONSTANTS from "../../constants";
 

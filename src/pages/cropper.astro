@@ -73,18 +73,17 @@ import Base from "../components/base.astro";
 	}
 	.hidden {
 		transform: scale(0);
-	} 
-	
-	.recording{
-		pointer-events: none;
 	}
 
+	.recording {
+		pointer-events: none;
+	}
 </style>
 
 <script>
-	import { invoke } from '@tauri-apps/api/tauri';
-	import { listen } from '@tauri-apps/api/event';
-	import { getCurrent } from '@tauri-apps/api/window';
+	import { invoke } from "@tauri-apps/api/core";
+	import { listen } from "@tauri-apps/api/event";
+	import { getCurrent } from "@tauri-apps/api/window";
 
 	let isSelecting = false;
 	let isToolbarVisible = false;
@@ -94,26 +93,25 @@ import Base from "../components/base.astro";
 	let endY = 0;
 
 	// Constants
-	const selectionEl = document.querySelector('section');
-	const selectableAreaEl = document.querySelector('main');
+	const selectionEl = document.querySelector("section");
+	const selectableAreaEl = document.querySelector("main");
 
 	// Check if elements are found
 	if (!selectionEl || !selectableAreaEl) {
 		console.error("Unable to find necessary elements.");
 	}
 	// Listen for events from the Rust side
-	listen('capture-started', () => {
+	listen("capture-started", () => {
 		selectableAreaEl!.classList.add("recording");
 	});
 
-	listen('capture-stopped', () => {
+	listen("capture-stopped", () => {
 		selectableAreaEl!.classList.remove("recording");
 	});
 
-
-	selectableAreaEl!.addEventListener('mousedown', (e) => {
+	selectableAreaEl!.addEventListener("mousedown", (e) => {
 		isSelecting = true;
-		selectionEl!.classList.remove('hidden');
+		selectionEl!.classList.remove("hidden");
 		startX = e.clientX - selectableAreaEl!.offsetLeft;
 		startY = e.clientY - selectableAreaEl!.offsetTop;
 		if (isToolbarVisible) {
@@ -121,13 +119,13 @@ import Base from "../components/base.astro";
 		}
 	});
 
-	selectableAreaEl!.addEventListener('mousemove', (e) => {
+	selectableAreaEl!.addEventListener("mousemove", (e) => {
 		if (isSelecting) {
 			updateSelection(e);
 		}
 	});
 
-	selectableAreaEl!.addEventListener('mouseup', () => {
+	selectableAreaEl!.addEventListener("mouseup", () => {
 		if (isSelecting) {
 			const buttonX = startX > endX ? endX - 24 : endX;
 			const buttonY = startY > endY ? endY - 24 : endY;
@@ -148,15 +146,15 @@ import Base from "../components/base.astro";
 	}
 
 	function hideToolbar() {
-		invoke('hide_toolbar')
+		invoke("hide_toolbar");
 		isToolbarVisible = false;
 	}
 
 	function showToolbar(buttonX: number, buttonY: number) {
-		invoke('show_toolbar', {
+		invoke("show_toolbar", {
 			buttonCoords: [buttonX, buttonY],
-			area: [startX + 2, startY + 2 , endX - 7, endY - 7] // added these number using trial and error to remove border from the captured frame
-		})
+			area: [startX + 2, startY + 2, endX - 7, endY - 7], // added these number using trial and error to remove border from the captured frame
+		});
 		isToolbarVisible = true;
 	}
 

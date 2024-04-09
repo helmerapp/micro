@@ -1,21 +1,21 @@
-use crate::{AppState, Status};
-use tauri::{AppHandle, Manager, PhysicalSize, Position, Size, WindowBuilder, WindowUrl};
-use tokio::sync::Mutex;
+use tauri::{AppHandle, Manager, PhysicalSize, Position, Size, WebviewUrl, WebviewWindowBuilder};
 
 pub fn init_cropper(app: &AppHandle) {
     // create cropper window
-    let mut cropper_win = WindowBuilder::new(app, "cropper", WindowUrl::App("/cropper".into()))
-        .accept_first_mouse(true)
-        .skip_taskbar(true)
-        .always_on_top(true)
-        .decorations(false)
-        .resizable(false)
-        .visible(false)
-        .focused(false)
-        .center();
+    let mut cropper_win =
+        WebviewWindowBuilder::new(app, "cropper", WebviewUrl::App("/cropper".into()))
+            .accept_first_mouse(true)
+            .skip_taskbar(true)
+            .always_on_top(true)
+            .decorations(false)
+            .resizable(false)
+            .visible(false)
+            .focused(false)
+            .center();
 
     // set transparent only on windows and linux
-    #[cfg(not(target_os = "macos"))]{
+    #[cfg(not(target_os = "macos"))]
+    {
         cropper_win = cropper_win.transparent(true);
     }
 
@@ -64,7 +64,7 @@ pub fn toggle_cropper(app: &AppHandle) {
 
     // match state.status {
     //     Status::Idle => {
-    let cropper_win = app.get_window("cropper").unwrap();
+    let cropper_win = app.get_webview_window("cropper").unwrap();
     if cropper_win.is_visible().unwrap() {
         cropper_win.hide().unwrap();
         // state.status = Status::Idle;
