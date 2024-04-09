@@ -30,12 +30,15 @@ gifski = { version = "1.12.2", default-features = false, features = [
 	"png",
 	"gifsicle",
 ] }
-helmer-media = { git = "ssh://git@github.com/helmerapp/helmer-media.git" }
 imgref = "1.10.0"
 rgb = "0.8.37"
 rand = "0.8.5"
 tempfile = "3.10.0"
 chrono = "0.4.33"
+anyhow = "1.0"
+itertools = "0.12.0"
+rgb2yuv420 = "0.2.3"
+ac-ffmpeg = { git = "https://github.com/angelcam/rust-ac-ffmpeg.git", branch="master" }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.25.0"
