@@ -14,7 +14,6 @@ pub fn init_editor(app: &AppHandle, video_file: String) {
             .title("Helmer Micro")
             .accept_first_mouse(true)
             .inner_size(800.0, 800.0)
-            .always_on_top(true)
             .decorations(true)
             .resizable(false)
             .visible(true)
