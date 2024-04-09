@@ -1,10 +1,11 @@
 use crate::AppState;
-use imgref::Img;
-use rgb::RGBA;
-use scap::frame::{BGRAFrame, BGRFrame, Frame, RGBFrame};
+use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
-use std::thread;
+use std::{sync::Arc, thread, time::SystemTime};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+
+mod frame_encoder;
+use frame_encoder::FrameEncoder;
 
 pub fn init_editor(app: &AppHandle, video_file: String) {
     let editor_url = format!("/editor?file={}", video_file);
@@ -39,46 +40,13 @@ pub struct ExportOptions {
     bounce: bool,
 }
 
-fn transform_frame_bgr0(frame: &BGRFrame) -> Img<Vec<RGBA<u8>>> {
-    let frame_data = &frame.data;
-    let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
-
-    for src in frame_data.chunks_exact(3) {
-        rgba_data.push(RGBA::new(src[2], src[1], src[0], 255))
-    }
-
-    Img::new(rgba_data, frame.width as usize, frame.height as usize)
-}
-
-fn transform_frame_bgra(frame: &BGRAFrame) -> Img<Vec<RGBA<u8>>> {
-    let frame_data = &frame.data;
-    let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
-
-    for src in frame_data.chunks_exact(4) {
-        rgba_data.push(RGBA::new(src[2], src[1], src[0], 255))
-    }
-
-    Img::new(rgba_data, frame.width as usize, frame.height as usize)
-}
-
-fn transform_frame_rgb(frame: &RGBFrame) -> Img<Vec<RGBA<u8>>> {
-    let frame_data = &frame.data;
-    let mut rgba_data: Vec<RGBA<u8>> = Vec::with_capacity(frame_data.len() / 4);
-
-    for src in frame_data.chunks_exact(3) {
-        rgba_data.push(RGBA::new(src[0], src[1], src[2], 255))
-    }
-
-    Img::new(rgba_data, frame.width as usize, frame.height as usize)
-}
-
 #[tauri::command]
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
+    let time = SystemTime::now();
     println!("TODO: export with options: {:?}", options);
 
-    let state = app_handle.state::<AppState>();
-
     let mut settings = gifski::Settings::default();
+    settings.fast = true;
 
     let width = options.size;
     let frame_start_time = options.range[0] as f64;
@@ -95,6 +63,8 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let mut no_progress = gifski::progress::NoProgress {};
 
     let (gif_encoder, gif_writer) = gifski::new(settings).unwrap();
+
+    let gif_encoder = Arc::new(gif_encoder);
 
     let gif_name = chrono::Local::now().format("HM-%y%m%d-%I%M%p").to_string();
     let gif_path = app_handle
@@ -120,13 +90,16 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
         println!("Finished writing");
     });
 
-    //  Get frames from app state
-    let mut frames = state.frames.lock().await;
     let mut i = 0;
 
+    // Get AppState from AppHandle
+    let state = app_handle.state::<AppState>();
+    //  Get frames from app state
+    let mut frames = state.frames.lock().await;
+    let frames: Vec<Frame> = frames.drain(..).collect();
+
     // Get the timestamp of the first frame
-    let mut base_ts;
-    const TIMEBASE: f64 = 1000000000.0; // TODO: Verify for windows. This value may be different
+    let base_ts;
     match &frames[0] {
         Frame::BGR0(f) => base_ts = f.display_time,
         Frame::RGB(f) => base_ts = f.display_time,
@@ -136,60 +109,51 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     }
 
     let step = ((60.0 * speed) / fps as f32).floor() as usize;
-    println!("Encoding frames to GIF {} by step {}", frames.len(), step);
-    for frame in (*frames).iter_mut().step_by(step) {
-        match frame {
-            Frame::BGR0(bgr_frame) => {
-                let img = transform_frame_bgr0(bgr_frame);
-                gif_encoder
-                    .add_frame_rgba(i, img, (bgr_frame.display_time - base_ts) as f64 / TIMEBASE)
-                    .unwrap_or_else(|err| {
-                        eprintln!("Error adding frame to encoder: {:?}", err);
-                    });
+    println!("Encoding {} frames to GIF by step {}", frames.len(), step);
 
-                i += 1;
-            }
-            Frame::BGRA(bgra_frame) => {
-                let img = transform_frame_bgra(bgra_frame);
-                gif_encoder
-                    .add_frame_rgba(
-                        i,
-                        img,
-                        (bgra_frame.display_time - base_ts) as f64 / TIMEBASE,
-                    )
-                    .unwrap_or_else(|err| {
-                        eprintln!("Error adding frame to encoder: {:?}", err);
-                    });
+    for frame in frames.into_iter().step_by(step).collect::<Vec<Frame>>() {
+        let gif_encoder_clone = gif_encoder.clone();
 
-                i += 1;
-            }
-            Frame::RGB(rgb_frame) => {
-                let img = transform_frame_rgb(rgb_frame);
-                let frame_pts = (rgb_frame.display_time - base_ts) as f64 / TIMEBASE;
-
-                if (frame_start_time > frame_pts || frame_pts > frame_end_time) {
-                    println!("Ignoring frame {} with t {}", i, frame_pts);
-                    continue;
-                }
-
-                gif_encoder
-                    .add_frame_rgba(i, img, frame_pts / (speed as f64))
-                    .unwrap_or_else(|err| {
-                        eprintln!("Error adding frame to encoder: {:?}", err);
-                    });
-
-                i += 1;
-            }
-            _ => {
-                panic!("This frame type is not supported yet");
-            }
-        }
+        // Remove the `frame` argument
+        unit_frame_handler(
+            &frame,
+            gif_encoder_clone,
+            i,
+            base_ts,
+            frame_start_time,
+            frame_end_time,
+            speed,
+        );
+        i += 1;
     }
+
     drop(gif_encoder);
     println!("GIF Encoded");
 
     handle.join().unwrap();
     println!("GIF Written to file");
 
-    println!("Completed");
+    let time_elapsed = time.elapsed().unwrap();
+    println!("Completed in {:?} seconds", time_elapsed.as_secs());
+}
+
+pub fn unit_frame_handler(
+    frame: &Frame,
+    gif_encoder: Arc<gifski::Collector>,
+    index: usize,
+    base_ts: u64,
+    start_ts: f64,
+    end_ts: f64,
+    speed: f32,
+) {
+    let frame_encoder = FrameEncoder::new(gif_encoder.clone(), index, base_ts);
+    match frame {
+        Frame::BGR0(bgr_frame) => frame_encoder.encode_bgr(bgr_frame),
+        Frame::BGRA(bgra_frame) => frame_encoder.encode_bgra(bgra_frame),
+        Frame::RGB(rgb_frame) => frame_encoder.encode_rgb(rgb_frame, speed, start_ts, end_ts),
+        _ => {
+            panic!("This frame type is not supported yet");
+        }
+    }
+    println!("Frame {} Encoded", index)
 }
