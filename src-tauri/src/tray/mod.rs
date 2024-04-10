@@ -1,3 +1,5 @@
+mod updater;
+
 use crate::cropper::toggle_cropper;
 use opener::open;
 use tauri::{
@@ -49,6 +51,9 @@ pub fn build(app: &AppHandle) {
             }
             "about" => {
                 open("https://www.helmer.app/micro").expect("failed to open about link");
+            }
+            "updates" => {
+                updater::check_for_update(app.clone()).expect("Failed to check for updates");
             }
             _ => (),
         })
