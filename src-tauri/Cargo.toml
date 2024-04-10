@@ -3,9 +3,11 @@ name = "helmer-micro"
 version = "0.0.1"
 description = "Rock solid GIFs, straight from your desktop."
 authors = ["Siddharth <siddharth99c@gmail.com>"]
-license = ""
-repository = "https://www.github.com/clearlysid/helmer-micro"
+license = "AGPL-3.0-only"
+repository = "https://www.github.com/helmerapp/micro"
 edition = "2021"
+homepage = "https://www.helmer.app/micro"
+rust-version = "1.76"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -21,6 +23,7 @@ serde_json = "1.0"
 tauri-plugin-store = "2.0.0-beta"
 tauri-plugin-global-shortcut = "2.0.0-beta"
 tauri-plugin-single-instance = "2.0.0-beta"
+tauri-plugin-updater = "2.0.0-beta"
 tokio = { version = "1", features = ["full"] }
 window-vibrancy = "0.4.0"
 window-shadows = "0.2.1"
