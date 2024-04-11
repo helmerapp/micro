@@ -23,7 +23,7 @@ const ToolbarReact = () => {
 		if (mainEl) {
 			const step = 360 / RECORDING_LIMIT;
 			const deg = (seconds * step);
-			mainEl.style.backgroundImage = `conic-gradient(lightseagreen ${deg}deg, white ${deg}deg, black 360deg)`
+			mainEl.style.backgroundImage = `conic-gradient(lightseagreen ${deg}deg, white ${deg}deg, white 360deg)`
 		}
 	}, [seconds])
 
