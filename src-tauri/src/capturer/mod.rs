@@ -1,4 +1,4 @@
-use crate::{cropper, AppState, Status};
+use crate::{AppState, Status};
 
 mod encoder;
 
@@ -129,11 +129,6 @@ pub async fn stop_capture(app_handle: AppHandle) {
         preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
     );
 
-    // let cropper_win = app_handle.get_webview_window("cropper").unwrap();
-    // cropper_win.set_ignore_cursor_events(false).unwrap();
-    // cropper_win.emit("capture-stopped", ()).unwrap();
-    // crate::cropper::toggle_cropper(&app_handle);
-
     // Stop capturing frames and drop recorder
     let mut recorder = state.recorder.lock().await;
     (*recorder).as_mut().unwrap().stop_capture();
@@ -164,15 +159,16 @@ pub async fn stop_capture(app_handle: AppHandle) {
 
     let time_base = encoder::TimeBase::new(1, 25);
     let mut frame_idx = 0;
-    let mut frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
+    let mut _frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
     println!("Encoding preview...");
+
     for frame in (*frames).iter_mut() {
-        encoder.ingest_next_video_frame(frame);
+        let _ = encoder.ingest_next_video_frame(frame);
 
         frame_idx += 1;
-        frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
+        _frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
     }
-    encoder.done();
+    let _ = encoder.done();
     drop(encoder);
     println!("Preview encoding complete");
 
