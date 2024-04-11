@@ -4,6 +4,7 @@ main {
 	width: fit-content;
 	height: fit-content;
 	border-radius: 50%;
+	background-image: conic-gradient(lightseagreen 0deg, lightseagreen 360deg);
 }
 
 button {
