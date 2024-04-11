@@ -47,6 +47,7 @@ const ToolbarReact = () => {
 			}}
 			onAnimationComplete={(e) => {
 				// TODO: refactor this to use framer motion variants
+				// @ts-expect-error: backgroundImage is not a valid property
 				if (e['backgroundImage'] === `conic-gradient(white 360deg, lightseagreen 360deg, lightseagreen 360deg)`) {
 					stopRecording();
 				}
