@@ -55,18 +55,20 @@ export default function Preview({
 
 	return <div className="w-[95%] h-fit rounded-xl overflow-hidden m-auto mt-0 mb-0 flex flex-col p-4 gap-2">
 		{
-			videoLoaded
-				? <video
-					className="w-full object-cover rounded-md overflow-hidden h-[380px] border border-neutral-600"
-					onClick={handlePlayPause}
-					controls={false}
-					ref={videoRef}
-					height={480}
-					width={800}
-					muted
-				/>
-				: <Spinner />
+			!videoLoaded && <Spinner />
 		}
+		<video
+			className="w-full object-cover rounded-md overflow-hidden h-[380px] border border-neutral-600"
+			onClick={handlePlayPause}
+			controls={false}
+			ref={videoRef}
+			height={480}
+			width={800}
+			style={{
+				opacity: videoLoaded ? 1 : 0
+			}}
+			muted
+		/>
 
 	</div>
 }
