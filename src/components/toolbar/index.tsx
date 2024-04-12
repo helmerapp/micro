@@ -28,6 +28,7 @@ const ToolbarReact = () => {
 	};
 
 	const stopRecording = () => {
+		if (!recording) return;
 		setRecording(false);
 		invoke("stop_capture", {});
 	};
