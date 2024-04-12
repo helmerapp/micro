@@ -84,6 +84,16 @@ export default function Trimmer({
 			value={selectedFrames}
 			className="relative flex items-center select-none touch-none h-5"
 			onValueChange={(e: number[]) => {
+
+				// TODO: this should in Preview.tsx but 🤷‍♂️
+				const videoEl = document.querySelector("video") as HTMLVideoElement;
+
+				if (e[0] !== selectedFrames[0]) {
+					videoEl.currentTime = e[0] / previewFps;
+				} else if (e[1] !== selectedFrames[1]) {
+					videoEl.currentTime = e[1] / previewFps;
+				}
+
 				playClickSound();
 				setSelectedFrames(e)
 			}}

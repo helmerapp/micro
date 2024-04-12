@@ -25,12 +25,6 @@ export default function Preview({
 		}
 	}
 
-	// if (e[0] !== selectedFrames[0]) {
-	// 	videoRef.current.currentTime = e[0] / previewFps;
-	// } else if (e[1] !== selectedFrames[1]) {
-	// 	videoRef.current.currentTime = e[1] / previewFps;
-	// }
-
 	useEffect(() => {
 		// Wait for preview to be ready
 		const previewListener = listen("preview-ready", () => {
