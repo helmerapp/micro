@@ -1,68 +1,76 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import RecordingButton from "./RecordingButton";
-import TimerDisplay from "./TimerDisplay";
+import { motion } from "framer-motion";
 import "./toolbar.css";
-import useInterval from "../../utils/useInterval";
 
-const RECORDING_LIMIT = 20;
+const MAX_RECORDING_LIMIT_SECONDS = 20;
 
 const ToolbarReact = () => {
-  const [seconds, setSeconds] = useState(RECORDING_LIMIT);
-  const [isVisible, setIsVisible] = useState(false);
+	const [recording, setRecording] = useState(false);
 
-  useInterval(() => {
-    if (isVisible && seconds >= 0) {
-      if (seconds === 0) {
-        onStopRecording();
-      } else {
-        setSeconds((prevSeconds) => prevSeconds - 1);
-      }
-    }
-  }, 1000);
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape" || event.key === "Esc") {
+				// TODO: hide cropper window
+				invoke("hide_toolbar");
+				stopRecording();
+			}
+		};
+		document.addEventListener("keydown", handleKeyDown);
+		return () => {
+			document.removeEventListener("keydown", handleKeyDown);
+		};
+	}, []);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" || event.key === "Esc") {
-        // TODO implement hide cropper window!
-        invoke("hide_toolbar");
-        onStopRecording();
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+	const startRecording = () => {
+		invoke("start_capture");
+		setRecording(true);
+	};
 
-  const startTimer = () => {
-    setIsVisible(true);
-  };
+	const stopRecording = () => {
+		if (!recording) return;
+		setRecording(false);
+		invoke("stop_capture", {});
+	};
 
-  const stopTimer = () => {
-    setIsVisible(false);
-    setSeconds(RECORDING_LIMIT);
-  };
+	const handleClick = () => recording ? stopRecording() : startRecording();
 
-  const onStartRecording = () => {
-    invoke("start_capture");
-    startTimer();
-  };
-
-  const onStopRecording = () => {
-    stopTimer();
-    invoke("stop_capture", {});
-  };
-
-  return (
-    <main>
-      <RecordingButton
-        onStartRecording={onStartRecording}
-        onStopRecording={onStopRecording}
-      />
-      <TimerDisplay seconds={seconds} isVisible={isVisible} />
-    </main>
-  );
+	return (
+		<motion.main
+			animate={{
+				backgroundImage: recording
+					? `conic-gradient(white 360deg, lightseagreen 360deg, lightseagreen 360deg)`
+					: `conic-gradient(white 0deg, lightseagreen 0deg, lightseagreen 360deg)`
+			}}
+			transition={{
+				duration: MAX_RECORDING_LIMIT_SECONDS,
+				ease: "linear"
+			}}
+			onAnimationComplete={(e) => {
+				// TODO: refactor this to use framer motion variants
+				// @ts-expect-error: backgroundImage is not a valid property
+				if (e['backgroundImage'] === `conic-gradient(white 360deg, lightseagreen 360deg, lightseagreen 360deg)`) {
+					stopRecording();
+				}
+			}}
+		>
+			<button className="record" onClick={handleClick}>
+				{
+					recording
+						? (
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+								<rect x="2" y="2" width="20" height="20"></rect>
+							</svg>
+						)
+						: (
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+								<circle cx="12" cy="12" r="10"></circle>
+							</svg>
+						)
+				}
+			</button>
+		</motion.main>
+	);
 };
 
 export default ToolbarReact;

@@ -20,7 +20,7 @@ pub fn init_toolbar(app: &AppHandle) {
     let toolbar_win = toolbar_win.build().expect("Failed to open toolbar");
 
     let size = Size::Logical(LogicalSize {
-        width: 150.0,
+        width: 70.0,
         height: 70.0,
     });
 

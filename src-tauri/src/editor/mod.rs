@@ -15,7 +15,6 @@ pub fn init_editor(app: &AppHandle, video_file: String) {
             .title("Helmer Micro")
             .accept_first_mouse(true)
             .inner_size(800.0, 800.0)
-            .always_on_top(true)
             .decorations(true)
             .resizable(false)
             .visible(true)
@@ -124,6 +123,14 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
             frame_end_time,
             speed,
         );
+
+        // if i % 5 === 0 then log time elapsed
+        if (i % 5) == 0 {
+            // log time elapsed since start
+            let time_elapsed = time.elapsed().unwrap();
+            println!("Time elapsed: {:?}", time_elapsed);
+        }
+
         i += 1;
     }
 
