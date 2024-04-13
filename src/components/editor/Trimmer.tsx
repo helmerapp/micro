@@ -54,7 +54,7 @@ export default function Trimmer({
 		source.stop(audioContext.currentTime + 0.02);
 	};
 
-	return <>
+	return <div className="w-[95%] h-fit flex flex-col pl-4 pr-4 gap-2">
 		<div className="w-full h-4 flex justify-between items-end">
 			{Array.from({ length: totalFrames }, (_, i) => {
 
@@ -110,5 +110,5 @@ export default function Trimmer({
 				aria-label="End Frame"
 			/>
 		</Slider.Root>
-	</>
+	</div>
 }
