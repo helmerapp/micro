@@ -69,7 +69,8 @@ fn main() {
 
             let app_handle = app.app_handle();
             tray::build(&app_handle);
-            tray::check_for_updates(&app_handle);
+            // CODE TO CHECK FOR UPDATES ON STARTUP
+            // tray::check_for_updates(&app_handle);
             cropper::init_cropper(&app_handle);
 
             Ok(())
