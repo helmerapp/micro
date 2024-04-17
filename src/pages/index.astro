@@ -3,5 +3,43 @@ import Base from "../components/base.astro";
 ---
 
 <Base>
-	<h1>Homepage</h1>
+	<main class="h-full w-full bg-[#111]">
+		<section>
+			<h1>Welcome to Micro</h1>
+			<p>Micro can record buttery smooth, sharp GIFs from your screen.</p>
+
+			<p>
+				Before you get started, we'll need permission to record your
+				screen.
+			</p>
+
+			<button>Grant Permission</button>
+		</section>
+
+		<section>
+			<h2>You're all set!</h2>
+
+			<p>
+				Press CTRL + SHIFT + 2 and drag to select an area of your
+				screen.
+			</p>
+			<p>
+				Micro can record upto 20 seconds and gives you some settings to
+				play with.
+			</p>
+
+			<p>
+				Share your creations online with the hash #MadeWithMicro, we'd
+				love to see it!
+			</p>
+		</section>
+	</main>
 </Base>
+
+<script>
+	const button = document.querySelector("button") as HTMLButtonElement;
+
+	button.addEventListener("click", async () => {
+		console.log("clicked");
+	});
+</script>
