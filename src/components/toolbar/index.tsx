@@ -14,7 +14,7 @@ const ToolbarReact = () => {
 			if (event.key === "Escape" || event.key === "Esc") {
 
 				const cropperWindow = getAll().find((win) => win.label === "cropper");
-				cropperWindow?.hide();
+				cropperWindow?.hide(); // TODO: also reset the crop area here
 
 				invoke("hide_toolbar");
 				stopRecording();
