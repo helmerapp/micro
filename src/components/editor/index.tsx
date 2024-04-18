@@ -29,7 +29,8 @@ export default function Editor() {
 				...options,
 			}
 		}).then(() => {
-			console.log("export started")
+			console.log("Export Finished")
+			setExporting(false);
 		})
 	}
 
