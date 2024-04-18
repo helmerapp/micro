@@ -94,8 +94,8 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     // Get AppState from AppHandle
     let state = app_handle.state::<AppState>();
     //  Get frames from app state
-    let mut frames = state.frames.lock().await;
-    let frames: Vec<Frame> = frames.drain(..).collect();
+    let frames = state.frames.lock().await;
+    let frames = frames.iter().collect::<Vec<&Frame>>();
 
     // Get the timestamp of the first frame
     let base_ts;
@@ -110,7 +110,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let step = ((60.0 * speed) / fps as f32).floor() as usize;
     println!("Encoding {} frames to GIF by step {}", frames.len(), step);
 
-    for frame in frames.into_iter().step_by(step).collect::<Vec<Frame>>() {
+    for frame in frames.iter().step_by(step) {
         let gif_encoder_clone = gif_encoder.clone();
 
         // Remove the `frame` argument
