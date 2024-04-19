@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
 import CONSTANTS from "../../constants";
+import ExportButton from "./ExportButton";
 
 const Label = ({ text, children }: {
 	text: string,
@@ -34,6 +35,7 @@ const getEstimatedFileSize = (
 export default function Controls({
 	exportHandler,
 	selectedFrames,
+  exporting
 }: {
 	exportHandler: (data: {
 		fps: number,
@@ -43,14 +45,13 @@ export default function Controls({
 		loop_gif: boolean
 	}) => void,
 	selectedFrames: number[],
-	exporting: boolean
+  exporting: boolean
 }) {
 
 	const [fps, setFps] = useState(30);
 	const [size, setSize] = useState(1000);
 	const [loop, setLoop] = useState(false);
 	const [speed, setSpeed] = useState(1);
-	const [bounce, setBounce] = useState(false);
 	const [quality, setQuality] = useState(90);
 
 	// TODO: implement quality setting in UI
@@ -98,27 +99,13 @@ export default function Controls({
 					<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
 				</Switch.Root>
 			</Label>
-			{/* TODO: add bounce later */}
-			{/* <Label text="Bounce">
-				<Switch.Root
-					className="w-[42px] h-[25px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
-					id="bounce"
-					checked={bounce}
-					onCheckedChange={e => setBounce(e)}
-				>
-					<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
-				</Switch.Root>
-			</Label> */}
 		</div>
 		<p>Estimated GIF Size: {estimatedSize}mb </p>
-		<input type="submit" value="Export to Desktop"
-			className="bg-[#444] text-white rounded-lg p-2 hover:scale-105 transition-all cursor-pointer"
-			onClick={e => {
-				e.preventDefault();
-				exportHandler({ size, fps, speed, loop_gif: loop, bounce })
+		<ExportButton
+			exporting={exporting}
+			clickHandler={() => {
+				exportHandler({ size, fps, speed, loop_gif: loop, bounce: false })
 			}}
 		/>
 	</form>
-
-
 }

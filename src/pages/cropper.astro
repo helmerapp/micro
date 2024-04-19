@@ -169,6 +169,7 @@ import Base from "../components/base.astro";
 
 	document.addEventListener("keydown", (e) => {
 		if (e.key === "Escape") {
+			hideToolbar();
 			closeCropper();
 		}
 	});

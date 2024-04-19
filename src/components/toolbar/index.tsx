@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { getAll } from "@tauri-apps/api/window";
 import { motion } from "framer-motion";
 import "./toolbar.css";
 
@@ -11,7 +12,10 @@ const ToolbarReact = () => {
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (event.key === "Escape" || event.key === "Esc") {
-				// TODO: hide cropper window
+
+				const cropperWindow = getAll().find((win) => win.label === "cropper");
+				cropperWindow?.hide(); // TODO: also reset the crop area here
+
 				invoke("hide_toolbar");
 				stopRecording();
 			}
