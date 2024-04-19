@@ -58,7 +58,7 @@ export default function Controls({
 
 	const durationInFrames = Math.abs(selectedFrames[1] - selectedFrames[0]);
 
-	// TODO: pass this from Rust
+	// TODO: pass aspect ratio from Rust
 	const aspectRatio = 1 / 1;
 	const width = size;
 	const height = width * aspectRatio;
