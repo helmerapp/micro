@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
+import ExportButton from "./ExportButton";
 
 const Label = ({ text, children }: {
 	text: string,
@@ -11,16 +12,22 @@ const Label = ({ text, children }: {
 	</label>
 }
 
-export default function Controls({ exportHandler }: {
-	exportHandler: (data: { size: number, fps: number, speed: number, loop_gif: boolean, bounce: boolean }) => void,
+export default function Controls({ exportHandler, exporting }: {
+	exportHandler: (
+		data: {
+			fps: number,
+			size: number,
+			speed: number,
+			bounce: boolean,
+			loop_gif: boolean
+		}) => void,
 	exporting: boolean
 }) {
 
-	const [size, setSize] = useState(1000);
 	const [fps, setFps] = useState(30);
-	const [speed, setSpeed] = useState(1);
+	const [size, setSize] = useState(1000);
 	const [loop, setLoop] = useState(false);
-	const [bounce, setBounce] = useState(false);
+	const [speed, setSpeed] = useState(1);
 
 	return <form className="flex flex-col p-6 gap-8 rounded-lg">
 		<div className="flex align-middle justify-center w-fit  gap-8 ">
@@ -58,23 +65,11 @@ export default function Controls({ exportHandler }: {
 					<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
 				</Switch.Root>
 			</Label>
-			{/* TODO: add bounce later */}
-			{/* <Label text="Bounce">
-				<Switch.Root
-					className="w-[42px] h-[25px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
-					id="bounce"
-					checked={bounce}
-					onCheckedChange={e => setBounce(e)}
-				>
-					<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
-				</Switch.Root>
-			</Label> */}
 		</div>
-		<input type="submit" value="Export to Desktop"
-			className="bg-[#444] text-white rounded-lg p-2 hover:scale-105 transition-all cursor-pointer"
-			onClick={e => {
-				e.preventDefault();
-				exportHandler({ size, fps, speed, loop_gif: loop, bounce })
+		<ExportButton
+			exporting={exporting}
+			clickHandler={() => {
+				exportHandler({ size, fps, speed, loop_gif: loop, bounce: false })
 			}}
 		/>
 	</form>
