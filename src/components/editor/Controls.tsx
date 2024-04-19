@@ -51,10 +51,19 @@ export default function Controls({
 	const [loop, setLoop] = useState(false);
 	const [speed, setSpeed] = useState(1);
 	const [bounce, setBounce] = useState(false);
+	const [quality, setQuality] = useState(90);
 
-	const totalFrames = Math.abs(selectedFrames[1] - selectedFrames[0]);
+	// TODO: implement quality setting in UI
+	// Gifski quality setting: https://docs.rs/gifski/latest/gifski/struct.Settings.html#structfield.quality
 
-	const estimatedSize = getEstimatedFileSize(fps, totalFrames, size, size, 90);
+	const durationInFrames = Math.abs(selectedFrames[1] - selectedFrames[0]);
+
+	// TODO: pass this from Rust
+	const aspectRatio = 1 / 1;
+	const width = size;
+	const height = width * aspectRatio;
+
+	const estimatedSize = getEstimatedFileSize(fps, width, height, quality, durationInFrames);
 
 	return <form className="flex flex-col p-6 gap-8 rounded-lg">
 		<div className="flex align-middle justify-center w-fit  gap-8 ">
@@ -67,7 +76,6 @@ export default function Controls({
 					<option value="800">800px</option>
 					<option value="1000">1000px</option>
 					<option value="1200">1200px</option>
-					{/* <option value="2000">2000px</option> */}
 				</select>
 			</Label>
 			<Label text="Smoothness">
