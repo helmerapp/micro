@@ -47,6 +47,7 @@ export default function Editor() {
 			/>
 			<Controls
 				exportHandler={exportHandler}
+				selectedFrames={selectedFrames}
 				exporting={exporting}
 			/>
 		</main>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
+import CONSTANTS from "../../constants";
 import ExportButton from "./ExportButton";
 
 const Label = ({ text, children }: {
@@ -12,37 +13,70 @@ const Label = ({ text, children }: {
 	</label>
 }
 
-export default function Controls({ exportHandler, exporting }: {
-	exportHandler: (
-		data: {
-			fps: number,
-			size: number,
-			speed: number,
-			bounce: boolean,
-			loop_gif: boolean
-		}) => void,
-	exporting: boolean
+const getEstimatedFileSize = (
+	fps: number,
+	width: number,
+	height: number,
+	quality: number,
+	durationInFrames: number
+) => {
+	const durationInSeconds = durationInFrames / CONSTANTS.previewFps;
+	const totalFrames = durationInSeconds * fps;
+	const qFactor = quality / 100;
+
+	const totalPixels = (width * height * totalFrames) / 3;
+
+	const totalBytes = (totalPixels * qFactor + 1.5) / 2.5
+	const totalKb = totalBytes / 1024;
+	const totalMb = totalKb / 1024;
+	return totalMb.toFixed(2);
+}
+
+export default function Controls({
+	exportHandler,
+	selectedFrames,
+  exporting
+}: {
+	exportHandler: (data: {
+		fps: number,
+		size: number,
+		speed: number,
+		bounce: boolean,
+		loop_gif: boolean
+	}) => void,
+	selectedFrames: number[],
+  exporting: boolean
 }) {
 
 	const [fps, setFps] = useState(30);
 	const [size, setSize] = useState(1000);
 	const [loop, setLoop] = useState(false);
 	const [speed, setSpeed] = useState(1);
+	const [quality, setQuality] = useState(90);
+
+	// TODO: implement quality setting in UI
+	// Gifski quality setting: https://docs.rs/gifski/latest/gifski/struct.Settings.html#structfield.quality
+
+	const durationInFrames = Math.abs(selectedFrames[1] - selectedFrames[0]);
+
+	// TODO: pass aspect ratio from Rust
+	const aspectRatio = 1 / 1;
+	const width = size;
+	const height = width * aspectRatio;
+
+	const estimatedSize = getEstimatedFileSize(fps, width, height, quality, durationInFrames);
 
 	return <form className="flex flex-col p-6 gap-8 rounded-lg">
 		<div className="flex align-middle justify-center w-fit  gap-8 ">
 			<Label text="Size">
 				<select className="rounded-lg p-2 bg-black"
 					defaultValue={"1000"}
-					onChange={(e) => {
-						setSize(Number.parseFloat(e.target.value))
-					}}>
+					onChange={(e) => setSize(Number.parseFloat(e.target.value))}>
 					<option value="200">200px</option>
 					<option value="400">400px</option>
 					<option value="800">800px</option>
 					<option value="1000">1000px</option>
 					<option value="1200">1200px</option>
-					{/* <option value="2000">2000px</option> */}
 				</select>
 			</Label>
 			<Label text="Smoothness">
@@ -66,6 +100,7 @@ export default function Controls({ exportHandler, exporting }: {
 				</Switch.Root>
 			</Label>
 		</div>
+		<p>Estimated GIF Size: {estimatedSize}mb </p>
 		<ExportButton
 			exporting={exporting}
 			clickHandler={() => {
@@ -73,6 +108,4 @@ export default function Controls({ exportHandler, exporting }: {
 			}}
 		/>
 	</form>
-
-
 }
