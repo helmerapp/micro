@@ -23,9 +23,9 @@ const getEstimatedFileSize = (
 	const totalFrames = durationInSeconds * fps;
 	const qFactor = quality / 100;
 
-	let totalPixels = (width * height * totalFrames) / 3;
+	const totalPixels = (width * height * totalFrames) / 3;
 
-	let totalBytes = (totalPixels * qFactor + 1.5) / 2.5
+	const totalBytes = (totalPixels * qFactor + 1.5) / 2.5
 	const totalKb = totalBytes / 1024;
 	const totalMb = totalKb / 1024;
 	return totalMb.toFixed(2);
