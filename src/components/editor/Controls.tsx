@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
+import CONSTANTS from "../../constants";
 
 const Label = ({ text, children }: {
 	text: string,
@@ -11,25 +12,55 @@ const Label = ({ text, children }: {
 	</label>
 }
 
-export default function Controls({ exportHandler }: {
-	exportHandler: (data: { size: number, fps: number, speed: number, loop_gif: boolean, bounce: boolean }) => void,
+const getEstimatedFileSize = (
+	fps: number,
+	width: number,
+	height: number,
+	quality: number,
+	durationInFrames: number
+) => {
+	const durationInSeconds = durationInFrames / CONSTANTS.previewFps;
+	const totalFrames = durationInSeconds * fps;
+	const qFactor = quality / 100;
+
+	const totalPixels = width * height * totalFrames;
+	const totalBytes = totalPixels * 4 * qFactor;
+	const totalKb = totalBytes / 1024;
+	const totalMb = totalKb / 1024;
+	return totalMb;
+}
+
+export default function Controls({
+	exportHandler,
+	selectedFrames,
+}: {
+	exportHandler: (data: {
+		fps: number,
+		size: number,
+		speed: number,
+		bounce: boolean,
+		loop_gif: boolean
+	}) => void,
+	selectedFrames: number[],
 	exporting: boolean
 }) {
 
-	const [size, setSize] = useState(1000);
 	const [fps, setFps] = useState(30);
-	const [speed, setSpeed] = useState(1);
+	const [size, setSize] = useState(1000);
 	const [loop, setLoop] = useState(false);
+	const [speed, setSpeed] = useState(1);
 	const [bounce, setBounce] = useState(false);
+
+	const totalFrames = Math.abs(selectedFrames[1] - selectedFrames[0]);
+
+	const estimatedSize = getEstimatedFileSize(fps, totalFrames, size, size, 100);
 
 	return <form className="flex flex-col p-6 gap-8 rounded-lg">
 		<div className="flex align-middle justify-center w-fit  gap-8 ">
 			<Label text="Size">
 				<select className="rounded-lg p-2 bg-black"
 					defaultValue={"1000"}
-					onChange={(e) => {
-						setSize(Number.parseFloat(e.target.value))
-					}}>
+					onChange={(e) => setSize(Number.parseFloat(e.target.value))}>
 					<option value="200">200px</option>
 					<option value="400">400px</option>
 					<option value="800">800px</option>
@@ -70,6 +101,7 @@ export default function Controls({ exportHandler }: {
 				</Switch.Root>
 			</Label> */}
 		</div>
+		<p>Estimated GIF Size: {estimatedSize}mb </p>
 		<input type="submit" value="Export to Desktop"
 			className="bg-[#444] text-white rounded-lg p-2 hover:scale-105 transition-all cursor-pointer"
 			onClick={e => {
