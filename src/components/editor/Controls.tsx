@@ -23,11 +23,12 @@ const getEstimatedFileSize = (
 	const totalFrames = durationInSeconds * fps;
 	const qFactor = quality / 100;
 
-	const totalPixels = width * height * totalFrames;
-	const totalBytes = totalPixels * 4 * qFactor;
+	let totalPixels = (width * height * totalFrames) / 3;
+
+	let totalBytes = (totalPixels * qFactor + 1.5) / 2.5
 	const totalKb = totalBytes / 1024;
 	const totalMb = totalKb / 1024;
-	return totalMb;
+	return totalMb.toFixed(2);
 }
 
 export default function Controls({
@@ -53,7 +54,7 @@ export default function Controls({
 
 	const totalFrames = Math.abs(selectedFrames[1] - selectedFrames[0]);
 
-	const estimatedSize = getEstimatedFileSize(fps, totalFrames, size, size, 100);
+	const estimatedSize = getEstimatedFileSize(fps, totalFrames, size, size, 90);
 
 	return <form className="flex flex-col p-6 gap-8 rounded-lg">
 		<div className="flex align-middle justify-center w-fit  gap-8 ">
