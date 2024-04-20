@@ -86,28 +86,37 @@ fn main() {
 
             store.load().unwrap_or_default();
 
+            // let first_run = true;
             let first_run = store
                 .get("first_run".to_string())
                 .unwrap_or(&serde_json::Value::Bool(true))
                 .as_bool()
                 .unwrap();
 
-            // const FIRST_RUN: bool = true;
             let recording_permission: bool = scap::has_permission();
 
             // Check if this is the first run or if the screen recording permission is not set
             if first_run || !recording_permission {
                 // Show onboarding screen
-                WebviewWindowBuilder::new(app_handle, "onboarding", WebviewUrl::App("/".into()))
-                    .accept_first_mouse(true)
-                    .always_on_top(true)
-                    .title("Helmer Micro")
-                    .inner_size(800.0, 600.0)
-                    .visible(true)
-                    .focused(true)
-                    .center()
-                    .build()
-                    .expect("Failed to open onboarding");
+                let mut onboarding_win = WebviewWindowBuilder::new(
+                    app_handle,
+                    "onboarding",
+                    WebviewUrl::App("/".into()),
+                )
+                .accept_first_mouse(true)
+                .always_on_top(true)
+                .title("Helmer Micro")
+                .inner_size(600.0, 600.0)
+                .visible(true)
+                .focused(true)
+                .center();
+
+                #[cfg(target_os = "macos")]
+                {
+                    onboarding_win = onboarding_win.title_bar_style(tauri::TitleBarStyle::Overlay);
+                }
+
+                onboarding_win.build().expect("Failed to open onboarding");
 
                 // Set first run to false
                 store.insert("first_run".to_string(), false.into()).unwrap();
