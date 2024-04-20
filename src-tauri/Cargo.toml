@@ -1,5 +1,5 @@
 [package]
-name = "helmer-micro"
+name = "micro"
 version = "0.1.3"
 description = "Rock solid GIFs, straight from your desktop."
 authors = ["Siddharth <siddharth99c@gmail.com>"]
