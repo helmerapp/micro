@@ -29,7 +29,8 @@ export default function Editor() {
 				...options,
 			}
 		}).then(() => {
-			console.log("export started")
+			console.log("Export Finished")
+			setExporting(false);
 		})
 	}
 
@@ -46,6 +47,7 @@ export default function Editor() {
 			/>
 			<Controls
 				exportHandler={exportHandler}
+				selectedFrames={selectedFrames}
 				exporting={exporting}
 			/>
 		</main>

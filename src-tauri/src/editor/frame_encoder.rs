@@ -1,6 +1,6 @@
 use imgref::Img;
 use rgb::RGBA;
-use scap::frame::{self, BGRAFrame, BGRFrame, Frame, RGBFrame};
+use scap::frame::{BGRAFrame, BGRFrame, RGBFrame};
 use std::sync::Arc;
 
 const TIMEBASE: f64 = 1000000000.0; // TODO: Verify for windows. This value may be different

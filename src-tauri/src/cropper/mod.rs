@@ -59,6 +59,9 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
+    // TODO: figure out why state doesn't work here.
+    // Ask in Tauri Discord.
+
     // let state_mutex = app.state::<Mutex<AppState>>();
     // let mut state = state_mutex.blocking_lock();
 
