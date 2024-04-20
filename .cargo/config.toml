@@ -2,6 +2,8 @@
 
 # FFMPEG Libraries
 FFMPEG_STATIC = "1"
+FFMPEG_INCLUDE_DIR = { value = "bin/ffmpeg-6.1/mac-arm64/include/", relative = true}
+FFMPEG_LIB_DIR = { value = "bin/ffmpeg-6.1/mac-arm64/lib/", relative = true}
 
 # Apple Silicon
 FFMPEG_INCLUDE_DIR_AARCH64_APPLE_DARWIN = { value = "bin/ffmpeg-6.1/mac-arm64/include/", relative = true}
