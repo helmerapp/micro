@@ -547,6 +547,11 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.20.2.tgz#9c907b21e30a52db959ba4f80bb01a0cc403d5cc"
   integrity sha512-N49X4lJX27+l9jbLKSqZ6bKNjzQvHaT8IIFUy+YIqmXQdjYCToGWwOItDrfby14c78aDd5NHQl29xingXfCdLQ==
 
+"@fontsource-variable/bricolage-grotesque@^5.0.5":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/bricolage-grotesque/-/bricolage-grotesque-5.0.5.tgz#fe148029d1d37ac9f4a975d6eee76c0fb3ba9665"
+  integrity sha512-te9l62tQCep/628SrSESaU/VHCK85AINmATjDANFle0cUPQX85HrL11DAK4/FONonSjbzGo7lu01IND5ux8+NA==
+
 "@isaacs/cliui@^8.0.2":
   version "8.0.2"
   resolved "https://registry.yarnpkg.com/@isaacs/cliui/-/cliui-8.0.2.tgz#b37667b7bc181c168782259bab42474fbf52b550"
