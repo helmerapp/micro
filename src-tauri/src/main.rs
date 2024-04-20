@@ -69,13 +69,11 @@ fn initialize_micro(app_handle: &AppHandle) {
 }
 
 fn main() {
-    // Set up Tauri Plugins
-    let tp_store = tauri_plugin_store::Builder::default().build();
-    let tp_single_instance = tauri_plugin_single_instance::init(|_, _, _| {});
     tauri::Builder::default()
-        .plugin(tp_store)
-        .plugin(tp_single_instance)
+        .plugin(tauri_plugin_single_instance::init(|_, _, _| {}))
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]
