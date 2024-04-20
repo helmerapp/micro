@@ -1,0 +1,13 @@
+prefix=/Users/runner/work/rust-ffmpeg-splitter/rust-ffmpeg-splitter/zimg/remotion
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: zimg
+Description: Scaling, colorspace conversion, and dithering library
+Version: 2.9.3
+
+# If building a static library against a C++ runtime other than libstdc++,
+# define STL_LIBS when running configure.
+Libs: -L${libdir} -lzimg -lstdc++ -lm -ldl
+Cflags: -I${includedir}
