@@ -1,9 +1,12 @@
 [env]
 
-# FFmpeg macOS (Apple Silicon)
-FFMPEG_INCLUDE_DIR_AARCH64_APPLE_DARWIN = "/opt/homebrew/Cellar/ffmpeg@6/6.1.1/include"
-FFMPEG_LIB_DIR_AARCH64_APPLE_DARWIN = "/opt/homebrew/Cellar/ffmpeg@6/6.1.1/lib"
+# FFMPEG Libraries
+FFMPEG_STATIC = "1"
 
-# FFmpeg Windows (x86_64, MSVC)
-FFMPEG_INCLUDE_DIR_X86_64_PC_WINDOWS_MSVC = { value = "ext/ffmpeg-5.1-full_build-shared/include/", relative = true}
-FFMPEG_LIB_DIR_X86_64_PC_WINDOWS_MSVC = { value = "ext/ffmpeg-5.1-full_build-shared/lib/", relative = true}
+# Apple Silicon
+FFMPEG_INCLUDE_DIR_AARCH64_APPLE_DARWIN = { value = "bin/ffmpeg-6.1/aarch64-apple-darwin/include/", relative = true}
+FFMPEG_LIB_DIR_AARCH64_APPLE_DARWIN = { value = "bin/ffmpeg-6.1/aarch64-apple-darwin/lib/", relative = true}
+
+# Windows x86_64, MSVC
+FFMPEG_INCLUDE_DIR_X86_64_PC_WINDOWS_MSVC = { value = "bin/ffmpeg-6.1/x86_64-pc-windows-msvc/include/", relative = true}
+FFMPEG_LIB_DIR_X86_64_PC_WINDOWS_MSVC = { value = "bin/ffmpeg-6.1/x86_64-pc-windows-msvc/lib/", relative = true}

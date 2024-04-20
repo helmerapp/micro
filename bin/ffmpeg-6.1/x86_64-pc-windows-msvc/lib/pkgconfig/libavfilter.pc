@@ -1,0 +1,14 @@
+prefix=remotion
+exec_prefix=${prefix}
+libdir=remotion/lib
+includedir=remotion/include
+
+Name: libavfilter
+Description: FFmpeg audio/video filtering library
+Version: 9.12.100
+Requires: 
+Requires.private: libswscale >= 7.5.100, libswresample >= 4.12.100, libavutil >= 58.29.100
+Conflicts:
+Libs: -L${libdir}  -lavfilter 
+Libs.private: -pthread -lm -latomic -L/home/circleci/project/zimg/remotion/lib -lzimg -lstdc++ -lm
+Cflags: -I${includedir}
