@@ -20,7 +20,7 @@ pub fn init_toolbar(app: &AppHandle) {
     let toolbar_win = toolbar_win.build().expect("Failed to open toolbar");
 
     let size = Size::Logical(LogicalSize {
-        width: 150.0,
+        width: 70.0,
         height: 70.0,
     });
 
@@ -51,7 +51,6 @@ pub fn init_toolbar(app: &AppHandle) {
     }
 }
 
-// create a toggle_toolbar function
 pub fn toggle_toolbar(app: &AppHandle) {
     let toolbar_win = app.get_webview_window("toolbar").unwrap();
     if toolbar_win.is_visible().unwrap() {
@@ -64,10 +63,9 @@ pub fn toggle_toolbar(app: &AppHandle) {
 #[tauri::command]
 pub async fn show_toolbar(button_coords: Vec<u32>, area: Vec<u32>, app: AppHandle) {
     if app.get_webview_window("toolbar").is_none() {
-        println!("creating new toolbar window");
         crate::toolbar::init_toolbar(&app);
     }
-    println!("Toolbar at {:?}", button_coords);
+
     let toolbar_win = app.get_webview_window("toolbar").unwrap();
     let pos = Position::Logical((button_coords[0], button_coords[1]).into());
     toolbar_win.set_position(pos).unwrap();

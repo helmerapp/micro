@@ -2094,40 +2094,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
-name = "helmer-micro"
-version = "0.0.1"
-dependencies = [
- "ac-ffmpeg",
- "anyhow",
- "chrono",
- "cocoa",
- "gifski",
- "imgref",
- "itertools",
- "objc",
- "opener",
- "os_info",
- "rand 0.8.5",
- "rgb",
- "rgb2yuv420",
- "scap",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-global-shortcut",
- "tauri-plugin-shell",
- "tauri-plugin-single-instance",
- "tauri-plugin-store",
- "tauri-plugin-updater",
- "tempfile",
- "tokio",
- "window-shadows",
- "window-vibrancy 0.4.3",
-]
-
-[[package]]
 name = "hermit-abi"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2860,6 +2826,40 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "488016bfae457b036d996092f6cb448677611ce4449e970ceaf42695203f218a"
 dependencies = [
  "autocfg",
+]
+
+[[package]]
+name = "micro"
+version = "0.1.3"
+dependencies = [
+ "ac-ffmpeg",
+ "anyhow",
+ "chrono",
+ "cocoa",
+ "gifski",
+ "imgref",
+ "itertools",
+ "objc",
+ "opener",
+ "os_info",
+ "rand 0.8.5",
+ "rgb",
+ "rgb2yuv420",
+ "scap",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-global-shortcut",
+ "tauri-plugin-shell",
+ "tauri-plugin-single-instance",
+ "tauri-plugin-store",
+ "tauri-plugin-updater",
+ "tempfile",
+ "tokio",
+ "window-shadows",
+ "window-vibrancy 0.4.3",
 ]
 
 [[package]]

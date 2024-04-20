@@ -1,0 +1,14 @@
+prefix=remotion
+exec_prefix=${prefix}
+libdir=remotion/lib
+includedir=remotion/include
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 60.31.102
+Requires: 
+Requires.private: libswresample >= 4.12.100, libavutil >= 58.29.100
+Conflicts:
+Libs: -L${libdir}  -lavcodec 
+Libs.private: -L/Users/runner/work/rust-ffmpeg-splitter/rust-ffmpeg-splitter/libvpx-1.12.0/remotion/lib -lvpx -lm -L/Users/runner/work/rust-ffmpeg-splitter/rust-ffmpeg-splitter/libvpx-1.12.0/remotion/lib -lvpx -lm -L/Users/runner/work/rust-ffmpeg-splitter/rust-ffmpeg-splitter/libvpx-1.12.0/remotion/lib -lvpx -lm -L/Users/runner/work/rust-ffmpeg-splitter/rust-ffmpeg-splitter/libvpx-1.12.0/remotion/lib -lvpx -lm -pthread -liconv -lm -L/Users/runner/work/rust-ffmpeg-splitter/rust-ffmpeg-splitter/av1/build/src -ldav1d -lpthread -ldl -L/Users/runner/work/rust-ffmpeg-splitter/rust-ffmpeg-splitter/fdk-aac-2.0.2/remotion/lib -lfdk-aac -lmp3lame -lm -Lremotion/lib -lopus -lm -Lremotion/lib -lx264 -lpthread -lm -Lremotion/lib -lx265 -lc++ -ldl -framework VideoToolbox -lz -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
+Cflags: -I${includedir}

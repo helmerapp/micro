@@ -12,10 +12,13 @@
 	* {
 		box-sizing: border-box;
 		user-select: none !important;
+		text-rendering: optimizeLegibilty;
 		-webkit-user-select: none !important;
+		-webkit-font-smoothing: antialiased;
 	}
 
-	html, body {
+	html,
+	body {
 		margin: 0;
 		padding: 0;
 		width: 100%;
@@ -24,3 +27,7 @@
 		color: white;
 	}
 </style>
+
+<script>
+	import "@fontsource-variable/bricolage-grotesque";
+</script>
