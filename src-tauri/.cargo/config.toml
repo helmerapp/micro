@@ -8,6 +8,10 @@ FFMPEG_STATIC = "1"
 FFMPEG_INCLUDE_DIR_AARCH64_APPLE_DARWIN = { value = "bin/ffmpeg-6.1/aarch64-apple-darwin/include/", relative = true}
 FFMPEG_LIB_DIR_AARCH64_APPLE_DARWIN = { value = "bin/ffmpeg-6.1/aarch64-apple-darwin/lib/", relative = true}
 
+# Apple x86_64
+FFMPEG_INCLUDE_DIR_X86_64_APPLE_DARWIN = { value = "bin/ffmpeg-6.1/x86_64-apple-darwin/include/", relative = true}
+FFMPEG_LIB_DIR_X86_64_APPLE_DARWIN = { value = "bin/ffmpeg-6.1/x86_64-apple-darwin/lib/", relative = true}
+
 # Windows x86_64, MSVC
 FFMPEG_INCLUDE_DIR_X86_64_PC_WINDOWS_MSVC = { value = "bin/ffmpeg-6.1/win-x86/include/", relative = true}
 FFMPEG_LIB_DIR_X86_64_PC_WINDOWS_MSVC = { value = "bin/ffmpeg-6.1/win-x86/lib/", relative = true}
