@@ -122,9 +122,9 @@ fn main() {
                 store.insert("first_run".to_string(), false.into()).unwrap();
 
                 store.save();
-            } else {
-                initialize_micro(app_handle);
             }
+
+            initialize_micro(app_handle);
 
             Ok(())
         })
