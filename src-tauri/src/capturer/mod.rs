@@ -1,16 +1,20 @@
+use std::{sync::mpsc, thread};
+
 use crate::{AppState, Status};
 
-mod encoder;
-
 use rand::Rng;
-use scap::{
-    capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
-    frame::FrameType,
-};
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
 
-const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
+use scap::frame::{Frame, FrameType};
+pub const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
+
+mod utils;
+use utils::start_recorder;
+
+use self::encoder::FileOutput;
+
+mod encoder;
 
 fn get_random_id() -> String {
     let random_number: u64 = rand::thread_rng().gen();
@@ -18,59 +22,45 @@ fn get_random_id() -> String {
     id.chars().take(13).collect()
 }
 
+fn process_data(rx: mpsc::Receiver<Frame>, width: usize, height: usize, file_path: FileOutput) {
+    let mut encoder = encoder::Encoder::new(encoder::Options {
+        output: encoder::Output::FileOutput(file_path),
+        input: encoder::InputOptions {
+            width: width,
+            height: height,
+            frame_type: FRAME_TYPE,
+            base_timestamp: None,
+        },
+    });
+    // Process data until the channel is closed
+    while let Ok(data) = rx.recv() {
+        // Process the received data
+        let _ = encoder.ingest_next_video_frame(&data);
+    }
+    println!("Recording stopped");
+    let x = encoder.done();
+    match x {
+        Ok(_) => {
+            println!("Encoding complete");
+        }
+        Err(e) => println!("Error: {:?}", e),
+    }
+    drop(encoder);
+    println!("Processing thread terminated.");
+}
+
 #[tauri::command]
 pub async fn start_capture(app_handle: AppHandle) {
-    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
-    cropper_win.set_ignore_cursor_events(true).unwrap();
-    cropper_win.emit("capture-started", ()).unwrap();
+    let app_handle_clone = app_handle.clone();
+    start_recorder(app_handle_clone).await;
     // // tokio sleep
     // tokio::time::sleep(std::time::Duration::from_secs(20)).await;
     // stop_capture(app_handle).await;
     // Update state to recording
     let state = app_handle.state::<AppState>();
-    let mut status = state.status.lock().await;
-    *status = Status::Recording;
-    drop(status);
 
     // TODO: Calculate capture area
     println!("Cropped Area: {:?}", state.cropped_area);
-
-    // area is of the form [x1, y1, x2, y2]
-    // we need it of the form [x1, y1, x2-x1, y2-y1]
-    let area = state.cropped_area.lock().await.clone();
-    let crop_area = vec![
-        area[0] as f64,
-        area[1] as f64,
-        area[2] as f64 - area[0] as f64,
-        area[3] as f64 - area[1] as f64,
-    ];
-
-    // Initialize scap
-    let options = Options {
-        fps: 60,
-        targets: Vec::new(),
-        show_cursor: true,
-        show_highlight: true,
-        excluded_targets: None,
-        output_type: FRAME_TYPE,
-        output_resolution: Resolution::_1080p, // TODO: doesn't respect aspect ratio yet
-        source_rect: Some(CGRect {
-            origin: CGPoint {
-                x: crop_area[0],
-                y: crop_area[1],
-            },
-            size: CGSize {
-                width: crop_area[2],
-                height: crop_area[3],
-            },
-        }),
-        ..Default::default()
-    };
-
-    let mut recorder = state.recorder.lock().await;
-    *recorder = Some(Capturer::new(options));
-    (*recorder).as_mut().unwrap().start_capture();
-    drop(recorder);
 
     // Start capturing frames
     println!("Capturing frames...");
@@ -79,35 +69,6 @@ pub async fn start_capture(app_handle: AppHandle) {
     // Reset frames to empty array to allow user to
     // record multiple gifs without restarting the app
     *frames = Vec::new();
-
-    loop {
-        let status = state.status.lock().await;
-        if *status != Status::Recording {
-            break;
-        }
-        drop(status);
-
-        let mut recorder = state.recorder.lock().await;
-        let frame = (*recorder)
-            .as_mut()
-            .unwrap()
-            .get_next_frame()
-            .expect("Error");
-        (*frames).push(frame);
-        println!("Frame captured");
-        drop(recorder);
-    }
-
-    println!("Recording stopped");
-}
-
-#[tauri::command]
-pub async fn stop_capture(app_handle: AppHandle) {
-    // Update app state to editing
-    let state = app_handle.state::<AppState>();
-    let mut status = state.status.lock().await;
-    *status = Status::Editing;
-    drop(status);
 
     // Create file in temp directory
     let preview_file = format!("HM-{}.mp4", get_random_id());
@@ -119,58 +80,143 @@ pub async fn stop_capture(app_handle: AppHandle) {
             .with_file_name(&preview_file),
     );
 
-    println!("Preview path: {:?}", preview_path);
-
-    // Hide cropper, create editor
-    crate::cropper::toggle_cropper(&app_handle);
-    crate::toolbar::toggle_toolbar(&app_handle);
     crate::editor::init_editor(
         &app_handle,
         preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
     );
 
+    println!("Preview path: {:?}", preview_path);
+
+    let mut recorder = state.recorder.lock().await;
+    let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
+    drop(recorder);
+
+    let file_output = encoder::FileOutput {
+        output_filename: preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
+    };
+
+    let mut i = 0;
+
+    // let mut tasks = vec![];
+
+    let (tx, rx) = mpsc::channel();
+
+    // Spawn a processing thread
+
+    let process_thread = thread::spawn(move || {
+        process_data(
+            rx,
+            output_width as usize,
+            output_height as usize,
+            file_output,
+        );
+    });
+
+    loop {
+        let status = state.status.lock().await;
+        if *status != Status::Recording {
+            break;
+        }
+        drop(status);
+
+        let mut recorder = state.recorder.lock().await;
+
+        let frame = (*recorder)
+            .as_mut()
+            .unwrap()
+            .get_next_frame()
+            .expect("Error");
+
+        let frame_for_preview = frame.clone();
+        tx.send(frame_for_preview).unwrap();
+
+        (*frames).push(frame);
+
+        println!("Frame captured {}", i);
+        i += 1;
+        drop(recorder);
+    }
+
+    drop(tx);
+    process_thread.join().expect("Processing thread panicked.");
+
+    let editor_win = app_handle.get_webview_window("editor").unwrap();
+    editor_win.emit("preview-ready", ()).unwrap();
+}
+
+#[tauri::command]
+pub async fn stop_capture(app_handle: AppHandle) {
+    // Update app state to editing
+    let state = app_handle.state::<AppState>();
+    let mut status = state.status.lock().await;
+    *status = Status::Editing;
+    drop(status);
+
+    // Create file in temp directory
+    // let preview_file = format!("HM-{}.mp4", get_random_id());
+    // let mut preview_path = state.preview_path.lock().await;
+    // *preview_path = Some(
+    //     NamedTempFile::new()
+    //         .unwrap()
+    //         .into_temp_path()
+    //         .with_file_name(&preview_file),
+    // );
+
+    // println!("Preview path: {:?}", preview_path);
+
+    // Hide cropper, create editor
+    crate::cropper::toggle_cropper(&app_handle);
+    crate::toolbar::toggle_toolbar(&app_handle);
+    // crate::editor::init_editor(
+    //     &app_handle,
+    //     preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
+    // );
+
     // Stop capturing frames and drop recorder
     let mut recorder = state.recorder.lock().await;
     (*recorder).as_mut().unwrap().stop_capture();
-    let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
+    // let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
     recorder.take();
     drop(recorder);
 
     println!("All frames captured");
 
     // Create Encoder
-    let mut encoder = encoder::Encoder::new(encoder::Options {
-        output: encoder::Output::FileOutput(encoder::FileOutput {
-            output_filename: preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
-        }),
-        input: encoder::InputOptions {
-            width: output_width as usize,
-            height: output_height as usize,
-            frame_type: FRAME_TYPE,
-            base_timestamp: None,
-        },
-    });
+    // let mut encoder = encoder::Encoder::new(encoder::Options {
+    //     output: encoder::Output::FileOutput(encoder::FileOutput {
+    //         output_filename: preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
+    //     }),
+    //     input: encoder::InputOptions {
+    //         width: output_width as usize,
+    //         height: output_height as usize,
+    //         frame_type: FRAME_TYPE,
+    //         base_timestamp: None,
+    //     },
+    // });
 
-    // print output_width and height
-    println!("output_width: {}", output_width);
-    println!("output_height: {}", output_height);
+    // // print output_width and height
+    // println!("output_width: {}", output_width);
+    // println!("output_height: {}", output_height);
 
-    let mut frames = state.frames.lock().await;
+    // let mut frames = state.frames.lock().await;
 
-    let time_base = encoder::TimeBase::new(1, 25);
-    let mut frame_idx = 0;
-    let mut _frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
-    println!("Encoding preview...");
+    // let time_base = encoder::TimeBase::new(1, 25);
+    // let mut frame_idx = 0;
+    // let mut _frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
+    // println!("Encoding preview...");
 
-    for frame in (*frames).iter_mut() {
-        let _ = encoder.ingest_next_video_frame(frame);
+    // for frame in (*frames).iter_mut() {
+    //     let _ = encoder.ingest_next_video_frame(frame);
 
-        frame_idx += 1;
-        _frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
-    }
-    let _ = encoder.done();
-    drop(encoder);
-    println!("Preview encoding complete");
+    //     frame_idx += 1;
+    //     _frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
+    // }
+    // let _ = encoder.done();
+    // drop(encoder);
+    // println!("Preview encoding complete");
+
+    // let editor_win = app_handle.get_webview_window("editor").unwrap();
+    // editor_win.emit("preview-ready", ()).unwrap();
 
     let editor_win = app_handle.get_webview_window("editor").unwrap();
     editor_win.emit("preview-ready", ()).unwrap();
