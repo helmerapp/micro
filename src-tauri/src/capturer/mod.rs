@@ -5,6 +5,7 @@ use crate::{AppState, Status};
 use rand::Rng;
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
+use tokio::time::{sleep, Duration};
 
 use scap::frame::{Frame, FrameType};
 pub const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
@@ -74,13 +75,6 @@ pub async fn start_capture(app_handle: AppHandle) {
             .with_file_name(&preview_file),
     );
 
-    crate::editor::init_editor(
-        &app_handle,
-        preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
-    );
-
-    println!("Preview path: {:?}", preview_path);
-
     let mut recorder = state.recorder.lock().await;
     let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
     drop(recorder);
@@ -90,8 +84,6 @@ pub async fn start_capture(app_handle: AppHandle) {
     };
 
     let mut i = 0;
-
-    // let mut tasks = vec![];
 
     let (tx, rx) = mpsc::channel();
 
@@ -133,35 +125,48 @@ pub async fn start_capture(app_handle: AppHandle) {
     drop(tx);
     process_thread.join().expect("Processing thread panicked.");
 
-    let editor_win = app_handle.get_webview_window("editor").unwrap();
-    editor_win.emit("preview-ready", ()).unwrap();
+    println!("Creating Editor Window");
+    println!("Preview path: {:?}", preview_path);
+    println!("Preview dimensions: {}x{}", output_width, output_height);
+
+    crate::editor::init_editor(
+        &app_handle,
+        preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
+    );
+
+    let editor_win = app_handle
+        .get_webview_window("editor")
+        .expect("couldn't get editor window");
+
+    // this sleep is needed because frontend is not ready
+    // to receive the preview-ready event immediately
+    sleep(Duration::from_secs(1)).await;
+
+    // TODO:
+    // if it is guaranteed that preview encoding is fully complete
+    // at the time of editor window creation, we can remove this
+    // event entirely from BE + FE
+
+    editor_win
+        .emit("preview-ready", ())
+        .expect("couldn't emit preview-ready");
 }
 
 #[tauri::command]
 pub async fn stop_capture(app_handle: AppHandle) {
-    // Update app state to editing
-    let state = app_handle.state::<AppState>();
-    let mut status = state.status.lock().await;
-    *status = Status::Editing;
-    drop(status);
-
-    // Hide cropper, create editor
+    // Hide cropper and toolbar
     crate::cropper::toggle_cropper(&app_handle);
     crate::toolbar::toggle_toolbar(&app_handle);
-    // crate::editor::init_editor(
-    //     &app_handle,
-    //     preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
-    // );
 
     // Stop capturing frames and drop recorder
+    let state = app_handle.state::<AppState>();
     let mut recorder = state.recorder.lock().await;
     (*recorder).as_mut().unwrap().stop_capture();
-    // let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
     recorder.take();
     drop(recorder);
 
-    println!("All frames captured");
-
-    let editor_win = app_handle.get_webview_window("editor").unwrap();
-    editor_win.emit("preview-ready", ()).unwrap();
+    // Update app state to editing
+    let mut status = state.status.lock().await;
+    *status = Status::Editing;
+    drop(status);
 }
