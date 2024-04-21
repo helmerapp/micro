@@ -53,14 +53,8 @@ fn process_data(rx: mpsc::Receiver<Frame>, width: usize, height: usize, file_pat
 pub async fn start_capture(app_handle: AppHandle) {
     let app_handle_clone = app_handle.clone();
     start_recorder(app_handle_clone).await;
-    // // tokio sleep
-    // tokio::time::sleep(std::time::Duration::from_secs(20)).await;
-    // stop_capture(app_handle).await;
-    // Update state to recording
-    let state = app_handle.state::<AppState>();
 
-    // TODO: Calculate capture area
-    println!("Cropped Area: {:?}", state.cropped_area);
+    let state = app_handle.state::<AppState>();
 
     // Start capturing frames
     println!("Capturing frames...");
@@ -152,18 +146,6 @@ pub async fn stop_capture(app_handle: AppHandle) {
     *status = Status::Editing;
     drop(status);
 
-    // Create file in temp directory
-    // let preview_file = format!("HM-{}.mp4", get_random_id());
-    // let mut preview_path = state.preview_path.lock().await;
-    // *preview_path = Some(
-    //     NamedTempFile::new()
-    //         .unwrap()
-    //         .into_temp_path()
-    //         .with_file_name(&preview_file),
-    // );
-
-    // println!("Preview path: {:?}", preview_path);
-
     // Hide cropper, create editor
     crate::cropper::toggle_cropper(&app_handle);
     crate::toolbar::toggle_toolbar(&app_handle);
@@ -180,43 +162,6 @@ pub async fn stop_capture(app_handle: AppHandle) {
     drop(recorder);
 
     println!("All frames captured");
-
-    // Create Encoder
-    // let mut encoder = encoder::Encoder::new(encoder::Options {
-    //     output: encoder::Output::FileOutput(encoder::FileOutput {
-    //         output_filename: preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
-    //     }),
-    //     input: encoder::InputOptions {
-    //         width: output_width as usize,
-    //         height: output_height as usize,
-    //         frame_type: FRAME_TYPE,
-    //         base_timestamp: None,
-    //     },
-    // });
-
-    // // print output_width and height
-    // println!("output_width: {}", output_width);
-    // println!("output_height: {}", output_height);
-
-    // let mut frames = state.frames.lock().await;
-
-    // let time_base = encoder::TimeBase::new(1, 25);
-    // let mut frame_idx = 0;
-    // let mut _frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
-    // println!("Encoding preview...");
-
-    // for frame in (*frames).iter_mut() {
-    //     let _ = encoder.ingest_next_video_frame(frame);
-
-    //     frame_idx += 1;
-    //     _frame_timestamp = encoder::Timestamp::new(frame_idx, time_base);
-    // }
-    // let _ = encoder.done();
-    // drop(encoder);
-    // println!("Preview encoding complete");
-
-    // let editor_win = app_handle.get_webview_window("editor").unwrap();
-    // editor_win.emit("preview-ready", ()).unwrap();
 
     let editor_win = app_handle.get_webview_window("editor").unwrap();
     editor_win.emit("preview-ready", ()).unwrap();
