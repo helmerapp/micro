@@ -51,3 +51,6 @@ rgb2yuv420 = "0.2.3"
 ac-ffmpeg = { git = "https://github.com/angelcam/rust-ac-ffmpeg.git", branch = "master" }
 cocoa = "0.25.0"
 objc = "0.2.7"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-capture = "1.1.7"
