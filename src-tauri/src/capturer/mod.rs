@@ -107,13 +107,12 @@ pub async fn start_capture(app_handle: AppHandle) {
     });
 
     loop {
-        let status = state.status.lock().await;
-        if *status != Status::Recording {
+        let mut recorder = state.recorder.lock().await;
+
+        if recorder.is_none() {
+            println!("Exiting encoding loop");
             break;
         }
-        drop(status);
-
-        let mut recorder = state.recorder.lock().await;
 
         let frame = (*recorder)
             .as_mut()
