@@ -100,19 +100,17 @@ impl Encoder {
     }
 
     pub fn ingest_next_video_frame(&mut self, frame: &Frame) -> Result<(), Error> {
-        self.core.encode_next_video_frame(frame);
+        self.core.encode_next_video_frame(frame)?;
 
-        if let Some(encoded_packet) = self.core.get_next_encoded_frame().unwrap() {
+        while let Some(encoded_packet) = self.core.get_next_encoded_frame()? {
             match &self.options.output {
                 OutputInternal::FileOutput(file_output) => {
                     file_output.handle.push(encoded_packet.with_stream_index(0));
                 }
             }
-
-            return Ok(());
-        } else {
-            return Ok(());
         }
+
+        Ok(())
     }
 
     pub fn done(&mut self) -> Result<(), Error> {

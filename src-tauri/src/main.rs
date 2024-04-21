@@ -1,9 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod capturer;
 mod cropper;
 mod editor;
+mod recorder;
 mod toolbar;
 mod tray;
 
@@ -29,7 +29,7 @@ pub struct AppState {
     cropped_area: Mutex<Vec<u32>>,
     status: Mutex<Status>,
     frames: Mutex<Vec<Frame>>,
-    recorder: Mutex<Option<Capturer>>,
+    capturer: Mutex<Option<Capturer>>,
     preview_path: Mutex<Option<PathBuf>>,
 }
 
@@ -39,7 +39,7 @@ impl Default for AppState {
             cropped_area: Mutex::new(Vec::new()),
             status: Mutex::new(Status::Idle),
             frames: Mutex::new(Vec::new()),
-            recorder: Mutex::new(None),
+            capturer: Mutex::new(None),
             preview_path: Mutex::new(None),
         }
     }
@@ -128,8 +128,8 @@ fn main() {
         })
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
-            capturer::start_capture,
-            capturer::stop_capture,
+            recorder::start_recording,
+            recorder::stop_recording,
             editor::export_handler,
             toolbar::show_toolbar,
             toolbar::hide_toolbar

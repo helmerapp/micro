@@ -27,14 +27,14 @@ const ToolbarReact = () => {
 	}, []);
 
 	const startRecording = () => {
-		invoke("start_capture");
+		invoke("start_recording");
 		setRecording(true);
 	};
 
 	const stopRecording = () => {
 		if (!recording) return;
 		setRecording(false);
-		invoke("stop_capture", {});
+		invoke("stop_recording", {});
 	};
 
 	const handleClick = () => recording ? stopRecording() : startRecording();

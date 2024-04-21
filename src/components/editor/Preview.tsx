@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { convertFileSrc } from '@tauri-apps/api/core'
-import { listen } from '@tauri-apps/api/event';
 
 import CONSTANTS from "../../constants";
 import Spinner from "./Spinner";
 
 export default function Preview({
-	selectedFrames,
 	onPreviewLoad
-}: {
-	selectedFrames: number[],
+}: Readonly<{
 	onPreviewLoad: (e: number) => void
-}) {
+}>) {
 	const previewFps = CONSTANTS.previewFps;
 	const videoRef = useRef<HTMLVideoElement>(null) as React.MutableRefObject<HTMLVideoElement>;
 
@@ -26,31 +23,24 @@ export default function Preview({
 	}
 
 	useEffect(() => {
-		// Wait for preview to be ready
-		const previewListener = listen("preview-ready", () => {
+		// Extract preview video path from query params
+		const params = new URLSearchParams(window.location.search);
+		const previewPath = params.get("file");
+		const previewUrl = convertFileSrc(previewPath!);
 
-			// Extract preview video path from query params
-			const params = new URLSearchParams(window.location.search);
-			const previewPath = params.get("file");
-			const previewUrl = convertFileSrc(previewPath!);
+		// Set the source to the preview URL
+		videoRef.current.src = previewUrl;
+		videoRef.current.load();
 
-			// Set the source to the preview URL
-			videoRef.current.src = previewUrl;
-			videoRef.current.load();
+		// Get duration (in seconds) after the video is loaded
+		videoRef.current.addEventListener('loadedmetadata', () => {
+			const duration = videoRef.current.duration;
+			const frames = Math.floor(duration * previewFps);
 
-			// Get duration (in seconds) after the video is loaded
-			videoRef.current.addEventListener('loadedmetadata', () => {
-				const duration = videoRef.current.duration;
-				const frames = Math.floor(duration * previewFps);
-
-				setVideoLoaded(true); // hide spinner
-				onPreviewLoad(frames); // pass total frames upwards
-			});
+			setVideoLoaded(true); // hide spinner
+			onPreviewLoad(frames); // pass total frames upwards
 		});
 
-		return () => {
-			previewListener.then(unlisten => unlisten())
-		}
 	}, []);
 
 	return <div className="w-[95%] h-fit rounded-xl overflow-hidden m-auto mt-0 mb-0 flex flex-col p-4 gap-2">
