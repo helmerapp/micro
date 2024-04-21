@@ -8,8 +8,6 @@ use tempfile::NamedTempFile;
 mod utils;
 use utils::{get_random_id, preview_encoder_thread_handler, start_frame_capture};
 
-mod encoder;
-
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
     let app_handle_clone = app_handle.clone();
@@ -35,13 +33,11 @@ pub async fn start_recording(app_handle: AppHandle) {
             .with_file_name(&preview_file),
     );
 
-    let mut recorder = state.capturer.lock().await;
+    let mut recorder = state.recorder.lock().await;
     let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
     drop(recorder);
 
-    let file_output = encoder::FileOutput {
-        output_filename: preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
-    };
+    let output_path =  preview_path.as_ref().unwrap().to_str().unwrap().to_string();
 
     let (tx, rx) = mpsc::channel();
 
@@ -51,12 +47,12 @@ pub async fn start_recording(app_handle: AppHandle) {
             rx,
             output_width as usize,
             output_height as usize,
-            file_output,
+            output_path,
         );
     });
 
     loop {
-        let mut recorder = state.capturer.lock().await;
+        let mut recorder = state.recorder.lock().await;
 
         if recorder.is_none() {
             println!("Exiting encoding loop");
@@ -102,7 +98,7 @@ pub async fn stop_recording(app_handle: AppHandle) {
 
     // Stop capturing frames and drop recorder
     let state = app_handle.state::<AppState>();
-    let mut recorder = state.capturer.lock().await;
+    let mut recorder = state.recorder.lock().await;
     (*recorder).as_mut().unwrap().stop_capture();
     recorder.take();
     drop(recorder);

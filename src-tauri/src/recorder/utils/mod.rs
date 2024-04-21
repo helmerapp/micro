@@ -1,7 +1,8 @@
-use std::sync::;
+use std::sync::mpsc;
 
-use super::encoder;
-use super::encoder::FileOutput;
+#[cfg(target_os = "macos")]
+mod encoder;
+
 use crate::{AppState, Status};
 use rand::Rng;
 use scap::{
@@ -56,7 +57,7 @@ pub async fn start_frame_capture(app_handle: AppHandle) {
         ..Default::default()
     };
 
-    let mut frame_capturer = state.capturer.lock().await;
+    let mut frame_capturer = state.recorder.lock().await;
     *frame_capturer = Some(Capturer::new(options));
     (*frame_capturer).as_mut().unwrap().start_capture();
     drop(frame_capturer);
@@ -66,32 +67,44 @@ pub fn preview_encoder_thread_handler(
     rx: mpsc::Receiver<Frame>,
     width: usize,
     height: usize,
-    file_path: FileOutput,
+    file_path: String,
 ) {
-    let mut encoder = encoder::Encoder::new(encoder::Options {
-        output: encoder::Output::FileOutput(file_path),
-        input: encoder::InputOptions {
-            width: width,
-            height: height,
-            frame_type: FRAME_TYPE,
-            base_timestamp: None,
-        },
-    });
-    // Process data until the channel is closed
-    while let Ok(data) = rx.recv() {
-        // Process the received data
-        let _ = encoder.ingest_next_video_frame(&data);
+    #[cfg(target_os = "windows")]
+    {
+
+        
     }
-    println!("Recording stopped");
-    let x = encoder.done();
-    match x {
-        Ok(_) => {
-            println!("Encoding complete");
+
+    #[cfg(target_os = "macos")]
+    {
+        let file_output = encoder::FileOutput {
+            output_filename: file_path,
+        };
+        let mut encoder = encoder::Encoder::new(encoder::Options {
+            output: encoder::Output::FileOutput(file_output),
+            input: encoder::InputOptions {
+                width: width,
+                height: height,
+                frame_type: FRAME_TYPE,
+                base_timestamp: None,
+            },
+        });
+        // Process data until the channel is closed
+        while let Ok(data) = rx.recv() {
+            // Process the received data
+            let _ = encoder.ingest_next_video_frame(&data);
         }
-        Err(e) => println!("Error: {:?}", e),
+        println!("Recording stopped");
+        let x = encoder.done();
+        match x {
+            Ok(_) => {
+                println!("Encoding complete");
+            }
+            Err(e) => println!("Error: {:?}", e),
+        }
+        drop(encoder);
+        println!("Processing thread terminated.");
     }
-    drop(encoder);
-    println!("Processing thread terminated.");
 }
 
 pub fn get_random_id() -> String {

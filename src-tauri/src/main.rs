@@ -29,7 +29,7 @@ pub struct AppState {
     cropped_area: Mutex<Vec<u32>>,
     status: Mutex<Status>,
     frames: Mutex<Vec<Frame>>,
-    capturer: Mutex<Option<Capturer>>,
+    recorder: Mutex<Option<Capturer>>,
     preview_path: Mutex<Option<PathBuf>>,
 }
 
@@ -39,7 +39,7 @@ impl Default for AppState {
             cropped_area: Mutex::new(Vec::new()),
             status: Mutex::new(Status::Idle),
             frames: Mutex::new(Vec::new()),
-            capturer: Mutex::new(None),
+            recorder: Mutex::new(None),
             preview_path: Mutex::new(None),
         }
     }
@@ -96,7 +96,7 @@ fn main() {
             // Check if this is the first run or if the screen recording permission is not set
             if first_run || !recording_permission {
                 // Show onboarding screen
-                let mut onboarding_win = WebviewWindowBuilder::new(
+                let onboarding_win = WebviewWindowBuilder::new(
                     app_handle,
                     "onboarding",
                     WebviewUrl::App("/".into()),
