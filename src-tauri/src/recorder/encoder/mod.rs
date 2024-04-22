@@ -2,7 +2,7 @@ use scap::frame::{Frame, FrameType};
 use std::sync::mpsc;
 
 #[cfg(target_os = "macos")]
-mod ffmpeg;
+mod mac;
 
 pub const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
 
@@ -63,12 +63,12 @@ pub fn preview_encoder_thread_handler(
 
     #[cfg(target_os = "macos")]
     {
-        let file_output = ffmpeg::FileOutput {
+        let file_output = mac::FileOutput {
             output_filename: file_path,
         };
-        let mut encoder = ffmpeg::Encoder::new(ffmpeg::Options {
-            output: ffmpeg::Output::FileOutput(file_output),
-            input: ffmpeg::InputOptions {
+        let mut encoder = mac::Encoder::new(mac::Options {
+            output: mac::Output::FileOutput(file_output),
+            input: mac::InputOptions {
                 width: width,
                 height: height,
                 frame_type: FRAME_TYPE,
