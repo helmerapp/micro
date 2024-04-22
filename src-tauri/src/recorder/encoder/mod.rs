@@ -1,6 +1,9 @@
 #[cfg(target_os = "macos")]
 mod mac;
 
+#[cfg(target_os = "macos")]
+use mac::{encoder_finish, encoder_ingest_yuv_frame, encoder_init, Int, SRData, SRString};
+
 #[cfg(target_os = "windows")]
 use windows_capture::encoder::{
     VideoEncoder as WVideoEncoder, VideoEncoderQuality, VideoEncoderType,
@@ -16,7 +19,7 @@ pub struct VideoEncoder {
     first_timestamp: u64,
 
     #[cfg(target_os = "macos")]
-    encoder: *mut c_void,
+    encoder: *mut std::ffi::c_void,
 
     #[cfg(target_os = "windows")]
     encoder: Option<WVideoEncoder>,
@@ -32,17 +35,28 @@ pub struct VideoEncoderOptions {
 impl VideoEncoder {
     pub fn new(options: VideoEncoderOptions) -> Self {
         #[cfg(target_os = "windows")]
-        let encoder = WVideoEncoder::new(
-            VideoEncoderType::Mp4,
-            VideoEncoderQuality::Uhd2160p,
-            options.width as u32,
-            options.height as u32,
-            options.path,
-        )
-        .expect("Failed to create video encoder");
+        let encoder = Some(
+            WVideoEncoder::new(
+                VideoEncoderType::Mp4,
+                VideoEncoderQuality::Uhd2160p,
+                options.width as u32,
+                options.height as u32,
+                options.path,
+            )
+            .expect("Failed to create video encoder"),
+        );
+
+        #[cfg(target_os = "macos")]
+        let encoder = unsafe {
+            encoder_init(
+                options.width as Int,
+                options.height as Int,
+                options.path.as_str().into(),
+            )
+        };
 
         Self {
-            encoder: Some(encoder),
+            encoder,
             first_timestamp: 0,
         }
     }
@@ -77,19 +91,23 @@ impl VideoEncoder {
             Frame::YUVFrame(frame) => {
                 #[cfg(target_os = "macos")]
                 {
-                    let timestamp = data.display_time - self.first_timestamp;
+                    if self.first_timestamp == 0 {
+                        self.first_timestamp = frame.display_time;
+                    }
+
+                    let timestamp = frame.display_time - self.first_timestamp;
 
                     #[cfg(target_os = "macos")]
                     unsafe {
                         encoder_ingest_yuv_frame(
                             self.encoder,
-                            data.width as Int,
-                            data.height as Int,
+                            frame.width as Int,
+                            frame.height as Int,
                             timestamp as Int,
-                            data.luminance_stride as Int,
-                            data.luminance_bytes.as_slice().into(),
-                            data.chrominance_stride as Int,
-                            data.chrominance_bytes.as_slice().into(),
+                            frame.luminance_stride as Int,
+                            frame.luminance_bytes.as_slice().into(),
+                            frame.chrominance_stride as Int,
+                            frame.chrominance_bytes.as_slice().into(),
                         );
                     }
                 }
@@ -116,7 +134,6 @@ impl VideoEncoder {
         unsafe {
             encoder_finish(self.encoder);
         }
-
         Ok(())
     }
 }
