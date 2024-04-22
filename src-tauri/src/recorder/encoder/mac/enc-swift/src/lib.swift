@@ -149,6 +149,83 @@ func encoderIngestYuvFrame(
     }
 }
 
+
+func createCvPixelBufferFromBgraFrameData(
+    _ width: Int,
+    _ height: Int,
+    _ displayTime: Int,
+    _ bytesPerRow: Int,
+    _ bgraBytes: [UInt8]
+) -> CVPixelBuffer? {
+    let pixelBufferAttributes: CFDictionary = [
+        kCVPixelBufferIOSurfacePropertiesKey: [:] as CFDictionary,
+        kCVPixelBufferPixelFormatTypeKey: kCVPixelFormatType_32BGRA
+    ] as CFDictionary
+
+    var pixelBuffer: CVPixelBuffer?
+
+    let status = CVPixelBufferCreate(
+        kCFAllocatorDefault,
+        width,
+        height,
+        kCVPixelFormatType_32BGRA,
+        pixelBufferAttributes,
+        &pixelBuffer
+    )
+
+    if status != kCVReturnSuccess {
+        print("Failed to create CVPixelBuffer")
+        return nil
+    }
+
+    // Get the base address of the pixel buffer
+    CVPixelBufferLockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
+    let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer!)
+
+    // Copy the BGRA data to the pixel buffer
+    let destPointer = baseAddress?.assumingMemoryBound(to: UInt8.self)
+    destPointer?.update(from: bgraBytes, count: bgraBytes.count)
+
+    CVPixelBufferUnlockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
+
+    return pixelBuffer
+}
+
+
+@_cdecl("encoder_ingest_bgra_frame")
+func encoderIngestBgraFrame(
+    _ enc: Encoder,
+    _ width: Int,
+    _ height: Int,
+    _ displayTime: Int,
+    _ bytesPerRow: Int,
+    _ bgraBytesRaw: SRData
+) {
+    let bgraBytes = bgraBytesRaw.toArray()
+
+    // Create a CVPixelBuffer from BGRA data
+    var pixelBuffer = createCvPixelBufferFromBgraFrameData(
+        width,
+        height,
+        displayTime,
+        bytesPerRow,
+        bgraBytes
+    )
+            
+    // Append the CVPixelBuffer to the AVAssetWriter
+    if enc.assetWriterInput.isReadyForMoreMediaData {
+        let frameTime = CMTimeMake(value: Int64(displayTime), timescale: 1000000000)
+        let success = enc.pixelBufferAdaptor.append(pixelBuffer!, withPresentationTime: frameTime)
+        if !success {
+            print("Asset writer error: \(enc.assetWriter.error?.localizedDescription ?? "Unknown error")")
+        } else {
+            print("frame appended successfully")
+        }
+    } else {
+        print("Asset writer input is not ready for more media data")
+    }
+}
+
 @_cdecl("encoder_finish")
 func encoderFinish(_ enc: Encoder) {
 

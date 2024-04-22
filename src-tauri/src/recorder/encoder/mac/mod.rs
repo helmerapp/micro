@@ -18,4 +18,13 @@ swift!(pub fn encoder_ingest_yuv_frame(
     chrominance_bytes: SRData
 ));
 
+swift!(pub fn encoder_ingest_bgra_frame(
+    enc: *mut std::ffi::c_void,
+    width: Int,
+    height: Int,
+    display_time: Int,
+    bytes_per_row: Int,
+    bgra_bytes_raw: SRData
+));
+
 swift!(pub fn encoder_finish(enc: *mut std::ffi::c_void));
