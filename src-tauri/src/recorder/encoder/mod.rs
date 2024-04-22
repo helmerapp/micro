@@ -1,94 +1,122 @@
-use scap::frame::{Frame, FrameType};
-use std::sync::mpsc;
-
 #[cfg(target_os = "macos")]
 mod mac;
 
-pub const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
+#[cfg(target_os = "windows")]
+use windows_capture::encoder::{
+    VideoEncoder as WVideoEncoder, VideoEncoderQuality, VideoEncoderType,
+};
 
-pub fn preview_encoder_thread_handler(
-    rx: mpsc::Receiver<Frame>,
-    width: usize,
-    height: usize,
-    file_path: String,
-) {
+use anyhow::Error;
+use scap::frame::Frame;
+
+mod utils;
+use utils::flip_image_vertical_bgra;
+
+pub struct VideoEncoder {
+    first_timestamp: u64,
+
+    #[cfg(target_os = "macos")]
+    encoder: *mut c_void,
+
     #[cfg(target_os = "windows")]
-    {
-        use windows_capture::encoder::{VideoEncoder, VideoEncoderQuality, VideoEncoderType};
+    encoder: Option<WVideoEncoder>,
+}
 
-        let mut encoder = VideoEncoder::new(
+#[derive(Debug)]
+pub struct VideoEncoderOptions {
+    pub width: usize,
+    pub height: usize,
+    pub path: String,
+}
+
+impl VideoEncoder {
+    pub fn new(options: VideoEncoderOptions) -> Self {
+        #[cfg(target_os = "windows")]
+        let encoder = WVideoEncoder::new(
             VideoEncoderType::Mp4,
-            VideoEncoderQuality::HD1080p,
-            width as u32,
-            height as u32,
-            file_path,
+            VideoEncoderQuality::Uhd2160p,
+            options.width as u32,
+            options.height as u32,
+            options.path,
         )
         .expect("Failed to create video encoder");
 
-        let mut start_time: u64 = 0;
+        Self {
+            encoder: Some(encoder),
+            first_timestamp: 0,
+        }
+    }
 
-        // Process data until the channel is closed
-        while let Ok(data) = rx.recv() {
-            match data {
-                Frame::BGRA(frame) => {
-                    if start_time == 0 {
-                        start_time = frame.display_time;
-                    }
-
+    pub fn ingest_next_frame(&mut self, frame: &Frame) -> Result<(), Error> {
+        match frame {
+            Frame::BGRA(frame) => {
+                #[cfg(target_os = "windows")]
+                {
                     let timespan_nanos =
-                        std::time::Duration::from_nanos(frame.display_time - start_time);
+                        std::time::Duration::from_nanos(frame.display_time - self.first_timestamp);
 
                     // TODO: why does the magic number 10 work here?
                     let timespan_micros = timespan_nanos.as_micros() as i64;
                     let timespan_micros_10 = timespan_micros * 10;
 
-                    let buffer = flip_image_vertical_bgra(&frame.data, width, height);
+                    let buffer = flip_image_vertical_bgra(
+                        &frame.data,
+                        frame.width as usize,
+                        frame.height as usize,
+                    );
 
-                    encoder
-                        .send_frame_buffer(&buffer, timespan_micros_10)
-                        .expect("failed to send frame");
+                    if self.encoder.is_some() {
+                        self.encoder
+                            .as_mut()
+                            .unwrap()
+                            .send_frame_buffer(&buffer, timespan_micros_10)
+                            .expect("failed to send frame");
+                    }
                 }
-                _ => {}
+            }
+            Frame::YUVFrame(frame) => {
+                #[cfg(target_os = "macos")]
+                {
+                    let timestamp = data.display_time - self.first_timestamp;
+
+                    #[cfg(target_os = "macos")]
+                    unsafe {
+                        encoder_ingest_yuv_frame(
+                            self.encoder,
+                            data.width as Int,
+                            data.height as Int,
+                            timestamp as Int,
+                            data.luminance_stride as Int,
+                            data.luminance_bytes.as_slice().into(),
+                            data.chrominance_stride as Int,
+                            data.chrominance_bytes.as_slice().into(),
+                        );
+                    }
+                }
+            }
+            _ => {
+                println!("encoder doesn't currently support this pixel format")
             }
         }
-        println!("Recording stopped");
-        let x = encoder.finish();
-        match x {
-            Ok(_) => {
-                println!("Encoding complete");
-            }
-            Err(e) => println!("Error: {:?}", e),
-        }
+
+        Ok(())
     }
 
-    #[cfg(target_os = "macos")]
-    {
-        let file_output = mac::FileOutput {
-            output_filename: file_path,
-        };
-        let mut encoder = mac::Encoder::new(mac::Options {
-            output: mac::Output::FileOutput(file_output),
-            input: mac::InputOptions {
-                width: width,
-                height: height,
-                frame_type: FRAME_TYPE,
-                base_timestamp: None,
-            },
-        });
-        // Process data until the channel is closed
-        while let Ok(data) = rx.recv() {
-            // Process the received data
-            let _ = encoder.ingest_next_video_frame(&data);
+    pub fn finish(&mut self) -> Result<(), Error> {
+        #[cfg(target_os = "windows")]
+        {
+            self.encoder
+                .take()
+                .unwrap()
+                .finish()
+                .expect("Failed to finish encoding");
         }
-        println!("Recording stopped");
-        let x = encoder.done();
-        match x {
-            Ok(_) => {
-                println!("Encoding complete");
-            }
-            Err(e) => println!("Error: {:?}", e),
+
+        #[cfg(target_os = "macos")]
+        unsafe {
+            encoder_finish(self.encoder);
         }
-        drop(encoder);
+
+        Ok(())
     }
-    println!("Processing thread terminated.");
 }

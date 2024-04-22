@@ -9,7 +9,7 @@ mod utils;
 use utils::{get_random_id, start_frame_capture};
 
 mod encoder;
-use encoder::preview_encoder_thread_handler;
+use encoder::{VideoEncoder, VideoEncoderOptions};
 
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
@@ -46,12 +46,26 @@ pub async fn start_recording(app_handle: AppHandle) {
 
     // Spawn a processing thread
     let preview_encoding_thread = thread::spawn(move || {
-        preview_encoder_thread_handler(
-            rx,
-            output_width as usize,
-            output_height as usize,
-            output_path,
-        );
+        let mut encoder = VideoEncoder::new(VideoEncoderOptions {
+            width: output_width as usize,
+            height: output_height as usize,
+            path: output_path.clone(),
+        });
+
+        // Process data until the channel is closed
+        while let Ok(data) = rx.recv() {
+            encoder
+                .ingest_next_frame(&data)
+                .expect("failed to send frame");
+        }
+
+        match encoder.finish() {
+            Ok(_) => {
+                println!("Encoding complete");
+            }
+            Err(e) => println!("Error: {:?}", e),
+        }
+        println!("Processing thread terminated.");
     });
 
     loop {
