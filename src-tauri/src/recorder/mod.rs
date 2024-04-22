@@ -6,7 +6,10 @@ use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
 
 mod utils;
-use utils::{get_random_id, preview_encoder_thread_handler, start_frame_capture};
+use utils::{get_random_id, start_frame_capture};
+
+mod encoder;
+use encoder::preview_encoder_thread_handler;
 
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
@@ -37,7 +40,7 @@ pub async fn start_recording(app_handle: AppHandle) {
     let [output_width, output_height] = (*recorder).as_mut().unwrap().get_output_frame_size();
     drop(recorder);
 
-    let output_path =  preview_path.as_ref().unwrap().to_str().unwrap().to_string();
+    let output_path = preview_path.as_ref().unwrap().to_str().unwrap().to_string();
 
     let (tx, rx) = mpsc::channel();
 
