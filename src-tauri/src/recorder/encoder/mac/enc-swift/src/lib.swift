@@ -164,11 +164,15 @@ func createCvPixelBufferFromBgraFrameData(
 
     var pixelBuffer: CVPixelBuffer?
 
-    let status = CVPixelBufferCreate(
+    let status = CVPixelBufferCreateWithBytes(
         kCFAllocatorDefault,
         width,
         height,
         kCVPixelFormatType_32BGRA,
+        UnsafeMutableRawPointer(mutating: bgraBytes),
+        width * 4,
+        nil,
+        nil,
         pixelBufferAttributes,
         &pixelBuffer
     )
