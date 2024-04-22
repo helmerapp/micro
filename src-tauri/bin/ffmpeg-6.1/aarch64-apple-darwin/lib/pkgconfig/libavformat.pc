@@ -1,14 +1,14 @@
-prefix=remotion
+prefix=/usr/local/ffmpegg
 exec_prefix=${prefix}
-libdir=remotion/lib
-includedir=remotion/include
+libdir=/usr/local/ffmpegg/lib
+includedir=/usr/local/ffmpegg/include
 
 Name: libavformat
 Description: FFmpeg container format library
-Version: 60.16.100
-Requires: 
-Requires.private: libavcodec >= 60.31.102, libswresample >= 4.12.100, libavutil >= 58.29.100
+Version: 61.2.100
+Requires: libavcodec >= 61.5.100, libswresample >= 5.2.100, libavutil >= 59.10.100
+Requires.private: 
 Conflicts:
-Libs: -L${libdir}  -lavformat 
-Libs.private: -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security
+Libs: -L${libdir}  -lavformat -lm -lbz2 -lz -Wl,-framework,CoreFoundation -Wl,-framework,Security
+Libs.private: 
 Cflags: -I${includedir}

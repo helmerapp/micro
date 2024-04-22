@@ -3,12 +3,12 @@ exec_prefix=${prefix}
 libdir=/usr/local/ffmpegg/lib
 includedir=/usr/local/ffmpegg/include
 
-Name: libswscale
-Description: FFmpeg image rescaling library
-Version: 8.2.100
+Name: libpostproc
+Description: FFmpeg postprocessing library
+Version: 58.2.100
 Requires: libavutil >= 59.10.100
 Requires.private: 
 Conflicts:
-Libs: -L${libdir}  -lswscale -lm
+Libs: -L${libdir}  -lpostproc -lm
 Libs.private: 
 Cflags: -I${includedir}

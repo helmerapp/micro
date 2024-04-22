@@ -1,4 +1,6 @@
 /*
+ * Version macros.
+ *
  * This file is part of FFmpeg.
  *
  * FFmpeg is free software; you can redistribute it and/or
@@ -16,30 +18,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef AVDEVICE_VERSION_H
-#define AVDEVICE_VERSION_H
+#ifndef POSTPROC_VERSION_H
+#define POSTPROC_VERSION_H
 
 /**
  * @file
- * @ingroup lavd
- * Libavdevice version macros
+ * Libpostproc version macros
  */
 
 #include "libavutil/version.h"
 
 #include "version_major.h"
 
-#define LIBAVDEVICE_VERSION_MINOR   2
-#define LIBAVDEVICE_VERSION_MICRO 100
+#define LIBPOSTPROC_VERSION_MINOR   2
+#define LIBPOSTPROC_VERSION_MICRO 100
 
-#define LIBAVDEVICE_VERSION_INT AV_VERSION_INT(LIBAVDEVICE_VERSION_MAJOR, \
-                                               LIBAVDEVICE_VERSION_MINOR, \
-                                               LIBAVDEVICE_VERSION_MICRO)
-#define LIBAVDEVICE_VERSION     AV_VERSION(LIBAVDEVICE_VERSION_MAJOR, \
-                                           LIBAVDEVICE_VERSION_MINOR, \
-                                           LIBAVDEVICE_VERSION_MICRO)
-#define LIBAVDEVICE_BUILD       LIBAVDEVICE_VERSION_INT
+#define LIBPOSTPROC_VERSION_INT AV_VERSION_INT(LIBPOSTPROC_VERSION_MAJOR, \
+                                               LIBPOSTPROC_VERSION_MINOR, \
+                                               LIBPOSTPROC_VERSION_MICRO)
+#define LIBPOSTPROC_VERSION     AV_VERSION(LIBPOSTPROC_VERSION_MAJOR, \
+                                           LIBPOSTPROC_VERSION_MINOR, \
+                                           LIBPOSTPROC_VERSION_MICRO)
+#define LIBPOSTPROC_BUILD       LIBPOSTPROC_VERSION_INT
 
-#define LIBAVDEVICE_IDENT       "Lavd" AV_STRINGIFY(LIBAVDEVICE_VERSION)
+#define LIBPOSTPROC_IDENT       "postproc" AV_STRINGIFY(LIBPOSTPROC_VERSION)
 
-#endif /* AVDEVICE_VERSION_H */
+#endif /* POSTPROC_VERSION_H */

@@ -1,14 +1,14 @@
-prefix=remotion
+prefix=/usr/local/ffmpegg
 exec_prefix=${prefix}
-libdir=remotion/lib
-includedir=remotion/include
+libdir=/usr/local/ffmpegg/lib
+includedir=/usr/local/ffmpegg/include
 
 Name: libavutil
 Description: FFmpeg utility library
-Version: 58.29.100
+Version: 59.10.100
 Requires: 
 Requires.private: 
 Conflicts:
-Libs: -L${libdir}  -lavutil 
-Libs.private: -pthread -lm -framework VideoToolbox -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
+Libs: -L${libdir}  -lavutil -pthread -lm -framework VideoToolbox -L/opt/homebrew/Cellar/libx11/1.8.7/lib -lX11 -framework CoreFoundation -framework CoreMedia -framework CoreVideo -framework CoreServices
+Libs.private: 
 Cflags: -I${includedir}

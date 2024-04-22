@@ -3,12 +3,12 @@ exec_prefix=${prefix}
 libdir=/usr/local/ffmpegg/lib
 includedir=/usr/local/ffmpegg/include
 
-Name: libswscale
-Description: FFmpeg image rescaling library
-Version: 8.2.100
+Name: libswresample
+Description: FFmpeg audio resampling library
+Version: 5.2.100
 Requires: libavutil >= 59.10.100
 Requires.private: 
 Conflicts:
-Libs: -L${libdir}  -lswscale -lm
+Libs: -L${libdir}  -lswresample -lm
 Libs.private: 
 Cflags: -I${includedir}
