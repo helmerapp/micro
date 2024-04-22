@@ -2,7 +2,10 @@
 mod mac;
 
 #[cfg(target_os = "macos")]
-use mac::{encoder_finish, encoder_ingest_yuv_frame, encoder_init, Int, SRData, SRString};
+use mac::{
+    encoder_finish, encoder_ingest_bgra_frame, encoder_ingest_yuv_frame, encoder_init, Int, SRData,
+    SRString,
+};
 
 #[cfg(target_os = "windows")]
 use windows_capture::encoder::{
@@ -64,14 +67,19 @@ impl VideoEncoder {
     pub fn ingest_next_frame(&mut self, frame: &Frame) -> Result<(), Error> {
         match frame {
             Frame::BGRA(frame) => {
+                if self.first_timestamp == 0 {
+                    self.first_timestamp = frame.display_time;
+                }
+
+                let timestamp = frame.display_time - self.first_timestamp;
+
                 #[cfg(target_os = "windows")]
                 {
-                    let timespan_nanos =
-                        std::time::Duration::from_nanos(frame.display_time - self.first_timestamp);
+                    let timestamp_nanos = std::time::Duration::from_nanos(timestamp);
 
                     // TODO: why does the magic number 10 work here?
-                    let timespan_micros = timespan_nanos.as_micros() as i64;
-                    let timespan_micros_10 = timespan_micros * 10;
+                    let timestamp_micros = timestamp_nanos.as_micros() as i64;
+                    let timestamp_micros_10 = timestamp_micros * 10;
 
                     let buffer = flip_image_vertical_bgra(
                         &frame.data,
@@ -83,9 +91,21 @@ impl VideoEncoder {
                         self.encoder
                             .as_mut()
                             .unwrap()
-                            .send_frame_buffer(&buffer, timespan_micros_10)
+                            .send_frame_buffer(&buffer, timestamp_micros_10)
                             .expect("failed to send frame");
                     }
+                }
+
+                #[cfg(target_os = "macos")]
+                unsafe {
+                    encoder_ingest_bgra_frame(
+                        self.encoder,
+                        frame.width as Int,
+                        frame.height as Int,
+                        timestamp as Int,
+                        frame.width as Int,
+                        frame.data.as_slice().into(),
+                    );
                 }
             }
             Frame::YUVFrame(frame) => {
