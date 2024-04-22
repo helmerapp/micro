@@ -96,7 +96,7 @@ fn main() {
             // Check if this is the first run or if the screen recording permission is not set
             if first_run || !recording_permission {
                 // Show onboarding screen
-                let onboarding_win = WebviewWindowBuilder::new(
+                let mut onboarding_win = WebviewWindowBuilder::new(
                     app_handle,
                     "onboarding",
                     WebviewUrl::App("/".into()),
