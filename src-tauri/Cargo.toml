@@ -44,13 +44,14 @@ rand = "0.8.5"
 tempfile = "3.10.0"
 chrono = "0.4.33"
 anyhow = "1.0"
-itertools = "0.12.0"
-rgb2yuv420 = "0.2.3"
 
 [target.'cfg(target_os = "macos")'.dependencies]
-ac-ffmpeg = { git = "https://github.com/angelcam/rust-ac-ffmpeg.git", branch = "master" }
 cocoa = "0.25.0"
 objc = "0.2.7"
+swift-rs = "1.0.5"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-capture = "1.1.7"
+
+[target.'cfg(target_os = "macos")'.build-dependencies]
+swift-rs = { version = "1.0.5", features = ["build"] }
