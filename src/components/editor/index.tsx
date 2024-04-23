@@ -4,8 +4,6 @@ import { invoke } from '@tauri-apps/api/core'
 import CONSTANTS from '../../constants';
 import Preview from "./Preview";
 import Controls from "./Controls";
-import Loader from './Loader';
-import { listen } from '@tauri-apps/api/event';
 import Trimmer from './Trimmer';
 
 const previewFps = CONSTANTS.previewFps;
