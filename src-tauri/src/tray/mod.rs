@@ -41,7 +41,7 @@ pub fn build(app: &AppHandle) {
 
     let mut tray = TrayIconBuilder::new()
         .menu(&tray_menu)
-        .icon(Image::from_path("./icons/128x128.png").expect(""))
+        .icon(Image::from_bytes(include_bytes!("../../icons/128x128.png")).expect(""))
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "record" => {
                 toggle_cropper(app);
@@ -70,7 +70,7 @@ pub fn build(app: &AppHandle) {
         tray = tray
             .menu_on_left_click(false)
             .icon(
-                Image::from_path("./icons/mac/TrayIdleTemplate@3x.png")
+                Image::from_bytes(include_bytes!("../../icons/mac/TrayIdleTemplate@3x.png"))
                     .expect("Couldn't find icon"),
             )
             .icon_as_template(true)
