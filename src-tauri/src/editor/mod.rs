@@ -7,14 +7,34 @@ use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 mod frame_encoder;
 use frame_encoder::FrameEncoder;
 
-pub fn init_editor(app: &AppHandle, video_file: String) {
-    let editor_url = format!("/editor?file={}", video_file);
+pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
+    // TODO: if there exits an editor, close it here
+    let existing_editor_win = app.get_webview_window("editor");
+
+    if let Some(existing_editor_win) = existing_editor_win {
+        existing_editor_win
+            .close()
+            .expect("couldn't close existing editor");
+    }
+
+    let (width, height) = size;
+    let editor_url = format!(
+        "/editor?file={}&width={}&height={}",
+        video_file, width, height
+    );
+
+    const EDITOR_WIDTH: u32 = 600;
+    const TOOLS_HEIGHT: u32 = 400;
+
+    let preview_height_adjusted = EDITOR_WIDTH * height / width;
+
+    let editor_win_height = preview_height_adjusted + TOOLS_HEIGHT;
 
     let mut editor_win =
         WebviewWindowBuilder::new(app, "editor", WebviewUrl::App(editor_url.into()))
             .title("Helmer Micro")
             .accept_first_mouse(true)
-            .inner_size(800.0, 800.0)
+            .inner_size(EDITOR_WIDTH.into(), editor_win_height.into())
             .decorations(true)
             .resizable(false)
             .visible(true)

@@ -100,9 +100,12 @@ pub async fn start_recording(app_handle: AppHandle) {
     println!("Preview dimensions: {}x{}", output_width, output_height);
 
     // initialise the editor with the file path of encoded video
+    let preview_path_string = preview_path.as_ref().unwrap().to_str().unwrap().to_string();
+
     crate::editor::init_editor(
         &app_handle,
-        preview_path.as_ref().unwrap().to_str().unwrap().to_string(),
+        preview_path_string,
+        (output_width, output_height),
     );
 }
 
