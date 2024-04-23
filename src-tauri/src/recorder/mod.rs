@@ -8,8 +8,7 @@ use tempfile::NamedTempFile;
 mod utils;
 use utils::{get_random_id, start_frame_capture};
 
-mod encoder;
-use encoder::{VideoEncoder, VideoEncoderOptions};
+use henx::{VideoEncoder, VideoEncoderOptions};
 
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
