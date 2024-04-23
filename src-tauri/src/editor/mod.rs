@@ -24,7 +24,7 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     );
 
     const EDITOR_WIDTH: u32 = 600;
-    const TOOLS_HEIGHT: u32 = 400;
+    const TOOLS_HEIGHT: u32 = 280;
 
     let preview_height_adjusted = EDITOR_WIDTH * height / width;
 
