@@ -1,16 +1,17 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod capturer;
 mod cropper;
 mod editor;
-mod tray;
+mod recorder;
 mod toolbar;
+mod tray;
 
 use scap::{capturer::Capturer, frame::Frame};
 use std::path::PathBuf;
-use tauri::{GlobalShortcutManager, Manager};
-use tauri_plugin_autostart::MacosLauncher;
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_global_shortcut;
+use tauri_plugin_store::StoreBuilder;
 use tokio::sync::Mutex;
 
 #[cfg(target_os = "macos")]
@@ -46,43 +47,89 @@ impl Default for AppState {
 
 const SHORTCUT: &str = "CmdOrCtrl+Shift+2";
 
-fn main() {
-    // Set up Tauri Plugins
-    let tp_store = tauri_plugin_store::Builder::default().build();
-    let tp_single_instance = tauri_plugin_single_instance::init(|_, _, _| {});
-    let tp_autostart = tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None);
+fn initialize_micro(app_handle: &AppHandle) {
+    // Register global shortcut
+    app_handle
+        .plugin(
+            tauri_plugin_global_shortcut::Builder::new()
+                .with_shortcut(SHORTCUT)
+                .expect("Failed to register global shortcut")
+                .with_handler(|app, _| {
+                    cropper::toggle_cropper(app);
+                })
+                .build(),
+        )
+        .expect("Failed to initialize global shortcut");
 
+    // Build system tray
+    tray::build(&app_handle);
+
+    // Initialize cropping window
+    cropper::init_cropper(&app_handle);
+}
+
+fn main() {
     tauri::Builder::default()
-        .plugin(tp_store)
-        .plugin(tp_autostart)
-        .plugin(tp_single_instance)
+        .plugin(tauri_plugin_single_instance::init(|_, _, _| {}))
+        .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]
             app.set_activation_policy(ActivationPolicy::Accessory);
 
             let app_handle = app.app_handle();
+            let mut store = StoreBuilder::new("app_data.bin").build(app.handle().clone());
 
-            cropper::init_cropper(&app_handle);
+            store.load().unwrap_or_default();
 
-            let mut shortcuts = app_handle.global_shortcut_manager();
-            if !shortcuts.is_registered(SHORTCUT).unwrap() {
-                shortcuts
-                    .register(SHORTCUT, move || {
-                        // app_handle.state().
-                        cropper::toggle_cropper(&app_handle);
-                    })
-                    .unwrap();
+            // let first_run = true;
+            let first_run = store
+                .get("first_run".to_string())
+                .unwrap_or(&serde_json::Value::Bool(true))
+                .as_bool()
+                .unwrap();
+
+            let recording_permission: bool = scap::has_permission();
+
+            // Check if this is the first run or if the screen recording permission is not set
+            if first_run || !recording_permission {
+                // Show onboarding screen
+                let mut onboarding_win = WebviewWindowBuilder::new(
+                    app_handle,
+                    "onboarding",
+                    WebviewUrl::App("/".into()),
+                )
+                .accept_first_mouse(true)
+                .always_on_top(true)
+                .title("Helmer Micro")
+                .inner_size(600.0, 600.0)
+                .visible(true)
+                .focused(true)
+                .center();
+
+                #[cfg(target_os = "macos")]
+                {
+                    onboarding_win = onboarding_win.title_bar_style(tauri::TitleBarStyle::Overlay);
+                }
+
+                onboarding_win.build().expect("Failed to open onboarding");
+
+                // Set first run to false
+                store.insert("first_run".to_string(), false.into()).unwrap();
+
+                store.save();
             }
+
+            initialize_micro(app_handle);
 
             Ok(())
         })
         .manage(AppState::default())
-        .system_tray(tray::build())
-        .on_system_tray_event(tray::events)
         .invoke_handler(tauri::generate_handler![
-            capturer::start_capture,
-            capturer::stop_capture,
+            recorder::start_recording,
+            recorder::stop_recording,
             editor::export_handler,
             toolbar::show_toolbar,
             toolbar::hide_toolbar

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
 import Knob from "./Knob";
+import CONSTANTS from "../../constants";
+import ExportButton from "./ExportButton";
 
 const Label = ({ text, children }: {
 	text: string,
@@ -12,114 +14,99 @@ const Label = ({ text, children }: {
 	</label>
 }
 
-export default function Controls({ exportHandler, exporting }: {
-	exportHandler: (data: { size: number, fps: number, speed: number, loop_gif: boolean, bounce: boolean }) => void,
-	exporting: boolean
+const getEstimatedFileSize = (
+	fps: number,
+	width: number,
+	height: number,
+	quality: number,
+	durationInFrames: number
+) => {
+	const durationInSeconds = durationInFrames / CONSTANTS.previewFps;
+	const totalFrames = durationInSeconds * fps;
+	const qFactor = quality / 100;
+
+	const totalPixels = (width * height * totalFrames) / 3;
+
+	const totalBytes = (totalPixels * qFactor + 1.5) / 2.5
+	const totalKb = totalBytes / 1024;
+	const totalMb = totalKb / 1024;
+	return totalMb.toFixed(2);
+}
+
+export default function Controls({
+	exportHandler,
+	selectedFrames,
+  exporting
+}: {
+	exportHandler: (data: {
+		fps: number,
+		size: number,
+		speed: number,
+		bounce: boolean,
+		loop_gif: boolean
+	}) => void,
+	selectedFrames: number[],
+  exporting: boolean
 }) {
 
-	const [size, setSize] = useState(1000);
 	const [fps, setFps] = useState(30);
-	const [speed, setSpeed] = useState(1);
+	const [size, setSize] = useState(1000);
 	const [loop, setLoop] = useState(false);
-	const [bounce, setBounce] = useState(false);
+	const [speed, setSpeed] = useState(1);
+	const [quality, setQuality] = useState(90);
+
+	// TODO: implement quality setting in UI
+	// Gifski quality setting: https://docs.rs/gifski/latest/gifski/struct.Settings.html#structfield.quality
+
+	const durationInFrames = Math.abs(selectedFrames[1] - selectedFrames[0]);
+
+	// TODO: pass aspect ratio from Rust
+	const aspectRatio = 1 / 1;
+	const width = size;
+	const height = width * aspectRatio;
+
+	const estimatedSize = getEstimatedFileSize(fps, width, height, quality, durationInFrames);
 
 	return <form className="flex flex-col p-6 gap-8 rounded-lg">
-		{
-			exporting ?
-				<span id="loader"><style>
-					{`
-					#loader {
-						width: 12px;
-						height: 12px;
-						border-radius: 50%;
-						display: block;
-						margin:15px auto;
-						position: relative;
-						color: #FFF;
-						box-sizing: border-box;
-						animation: animloader 2s linear infinite;
-					}
-					
-					@keyframes animloader {
-						0% {
-							box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
-						}
-						25% {
-							box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 2px;
-						}
-						50% {
-							box-shadow: 14px 0 0 -2px,  38px 0 0 -2px,  -14px 0 0 2px,  -38px 0 0 -2px;
-						}
-						75% {
-							box-shadow: 14px 0 0 2px,  38px 0 0 -2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
-						}
-						100% {
-							box-shadow: 14px 0 0 -2px,  38px 0 0 2px,  -14px 0 0 -2px,  -38px 0 0 -2px;
-						}
-					}
-		`}
-				</style></span>
-				: <>
-					<div className="flex align-middle justify-center w-fit  gap-8 ">
-						<Label text="Size">
-							<select className="rounded-lg p-2 bg-black"
-								defaultValue={"1000"}
-								onChange={(e) => {
-									setSize(Number.parseFloat(e.target.value))
-								}}>
-								<option value="200">200px</option>
-								<option value="400">400px</option>
-								<option value="800">800px</option>
-								<option value="1000">1000px</option>
-								<option value="1200">1200px</option>
-								{/* <option value="2000">2000px</option> */}
-							</select>
-						</Label>
-						<Label text="Smoothness">
-							<input type="range" min="15" max="60" value={fps}
-								onChange={e => setFps(Number(e.target.value))}
-							/>
-						</Label>
-						<Label text="Speed">
-							<input type="range" min="0.5" max="2"
-								value={speed} step="0.1"
-								onChange={e => setSpeed(Number(e.target.value))} />
-						</Label>
-						<Label text="Loop">
-							<Switch.Root
-								className="w-[42px] h-[25px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
-								id="loop"
-								checked={loop}
-								onCheckedChange={e => setLoop(e)}
-							>
-								<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
-							</Switch.Root>
-						</Label>
-						{/* TODO: add bounce later */}
-						{/* <Label text="Bounce">
+		<div className="flex align-middle justify-center w-fit  gap-8 ">
+			<Label text="Size">
+				<select className="rounded-lg p-2 bg-black"
+					defaultValue={"1000"}
+					onChange={(e) => setSize(Number.parseFloat(e.target.value))}>
+					<option value="200">200px</option>
+					<option value="400">400px</option>
+					<option value="800">800px</option>
+					<option value="1000">1000px</option>
+					<option value="1200">1200px</option>
+				</select>
+			</Label>
+			<Label text="Smoothness">
+				<input type="range" min="15" max="60" value={fps}
+					onChange={e => setFps(Number(e.target.value))}
+				/>
+			</Label>
+			<Label text="Speed">
+				<input type="range" min="0.5" max="2"
+					value={speed} step="0.1"
+					onChange={e => setSpeed(Number(e.target.value))} />
+			</Label>
+			<Label text="Loop">
 				<Switch.Root
 					className="w-[42px] h-[25px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
-					id="bounce"
-					checked={bounce}
-					onCheckedChange={e => setBounce(e)}
+					id="loop"
+					checked={loop}
+					onCheckedChange={e => setLoop(e)}
 				>
 					<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
 				</Switch.Root>
-			</Label> */}
-					</div>
-					<input type="submit" value="Export to Desktop"
-						className="bg-[#444] text-white rounded-lg p-2 hover:scale-105 transition-all cursor-pointer"
-						onClick={e => {
-							e.preventDefault();
-							exportHandler({ size, fps, speed, loop_gif: loop, bounce })
-						}}
-					/><Knob />
-
-				</>
-
-		}
-
+			</Label>
+		</div>
+		<p>Estimated GIF Size: {estimatedSize}mb </p>
+		<ExportButton
+			exporting={exporting}
+			clickHandler={() => {
+				exportHandler({ size, fps, speed, loop_gif: loop, bounce: false })
+			}}
+		/>
 	</form>
-
-
 }

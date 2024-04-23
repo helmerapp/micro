@@ -1,0 +1,24 @@
+{
+	"$schema": "../gen/schemas/desktop-schema.json",
+	"identifier": "desktop-capability",
+	"description": "Capabilities for all windows",
+	"windows": [
+		"editor",
+		"cropper",
+		"toolbar",
+		"onboarding"
+	],
+	"permissions": [
+		"path:default",
+		"event:default",
+		"window:default",
+		"app:default",
+		"resources:default",
+		"menu:default",
+		"tray:default",
+		"window:allow-hide",
+		"window:allow-set-title",
+		"window:allow-start-dragging",
+		"global-shortcut:allow-register"
+	]
+}

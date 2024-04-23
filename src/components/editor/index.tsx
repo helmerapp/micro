@@ -1,60 +1,56 @@
-import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri'
+import { useState } from 'react';
+import { invoke } from '@tauri-apps/api/core'
+
+import CONSTANTS from '../../constants';
 import Preview from "./Preview";
 import Controls from "./Controls";
 import Loader from './Loader';
-import CONSTANTS from '../../constants';
 import { listen } from '@tauri-apps/api/event';
+import Trimmer from './Trimmer';
 
 const previewFps = CONSTANTS.previewFps;
-export default function Editor() {
 
-	const [selectedFrames, setSelectedFrames] = useState([0, 200]);
+export default function Editor() {
 	const [exporting, setExporting] = useState(false);
-	const [isPreviewLoading, setIsPreviewLoading] = useState(true);
+	const [totalFrames, setTotalFrames] = useState(0);
+	const [selectedFrames, setSelectedFrames] = useState([0, totalFrames]);
 
 	const exportHandler = (options: {
-		size: number,
 		fps: number,
+		size: number,
 		speed: number,
-		loop_gif: boolean,
-		bounce: boolean
+		bounce: boolean,
+		loop_gif: boolean
 	}) => {
 		setExporting(true);
 		invoke('export_handler', {
 			options: {
-				// We pass the range as time because the frame count here
-				// does not match the frame count in rust
+				// Pass the range as time because it may be
+				// different than frame count in rust
 				range: [selectedFrames[0] / previewFps, selectedFrames[1] / previewFps],
 				...options,
 			}
 		}).then(() => {
-			console.log("export started")
+			console.log("Export Finished")
+			setExporting(false);
 		})
 	}
 
-	useEffect(() => {
-
-		const previewListener = listen("preview-ready", () => {
-			setIsPreviewLoading(false);
-		});
-
-		return () => {
-			previewListener.then(unlisten => unlisten())
-		}
-
-	}, []);
-
 	return (
-		<main className="w-full h-full flex flex-col bg-[#222] p-8 items-center justify-center">
-			{
-				isPreviewLoading
-					? <Loader />
-					: <>
-						<Preview setSelectedFrames={setSelectedFrames} selectedFrames={selectedFrames} />
-					</>
-			}
-			<Controls exportHandler={exportHandler} exporting={exporting} />
+		<main className="w-full h-full flex flex-col bg-[#222] p-8 items-center">
+			<Preview
+				onPreviewLoad={(f) => setTotalFrames(f)}
+			/>
+			<Trimmer
+				totalFrames={totalFrames}
+				selectedFrames={selectedFrames}
+				setSelectedFrames={setSelectedFrames}
+			/>
+			<Controls
+				exportHandler={exportHandler}
+				selectedFrames={selectedFrames}
+				exporting={exporting}
+			/>
 		</main>
 	);
 }
