@@ -4,6 +4,8 @@ import { convertFileSrc } from '@tauri-apps/api/core'
 import CONSTANTS from "../../constants";
 import Spinner from "./Spinner";
 
+const PREVIEW_WIDTH = 600;
+
 export default function Preview({
 	onPreviewLoad
 }: Readonly<{
@@ -28,6 +30,15 @@ export default function Preview({
 		const previewPath = params.get("file");
 		const previewUrl = convertFileSrc(previewPath!);
 
+		// Get video dimensions from query params
+		const height = params.get("height");
+		const width = params.get("width");
+
+		const aspectRatio = Number(width) / Number(height);
+
+		videoRef.current.width = PREVIEW_WIDTH;
+		videoRef.current.height = PREVIEW_WIDTH / aspectRatio;
+
 		// Set the source to the preview URL
 		videoRef.current.src = previewUrl;
 		videoRef.current.load();
@@ -43,17 +54,15 @@ export default function Preview({
 
 	}, []);
 
-	return <div className="w-[95%] h-fit rounded-xl overflow-hidden m-auto mt-0 mb-0 flex flex-col p-4 gap-2">
+	return <div className="w-full h-fit rounded-xl overflow-hidden mt-5 mb-0 flex flex-col border border-neutral-600 items-center">
 		{
 			!videoLoaded && <Spinner />
 		}
 		<video
-			className="w-full object-cover rounded-md overflow-hidden h-[380px] border border-neutral-600"
+			className="object-cover"
 			onClick={handlePlayPause}
 			controls={false}
 			ref={videoRef}
-			height={480}
-			width={800}
 			style={{
 				opacity: videoLoaded ? 1 : 0
 			}}
