@@ -1,9 +1,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod capturer;
 mod cropper;
 mod editor;
+mod recorder;
 mod toolbar;
 mod tray;
 
@@ -84,17 +84,15 @@ fn main() {
 
             store.load().unwrap_or_default();
 
-            // let first_run = true;
-            let first_run = store
-                .get("first_run".to_string())
-                .unwrap_or(&serde_json::Value::Bool(true))
-                .as_bool()
-                .unwrap();
-
-            let recording_permission: bool = scap::has_permission();
+            let first_run = true;
+            // let first_run = store
+            //     .get("first_run".to_string())
+            //     .unwrap_or(&serde_json::Value::Bool(true))
+            //     .as_bool()
+            //     .unwrap();
 
             // Check if this is the first run or if the screen recording permission is not set
-            if first_run || !recording_permission {
+            if first_run {
                 // Show onboarding screen
                 let mut onboarding_win = WebviewWindowBuilder::new(
                     app_handle,
@@ -119,7 +117,7 @@ fn main() {
                 // Set first run to false
                 store.insert("first_run".to_string(), false.into()).unwrap();
 
-                store.save();
+                store.save().expect("Failed to save store")
             }
 
             initialize_micro(app_handle);
@@ -128,8 +126,8 @@ fn main() {
         })
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
-            capturer::start_capture,
-            capturer::stop_capture,
+            recorder::start_recording,
+            recorder::stop_recording,
             editor::export_handler,
             toolbar::show_toolbar,
             toolbar::hide_toolbar

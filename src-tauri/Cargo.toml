@@ -15,9 +15,14 @@ rust-version = "1.76"
 tauri-build = { version = "2.0.0-beta", features = [] }
 
 [dependencies]
-tauri = { version = "2.0.0-beta", features = [ "protocol-asset", "tray-icon", "image-png"] }
+tauri = { version = "2.0.0-beta", features = [
+	"protocol-asset",
+	"tray-icon",
+	"image-png",
+] }
 tauri-plugin-shell = "2.0.0-beta"
 scap = { git = "https://github.com/helmerapp/scap/", branch = "main" }
+henx = { git = "https://github.com/helmerapp/henx/", branch = "main" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tauri-plugin-store = "2.0.0-beta"
@@ -40,9 +45,6 @@ rand = "0.8.5"
 tempfile = "3.10.0"
 chrono = "0.4.33"
 anyhow = "1.0"
-itertools = "0.12.0"
-rgb2yuv420 = "0.2.3"
-ac-ffmpeg = { git = "https://github.com/angelcam/rust-ac-ffmpeg.git", branch="master" }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.25.0"
