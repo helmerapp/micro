@@ -36,7 +36,7 @@ const getEstimatedFileSize = (
 export default function Controls({
 	exportHandler,
 	selectedFrames,
-  exporting
+	exporting
 }: {
 	exportHandler: (data: {
 		fps: number,
@@ -46,7 +46,7 @@ export default function Controls({
 		loop_gif: boolean
 	}) => void,
 	selectedFrames: number[],
-  exporting: boolean
+	exporting: boolean
 }) {
 
 	const [fps, setFps] = useState(30);
@@ -67,8 +67,8 @@ export default function Controls({
 
 	const estimatedSize = getEstimatedFileSize(fps, width, height, quality, durationInFrames);
 
-	return <form className="flex flex-col p-6 gap-8 rounded-lg">
-		<div className="flex align-middle justify-center w-fit  gap-8 ">
+	return <form className="flex flex-col gap-6 h-fit w-full items-center">
+		<div className="flex w-full justify-between">
 			<Label text="Size">
 				<select className="rounded-lg p-2 bg-black"
 					defaultValue={"1000"}

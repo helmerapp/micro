@@ -54,8 +54,8 @@ export default function Trimmer({
 		source.stop(audioContext.currentTime + 0.02);
 	};
 
-	return <div className="w-[95%] h-fit flex flex-col pl-4 pr-4 gap-2">
-		<div className="w-full h-4 flex justify-between items-end">
+	return <div className="w-full h-fit flex flex-col pl-4 pr-4 gap-2 mt-5 mb-5">
+		<div className="w-full h-6 flex justify-between items-end">
 			{Array.from({ length: totalFrames }, (_, i) => {
 
 				let color = "bg-[rgba(255,255,255,0.3)]"
@@ -102,11 +102,11 @@ export default function Trimmer({
 				<Slider.Range className="absolute bg-[transparent] rounded-full h-full" />
 			</Slider.Track>
 			<Slider.Thumb
-				className="block w-5 h-6 bg-[orange] rounded-2xl rounded-ss-3xl rounded-se-3xl translate-x-[-10px]"
+				className="block w-4 h-4 bg-[orange] rounded-2xl rounded-ss-3xl rounded-se-3xl translate-x-[-5px]"
 				aria-label="Start Frame"
 			/>
 			<Slider.Thumb
-				className="block w-5 h-6 bg-[orange] rounded-2xl rounded-ss-3xl rounded-se-3xl translate-x-[10px]"
+				className="block w-4 h-4 bg-[orange] rounded-2xl rounded-ss-3xl rounded-se-3xl translate-x-[5px]"
 				aria-label="End Frame"
 			/>
 		</Slider.Root>
