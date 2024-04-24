@@ -126,4 +126,8 @@ pub async fn stop_recording(app_handle: AppHandle) {
     let mut status = state.status.lock().await;
     *status = Status::Editing;
     drop(status);
+
+    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
+    cropper_win.set_ignore_cursor_events(false).unwrap();
+    cropper_win.emit("capture-stopped", ()).unwrap();
 }
