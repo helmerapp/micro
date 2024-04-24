@@ -67,14 +67,6 @@ pub async fn start_recording(app_handle: AppHandle) {
         println!("Processing thread terminated.");
     });
 
-    // if there exits an editor, close it here
-    let existing_editor_win = app_handle.get_webview_window("editor");
-    if let Some(existing_editor_win) = existing_editor_win {
-        existing_editor_win
-            .destroy()
-            .expect("couldn't destory and close existing editor");
-    }
-
     loop {
         let mut recorder = state.recorder.lock().await;
 
@@ -96,6 +88,16 @@ pub async fn start_recording(app_handle: AppHandle) {
         drop(recorder);
     }
 
+    // if there exits an editor, close it here
+    // TODO: ideal case: use the existing editor itself
+    // update preview path and animate to the right dimensions
+    let existing_editor_win = app_handle.get_webview_window("editor");
+    if let Some(existing_editor_win) = existing_editor_win {
+        existing_editor_win
+            .close()
+            .expect("couldn't destory and close existing editor");
+    }
+
     // drop the sender to close the channel
     drop(tx);
     // wait for the encoding thread to finish
@@ -106,6 +108,9 @@ pub async fn start_recording(app_handle: AppHandle) {
     println!("Creating Editor Window");
     println!("Preview path: {:?}", preview_path);
     println!("Preview dimensions: {}x{}", output_width, output_height);
+
+    // sleep 1 second
+    std::thread::sleep(std::time::Duration::from_secs(1));
 
     // initialise the editor with the file path of encoded video
     let preview_path_string = preview_path.as_ref().unwrap().to_str().unwrap().to_string();
