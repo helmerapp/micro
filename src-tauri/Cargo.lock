@@ -1722,9 +1722,9 @@ dependencies = [
 
 [[package]]
 name = "gifski"
-version = "1.14.4"
+version = "1.32.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6a6c5eab296009821c25867a4eaa9fca77df08bade4eed27bc5c211b3e6466f"
+checksum = "fa3aeeed337aa658d1c2d90cb21b6db6172d1b8a84dfb462ade81f48eb0fd5eb"
 dependencies = [
  "crossbeam-channel",
  "crossbeam-utils",
@@ -1955,7 +1955,7 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 [[package]]
 name = "henx"
 version = "0.1.0"
-source = "git+https://github.com/helmerapp/henx/?branch=main#b6a774deca7a3d95f31d6192517805493bc3e188"
+source = "git+https://github.com/helmerapp/henx/?branch=main#57f1dfdbe2d3a8074438cf1e65aba7851f7d0720"
 dependencies = [
  "anyhow",
  "scap",
@@ -3903,9 +3903,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-pki-types"
-version = "1.4.1"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecd36cc4259e3e4514335c4a138c6b43171a8d61d8f5c9348f9fc7529416f247"
+checksum = "beb461507cee2c2ff151784c52762cf4d9ff6a61f3e80968600ed24fa837fa54"
 
 [[package]]
 name = "rustls-webpki"
@@ -5713,11 +5713,11 @@ checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
 
 [[package]]
 name = "winapi-util"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f29e6f9198ba0d26b4c9f07dbe6f9ed633e1f3d5b8b414090084349e46a52596"
+checksum = "134306a13c5647ad6453e8deaec55d3a44d6021970129e6188735e74bf546697"
 dependencies = [
- "winapi",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
