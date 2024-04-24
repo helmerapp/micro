@@ -77,7 +77,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let gif_encoder = Arc::new(gif_encoder);
 
     let gif_name = chrono::Local::now()
-        .format("HM_%y:%m:%d_%I%M%S%p")
+        .format("GIF %Y-%m-%d at %I-%M-%S %p")
         .to_string();
     let gif_path = app_handle
         .path()
