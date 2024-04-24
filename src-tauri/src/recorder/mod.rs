@@ -128,6 +128,10 @@ pub async fn stop_recording(app_handle: AppHandle) {
     crate::cropper::toggle_cropper(&app_handle);
     crate::toolbar::toggle_toolbar(&app_handle);
 
+    // Reset cropper
+    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
+    cropper_win.emit("reset-cropper", ()).unwrap();
+
     // Stop capturing frames and drop recorder
     let state = app_handle.state::<AppState>();
     let mut recorder = state.recorder.lock().await;
