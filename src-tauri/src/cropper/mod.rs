@@ -36,16 +36,12 @@ pub fn init_cropper(app: &AppHandle) {
         use objc::{class, msg_send, sel, sel_impl};
 
         cropper_win
-       
             .to_owned()
             .run_on_main_thread(move || {
                 let id = cropper_win.ns_window().unwrap() as cocoa::base::id;
 
                 unsafe {
-                    // set window level
-                    // let _: cocoa::base::id = msg_send![id, setLevel: 25];
-
-                     // Make the webview and window background transparent
+                    // Make the webview and window background transparent
                     let color =
                     NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
                     let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
