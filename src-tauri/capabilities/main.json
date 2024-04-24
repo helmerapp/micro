@@ -17,6 +17,7 @@
 		"menu:default",
 		"tray:default",
 		"window:allow-hide",
+		"window:allow-close",
 		"window:allow-set-title",
 		"window:allow-start-dragging",
 		"global-shortcut:allow-register"
