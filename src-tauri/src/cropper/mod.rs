@@ -1,4 +1,4 @@
-use tauri::{AppHandle, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
 pub fn init_cropper(app: &AppHandle) {
     //  get size of primary monitor
@@ -36,19 +36,26 @@ pub fn init_cropper(app: &AppHandle) {
         use objc::{class, msg_send, sel, sel_impl};
 
         cropper_win
+       
             .to_owned()
-            .run_on_main_thread(move || unsafe {
+            .run_on_main_thread(move || {
                 let id = cropper_win.ns_window().unwrap() as cocoa::base::id;
 
-                let color =
+                unsafe {
+                    // set window level
+                    let _: cocoa::base::id = msg_send![id, setLevel: 25];
+
+                     // Make the webview and window background transparent
+                    let color =
                     NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
-                let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
-                cropper_win.with_webview(|webview| {
-                    // !!! has delay
-                    let id = webview.inner();
-                    let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
-                    let _: cocoa::base::id = msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
-                }).ok();
+                    let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
+                    cropper_win.with_webview(|webview| {
+                        // !!! has delay
+                        let id = webview.inner();
+                        let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
+                        let _: cocoa::base::id = msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
+                    }).ok();
+                }
             })
             .unwrap();
     }
