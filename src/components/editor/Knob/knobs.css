@@ -1,0 +1,109 @@
+.ui-knob-shadow {
+	box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.ui-knob {
+	position: relative;
+	display: inline-block;
+	overflow: visible;
+	width: 64px;
+	height: 64px;
+	padding: 0px;
+
+	border: 1px solid #ddd;
+	border-radius: 50px;
+
+	/* center the div */
+	top: 50%;
+	left: 50%;
+
+	border-width: 0;
+	background: #eee;
+	font-weight: bold;
+	text-shadow: 0 1px 1px #f6f6f6;
+	color: #444;
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, rgb(255, 192, 192)),
+		color-stop(1, rgb(255, 233, 207))
+	);
+}
+
+.ui-knob-indicator {
+	position: absolute;
+	display: block;
+	z-index: 10;
+	margin: 0;
+	padding: 0;
+	border-radius: 3px;
+	/* Due to a display bug with anti-aliasing */
+	-webkit-backface-visibility: hidden;
+
+	/* border: 1px solid black; */
+	/* background: black; */
+	font-weight: bold;
+	color: #111111;
+	text-shadow: 0 1px 1px #ffffff;
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, rgba(0, 0, 0, 0.3)),
+		color-stop(1, rgba(0, 0, 0, 0.3))
+	);
+}
+
+.rotate-knob.ui-knob {
+	background: #333;
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, #333),
+		color-stop(1, #222)
+	);
+}
+
+.position-rotate-knob.ui-knob {
+	background: #333;
+	background-image: -webkit-gradient(
+		linear,
+		left top,
+		left bottom,
+		color-stop(0, #333),
+		color-stop(1, #222)
+	);
+}
+
+.position-css-knob .ui-knob-indicator,
+.spin-knob .ui-knob-indicator,
+.vertical-slide-knob .ui-knob-indicator,
+.horizontal-slide-knob .ui-knob-indicator {
+	width: 10px;
+	height: 10px;
+	border-radius: 8px;
+}
+
+.rotate-css-knob .ui-knob-indicator {
+	width: 62px;
+	height: 10px;
+}
+
+.position-rotate-css-knob .ui-knob-indicator {
+	width: 10px;
+	height: 6px;
+}
+
+.ui-knob-container {
+	position: relative;
+	width: 256px;
+	height: 100px;
+	cursor: pointer;
+	overflow: hidden;
+	margin: auto;
+
+	-webkit-user-select: none;
+	user-select: none;
+}

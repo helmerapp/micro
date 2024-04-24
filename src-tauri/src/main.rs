@@ -84,16 +84,15 @@ fn main() {
 
             store.load().unwrap_or_default();
 
-            let first_run = true;
-            // let first_run = store
-            //     .get("first_run".to_string())
-            //     .unwrap_or(&serde_json::Value::Bool(true))
-            //     .as_bool()
-            //     .unwrap();
+            // let first_run = true;
+            let first_run = store
+                .get("first_run".to_string())
+                .unwrap_or(&serde_json::Value::Bool(true))
+                .as_bool()
+                .unwrap();
 
-            // Check if this is the first run or if the screen recording permission is not set
+            // If this is the first run, show onboarding screen
             if first_run {
-                // Show onboarding screen
                 let mut onboarding_win = WebviewWindowBuilder::new(
                     app_handle,
                     "onboarding",
@@ -102,7 +101,7 @@ fn main() {
                 .accept_first_mouse(true)
                 .always_on_top(true)
                 .title("Helmer Micro")
-                .inner_size(600.0, 600.0)
+                .inner_size(600.0, 580.0)
                 .visible(true)
                 .focused(true)
                 .center();

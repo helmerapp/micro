@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
+import Knob from "./Knob";
 import CONSTANTS from "../../constants";
 import ExportButton from "./ExportButton";
 
@@ -35,7 +36,7 @@ const getEstimatedFileSize = (
 export default function Controls({
 	exportHandler,
 	selectedFrames,
-  exporting
+	exporting
 }: {
 	exportHandler: (data: {
 		fps: number,
@@ -45,7 +46,7 @@ export default function Controls({
 		loop_gif: boolean
 	}) => void,
 	selectedFrames: number[],
-  exporting: boolean
+	exporting: boolean
 }) {
 
 	const [fps, setFps] = useState(30);
@@ -66,8 +67,8 @@ export default function Controls({
 
 	const estimatedSize = getEstimatedFileSize(fps, width, height, quality, durationInFrames);
 
-	return <form className="flex flex-col p-6 gap-8 rounded-lg">
-		<div className="flex align-middle justify-center w-fit  gap-8 ">
+	return <form className="flex flex-col gap-6 h-fit w-full items-center">
+		<div className="flex w-full justify-between">
 			<Label text="Size">
 				<select className="rounded-lg p-2 bg-black"
 					defaultValue={"1000"}
@@ -79,25 +80,45 @@ export default function Controls({
 					<option value="1200">1200px</option>
 				</select>
 			</Label>
-			<Label text="Smoothness">
-				<input type="range" min="15" max="60" value={fps}
-					onChange={e => setFps(Number(e.target.value))}
-				/>
+			<Label text="Smooth?">
+				<select className="rounded-lg p-2 bg-black"
+					defaultValue={"30"}
+					onChange={(e) => setFps(Number(e.target.value))}>
+					<option value="15">Meh</option>
+					<option value="30">Yes</option>
+					<option value="60">Yaaaaas!</option>
+				</select>
+				{/* <input type="range" min="15" max="60" value={fps}
+					onChange={(e) => setFps(Number(e.target.value))}
+				/> */}
 			</Label>
 			<Label text="Speed">
-				<input type="range" min="0.5" max="2"
+				<select className="rounded-lg p-2 bg-black"
+					defaultValue={"1"}
+					onChange={(e) => setSpeed(Number(e.target.value))}>
+					<option value="0.5">Half</option>
+					<option value="1">Normal</option>
+					<option value="2">Double</option>
+				</select>
+				{/* <input type="range" min="0.5" max="2"
 					value={speed} step="0.1"
-					onChange={e => setSpeed(Number(e.target.value))} />
+					onChange={e => setSpeed(Number(e.target.value))} /> */}
 			</Label>
 			<Label text="Loop">
-				<Switch.Root
-					className="w-[42px] h-[25px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
+				<select className="rounded-lg p-2 bg-black"
+					defaultValue={"30"}
+					onChange={(e) => e.target.value === "true" ? setLoop(true) : setLoop(false)}>
+					<option value="true">Yes</option>
+					<option value="false">No</option>
+				</select>
+				{/* <Switch.Root
+					className="w-[36px] h-[18px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
 					id="loop"
 					checked={loop}
 					onCheckedChange={e => setLoop(e)}
 				>
-					<Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
-				</Switch.Root>
+					<Switch.Thumb className="block w-[16px] h-[16px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
+				</Switch.Root> */}
 			</Label>
 		</div>
 		<p>Estimated GIF Size: {estimatedSize}mb </p>

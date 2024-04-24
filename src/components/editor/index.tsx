@@ -35,9 +35,8 @@ export default function Editor() {
 	}
 
 	return (
-		<main className="w-full h-full flex flex-col bg-[#222] p-8 items-center">
+		<main className="w-full h-full flex flex-col bg-[#181818] p-8 items-center">
 			<Preview
-				selectedFrames={selectedFrames}
 				onPreviewLoad={(f) => setTotalFrames(f)}
 			/>
 			<Trimmer

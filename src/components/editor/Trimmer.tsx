@@ -5,11 +5,15 @@ import CONSTANTS from "../../constants";
 export default function Trimmer({
 	totalFrames,
 	selectedFrames,
-	setSelectedFrames
+	setSelectedFrames,
+	// speed = 1,
+	// fps = 30,
 }: {
 	totalFrames: number
 	selectedFrames: number[],
 	setSelectedFrames: (e: number[]) => void,
+	// speed: number,
+	// fps: number
 }) {
 
 	const previewFps = CONSTANTS.previewFps;
@@ -54,35 +58,13 @@ export default function Trimmer({
 		source.stop(audioContext.currentTime + 0.02);
 	};
 
-	return <div className="w-[95%] h-fit flex flex-col pl-4 pr-4 gap-2">
-		<div className="w-full h-4 flex justify-between items-end">
-			{Array.from({ length: totalFrames }, (_, i) => {
-
-				let color = "bg-[rgba(255,255,255,0.3)]"
-
-				// if i is included in selected frames
-				if (i >= selectedFrames[0] && i <= selectedFrames[1]) {
-					color = "bg-[orange]"
-				}
-
-				if (i % previewFps === 0) {
-					return (
-						<div key={i} className={`w-[2px] h-full ${color}`} />
-					)
-				} else {
-					return (
-						<div key={i} className={`w-[2px] h-1/2 ${color}`} />
-					)
-				}
-			})}
-		</div>
-
+	return <div className="w-full h-fit flex flex-col gap-2 mt-5 pb-4 mb-1">
 		<Slider.Root
 			min={0}
 			step={1}
 			max={totalFrames}
 			value={selectedFrames}
-			className="relative flex items-center select-none touch-none h-5"
+			className="relative items-center select-none touch-none h-fit"
 			onValueChange={(e: number[]) => {
 
 				// TODO: this should in Preview.tsx but 🤷‍♂️
@@ -98,15 +80,36 @@ export default function Trimmer({
 				setSelectedFrames(e)
 			}}
 		>
-			<Slider.Track className="bg-[transparent] relative grow rounded-full h-[3px] w-full">
-				<Slider.Range className="absolute bg-[transparent] rounded-full h-full" />
+			<Slider.Track className="relative w-full">
+				<div className="w-full h-6 flex justify-between items-end">
+					{Array.from({ length: totalFrames }, (_, i) => {
+
+						let color = "bg-[rgba(255,255,255,0.3)]"
+
+						// if i is included in selected frames
+						if (i >= selectedFrames[0] && i <= selectedFrames[1]) {
+							color = "bg-[orange]"
+						}
+
+						if (i % previewFps === 0) {
+							return (
+								<div key={i} className={`w-full h-full ${color} ml-[1px] mr-[1px]`} />
+							)
+						} else {
+							return (
+								<div key={i} className={`w-full h-2/3 ${color} ml-[1px] mr-[1px] rounded-lg`} />
+							)
+						}
+					})}
+				</div>
+				{/* <Slider.Range className="absolute bg-white rounded-full h-full" /> */}
 			</Slider.Track>
 			<Slider.Thumb
-				className="block w-5 h-6 bg-[orange] rounded-2xl rounded-ss-3xl rounded-se-3xl translate-x-[-10px]"
+				className="block w-2 h-3 bg-[orange] rounded-full translate-y-1"
 				aria-label="Start Frame"
 			/>
 			<Slider.Thumb
-				className="block w-5 h-6 bg-[orange] rounded-2xl rounded-ss-3xl rounded-se-3xl translate-x-[10px]"
+				className="block w-2 h-3 bg-[orange] rounded-full translate-y-1"
 				aria-label="End Frame"
 			/>
 		</Slider.Root>
