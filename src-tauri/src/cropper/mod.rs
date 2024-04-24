@@ -43,7 +43,7 @@ pub fn init_cropper(app: &AppHandle) {
 
                 unsafe {
                     // set window level
-                    // let _: cocoa::base::id = msg_send![id, setLevel: 25];
+                    let _: cocoa::base::id = msg_send![id, setLevel: 25];
 
                      // Make the webview and window background transparent
                     let color =
