@@ -35,6 +35,10 @@ pub fn init_toolbar(app: &AppHandle) {
         .to_owned()
         .run_on_main_thread(move || unsafe {
             let id = toolbar_win.ns_window().unwrap() as cocoa::base::id;
+            
+            // set window level
+            // let _: cocoa::base::id = msg_send![id, setLevel: 26];
+
             let color =
                 NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
             let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
