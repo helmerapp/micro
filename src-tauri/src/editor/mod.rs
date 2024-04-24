@@ -8,15 +8,6 @@ mod frame_encoder;
 use frame_encoder::FrameEncoder;
 
 pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
-    // TODO: if there exits an editor, close it here
-    let existing_editor_win = app.get_webview_window("editor");
-
-    if let Some(existing_editor_win) = existing_editor_win {
-        existing_editor_win
-            .close()
-            .expect("couldn't close existing editor");
-    }
-
     let (width, height) = size;
     let editor_url = format!(
         "/editor?file={}&width={}&height={}",

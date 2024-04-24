@@ -67,6 +67,14 @@ pub async fn start_recording(app_handle: AppHandle) {
         println!("Processing thread terminated.");
     });
 
+    // if there exits an editor, close it here
+    let existing_editor_win = app_handle.get_webview_window("editor");
+    if let Some(existing_editor_win) = existing_editor_win {
+        existing_editor_win
+            .destroy()
+            .expect("couldn't destory and close existing editor");
+    }
+
     loop {
         let mut recorder = state.recorder.lock().await;
 
