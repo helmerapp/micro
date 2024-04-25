@@ -48,6 +48,12 @@ impl Default for AppState {
 const SHORTCUT: &str = "CmdOrCtrl+Shift+2";
 
 fn initialize_micro(app_handle: &AppHandle) {
+    // Build system tray
+    tray::build(&app_handle);
+
+    // Initialize cropping window
+    cropper::init_cropper(&app_handle);
+
     // Register global shortcut
     app_handle
         .plugin(
@@ -60,12 +66,6 @@ fn initialize_micro(app_handle: &AppHandle) {
                 .build(),
         )
         .expect("Failed to initialize global shortcut");
-
-    // Build system tray
-    tray::build(&app_handle);
-
-    // Initialize cropping window
-    cropper::init_cropper(&app_handle);
 }
 
 fn main() {
@@ -84,13 +84,6 @@ fn main() {
 
             store.load().unwrap_or_default();
 
-            let screen_recording_permission = scap::has_permission();
-
-            println!(
-                "Screen recording permission: {}",
-                screen_recording_permission
-            );
-
             // let first_run = true;
             let first_run = store
                 .get("first_run".to_string())
@@ -99,12 +92,11 @@ fn main() {
                 .unwrap();
 
             // If this is the first run, show onboarding screen
-            if first_run || !screen_recording_permission {
+            if first_run || !scap::has_permission() {
                 open_onboarding(app_handle);
 
                 // Set first run to false
                 store.insert("first_run".to_string(), false.into()).unwrap();
-
                 store.save().expect("Failed to save store")
             }
 
@@ -139,9 +131,8 @@ fn create_onboarding_win(app_handle: &AppHandle) {
     let mut onboarding_win =
         WebviewWindowBuilder::new(app_handle, "onboarding", WebviewUrl::App("/".into()))
             .accept_first_mouse(true)
-            .always_on_top(true)
-            .title("Helmer Micro")
             .inner_size(600.0, 580.0)
+            .title("Helmer Micro")
             .visible(true)
             .focused(true)
             .center();

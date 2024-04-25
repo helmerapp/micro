@@ -64,6 +64,12 @@ pub fn toggle_cropper(app: &AppHandle) {
 
     // TODO: figure out why the above doesn't work
     // Ask in Tauri Discord.
+
+    if !scap::has_permission() {
+        crate::open_onboarding(app);
+        return;
+    }
+
     if let Some(cropper_win) = app.get_webview_window("cropper") {
         match cropper_win.is_visible() {
             Ok(true) => {
