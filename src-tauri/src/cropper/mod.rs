@@ -58,24 +58,31 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
-    // TODO: figure out why state doesn't work here.
-    // Ask in Tauri Discord.
-
     // let state_mutex = app.state::<Mutex<AppState>>();
     // let mut state = state_mutex.blocking_lock();
+    // match state.status ...
 
-    // match state.status {
-    //     Status::Idle => {
+    // TODO: figure out why the above doesn't work
+    // Ask in Tauri Discord.
+
     let cropper_win = app.get_webview_window("cropper").unwrap();
     if cropper_win.is_visible().unwrap() {
         cropper_win.hide().unwrap();
-        // state.status = Status::Idle;
+
+        // reset cropper
+        cropper_win
+            .emit("reset-cropper", ())
+            .expect("couldn't reset cropper");
+
+        // always hide toolbar too, if it's visible
+        let toolbar_win = app
+            .get_webview_window("toolbar")
+            .expect("couldn't find toolbar");
+        if toolbar_win.is_visible().unwrap() {
+            toolbar_win.hide().unwrap();
+        }
     } else {
         cropper_win.show().unwrap();
         cropper_win.set_focus().unwrap();
-        // state.status = Status::Cropper;
     }
-    // }
-    // _ => {}
-    // }
 }
