@@ -64,18 +64,26 @@ pub fn toggle_cropper(app: &AppHandle) {
     // let state_mutex = app.state::<Mutex<AppState>>();
     // let mut state = state_mutex.blocking_lock();
 
-    // match state.status {
-    //     Status::Idle => {
+    // TODO: need to figure out why this doesn't work
+    // match state.status ...
     let cropper_win = app.get_webview_window("cropper").unwrap();
     if cropper_win.is_visible().unwrap() {
         cropper_win.hide().unwrap();
-        // state.status = Status::Idle;
+
+        // reset cropper
+        cropper_win
+            .emit("reset-cropper", ())
+            .expect("couldn't reset cropper");
+
+        // always hide toolbar too, if it's visible
+        let toolbar_win = app
+            .get_webview_window("toolbar")
+            .expect("couldn't find toolbar");
+        if toolbar_win.is_visible().unwrap() {
+            toolbar_win.hide().unwrap();
+        }
     } else {
         cropper_win.show().unwrap();
         cropper_win.set_focus().unwrap();
-        // state.status = Status::Cropper;
     }
-    // }
-    // _ => {}
-    // }
 }

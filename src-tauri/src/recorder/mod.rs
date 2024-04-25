@@ -88,9 +88,9 @@ pub async fn start_recording(app_handle: AppHandle) {
         drop(recorder);
     }
 
-    // if there exits an editor, close it here
-    // TODO: ideal case: use the existing editor itself
-    // update preview path and animate to the right dimensions
+    // if there exists an editor, close it here
+    // TODO: ideal would be to use the existing editor itself
+    // update it's preview path and animate to the right dimensions
     let existing_editor_win = app_handle.get_webview_window("editor");
     if let Some(existing_editor_win) = existing_editor_win {
         existing_editor_win
@@ -124,13 +124,11 @@ pub async fn start_recording(app_handle: AppHandle) {
 
 #[tauri::command]
 pub async fn stop_recording(app_handle: AppHandle) {
-    // Hide cropper and toolbar
+    // Hide and reset cropper (toolbar also handled)
     crate::cropper::toggle_cropper(&app_handle);
-    crate::toolbar::toggle_toolbar(&app_handle);
-
-    // Reset cropper
     let cropper_win = app_handle.get_webview_window("cropper").unwrap();
-    cropper_win.emit("reset-cropper", ()).unwrap();
+    cropper_win.emit("capture-stopped", ()).unwrap();
+    cropper_win.set_ignore_cursor_events(false).unwrap();
 
     // Stop capturing frames and drop recorder
     let state = app_handle.state::<AppState>();
@@ -143,8 +141,4 @@ pub async fn stop_recording(app_handle: AppHandle) {
     let mut status = state.status.lock().await;
     *status = Status::Editing;
     drop(status);
-
-    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
-    cropper_win.set_ignore_cursor_events(false).unwrap();
-    cropper_win.emit("capture-stopped", ()).unwrap();
 }
