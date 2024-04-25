@@ -58,14 +58,13 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
-    // TODO: figure out why state doesn't work here.
-    // Ask in Tauri Discord.
-
     // let state_mutex = app.state::<Mutex<AppState>>();
     // let mut state = state_mutex.blocking_lock();
-
-    // TODO: need to figure out why this doesn't work
     // match state.status ...
+
+    // TODO: figure out why the above doesn't work
+    // Ask in Tauri Discord.
+
     let cropper_win = app.get_webview_window("cropper").unwrap();
     if cropper_win.is_visible().unwrap() {
         cropper_win.hide().unwrap();
