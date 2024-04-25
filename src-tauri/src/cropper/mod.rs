@@ -64,25 +64,24 @@ pub fn toggle_cropper(app: &AppHandle) {
 
     // TODO: figure out why the above doesn't work
     // Ask in Tauri Discord.
-
-    let cropper_win = app.get_webview_window("cropper").unwrap();
-    if cropper_win.is_visible().unwrap() {
-        cropper_win.hide().unwrap();
-
-        // reset cropper
-        cropper_win
-            .emit("reset-cropper", ())
-            .expect("couldn't reset cropper");
-
-        // always hide toolbar too, if it's visible
-        let toolbar_win = app
-            .get_webview_window("toolbar")
-            .expect("couldn't find toolbar");
-        if toolbar_win.is_visible().unwrap() {
-            toolbar_win.hide().unwrap();
+    if let Some(cropper_win) = app.get_webview_window("cropper") {
+        match cropper_win.is_visible() {
+            Ok(true) => {
+                cropper_win.hide().unwrap();
+                cropper_win
+                    .emit("reset-cropper", ())
+                    .expect("couldn't reset cropper");
+                if let Some(toolbar_win) = app.get_webview_window("toolbar") {
+                    if toolbar_win.is_visible().unwrap() {
+                        toolbar_win.hide().unwrap();
+                    }
+                }
+            }
+            Ok(false) => {
+                cropper_win.show().unwrap();
+                cropper_win.set_focus().unwrap();
+            }
+            Err(_) => {}
         }
-    } else {
-        cropper_win.show().unwrap();
-        cropper_win.set_focus().unwrap();
     }
 }
