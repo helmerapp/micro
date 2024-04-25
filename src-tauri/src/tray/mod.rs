@@ -4,7 +4,7 @@ use crate::cropper::toggle_cropper;
 use opener::open;
 use tauri::{
     image::Image,
-    menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem},
+    menu::{CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder, PredefinedMenuItem},
     tray::{ClickType, TrayIconBuilder},
     AppHandle,
 };
@@ -17,16 +17,20 @@ pub fn build(app: &AppHandle) {
                 .build(app)
                 .expect(""),
             &PredefinedMenuItem::separator(app).expect(""),
-            &MenuItemBuilder::with_id("show_cursor", "Show Mouse Cursor")
+            &CheckMenuItemBuilder::with_id("record_cursor", "Record Mouse Cursor")
+                .enabled(true)
                 .build(app)
                 .expect(""),
-            &MenuItemBuilder::with_id("start_at_login", "Start at Login")
+            &CheckMenuItemBuilder::with_id("start_at_login", "Start at Login")
                 .build(app)
                 .expect(""),
-            &MenuItemBuilder::with_id("updates", "Check for Updates")
+            &CheckMenuItemBuilder::with_id("share_usage_data", "Share Usage Data")
                 .build(app)
                 .expect(""),
             &PredefinedMenuItem::separator(app).expect(""),
+            &MenuItemBuilder::with_id("updates", "Check for Updates...")
+                .build(app)
+                .expect(""),
             &MenuItemBuilder::with_id("feedback", "Give Feedback")
                 .build(app)
                 .expect(""),
@@ -39,7 +43,7 @@ pub fn build(app: &AppHandle) {
         .build()
         .expect("Failed to build tray menu");
 
-    let mut tray = TrayIconBuilder::new()
+    let mut tray = TrayIconBuilder::with_id("tray")
         .menu(&tray_menu)
         .icon(Image::from_bytes(include_bytes!("../../icons/128x128.png")).expect(""))
         .on_menu_event(move |app, event| match event.id().as_ref() {
@@ -54,6 +58,18 @@ pub fn build(app: &AppHandle) {
             }
             "updates" => {
                 updater::check_for_update(app.clone()).expect("Failed to check for updates");
+            }
+            "record_cursor" => {
+                // TODO: implement
+                println!("Record cursor")
+            }
+            "start_at_login" => {
+                // TODO: implement
+                println!("Start at login")
+            }
+            "share_usage_data" => {
+                // TODO: implement
+                println!("Share usage data")
             }
             _ => (),
         })
