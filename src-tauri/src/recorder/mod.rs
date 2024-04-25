@@ -149,3 +149,8 @@ pub async fn stop_recording(app_handle: AppHandle) {
     *status = Status::Editing;
     drop(status);
 }
+
+#[tauri::command]
+pub async fn request_recording_permission(_: AppHandle) -> bool {
+    scap::request_permission()
+}

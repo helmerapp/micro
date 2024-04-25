@@ -108,6 +108,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             recorder::start_recording,
             recorder::stop_recording,
+            recorder::request_recording_permission,
             editor::export_handler,
             toolbar::show_toolbar,
             toolbar::hide_toolbar
