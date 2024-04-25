@@ -84,6 +84,13 @@ fn main() {
 
             store.load().unwrap_or_default();
 
+            let screen_recording_permission = scap::has_permission();
+
+            println!(
+                "Screen recording permission: {}",
+                screen_recording_permission
+            );
+
             // let first_run = true;
             let first_run = store
                 .get("first_run".to_string())
@@ -92,26 +99,8 @@ fn main() {
                 .unwrap();
 
             // If this is the first run, show onboarding screen
-            if first_run {
-                let mut onboarding_win = WebviewWindowBuilder::new(
-                    app_handle,
-                    "onboarding",
-                    WebviewUrl::App("/".into()),
-                )
-                .accept_first_mouse(true)
-                .always_on_top(true)
-                .title("Helmer Micro")
-                .inner_size(600.0, 580.0)
-                .visible(true)
-                .focused(true)
-                .center();
-
-                #[cfg(target_os = "macos")]
-                {
-                    onboarding_win = onboarding_win.title_bar_style(tauri::TitleBarStyle::Overlay);
-                }
-
-                onboarding_win.build().expect("Failed to open onboarding");
+            if first_run || !screen_recording_permission {
+                open_onboarding(app_handle);
 
                 // Set first run to false
                 store.insert("first_run".to_string(), false.into()).unwrap();
@@ -133,4 +122,32 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
+}
+
+fn open_onboarding(app_handle: &AppHandle) {
+    match app_handle.get_webview_window("onboarding") {
+        Some(window) => {
+            if window.is_visible().unwrap() {
+                window.set_focus().unwrap();
+            }
+        }
+        None => create_onboarding_win(app_handle),
+    }
+}
+
+fn create_onboarding_win(app_handle: &AppHandle) {
+    let mut onboarding_win =
+        WebviewWindowBuilder::new(app_handle, "onboarding", WebviewUrl::App("/".into()))
+            .accept_first_mouse(true)
+            .always_on_top(true)
+            .title("Helmer Micro")
+            .inner_size(600.0, 580.0)
+            .visible(true)
+            .focused(true)
+            .center();
+    #[cfg(target_os = "macos")]
+    {
+        onboarding_win = onboarding_win.title_bar_style(tauri::TitleBarStyle::Overlay);
+    }
+    onboarding_win.build().expect("Failed to open onboarding");
 }
