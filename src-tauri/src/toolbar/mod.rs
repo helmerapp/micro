@@ -34,19 +34,24 @@ pub fn init_toolbar(app: &AppHandle) {
 
         toolbar_win
             .to_owned()
-            .run_on_main_thread(move || unsafe {
+            .run_on_main_thread(move || {
                 let id = toolbar_win.ns_window().unwrap() as cocoa::base::id;
 
-                let color =
-                    NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
-                let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
-                toolbar_win.with_webview(|webview| {
-                    // !!! has delay
-                    let id = webview.inner();
-                    let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
-                    let _: cocoa::base::id =
-                            msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
-                }).ok();
+                unsafe {
+                    // set window level to 26
+                    let _: cocoa::base::id = msg_send![id, setLevel: 26];
+
+                    let color =
+                        NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
+                    let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
+                    toolbar_win.with_webview(|webview| {
+                        // !!! has delay
+                        let id = webview.inner();
+                        let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
+                        let _: cocoa::base::id =
+                                msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
+                    }).ok();
+                }
             })
         .unwrap();
     }
