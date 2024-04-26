@@ -79,6 +79,7 @@ pub async fn show_toolbar(button_coords: Vec<u32>, area: Vec<u32>, app: AppHandl
 
 #[tauri::command]
 pub async fn hide_toolbar(app: AppHandle) {
-    let toolbar_win = app.get_webview_window("toolbar").unwrap();
-    toolbar_win.hide().unwrap();
+    if let Some(window) = app.get_webview_window("toolbar") {
+        window.hide().expect("Failed to hide toolbar");
+    }
 }
