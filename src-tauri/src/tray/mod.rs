@@ -4,12 +4,23 @@ use crate::cropper::toggle_cropper;
 use opener::open;
 use tauri::{
     image::Image,
-    menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem},
+    menu::{AboutMetadataBuilder, MenuBuilder, MenuItemBuilder, PredefinedMenuItem},
     tray::{ClickType, TrayIconBuilder},
     AppHandle,
 };
 
 pub fn build(app: &AppHandle) {
+    let about_metadata = AboutMetadataBuilder::new()
+        .short_version("Alpha".into())
+        .icon(Some(
+            Image::from_bytes(include_bytes!("../../icons/128x128.png")).expect(""),
+        ))
+        .copyright("©2024 Helmer Media Private Limited".into())
+        .website("https://www.helmer.app/micro".into())
+        .website_label("Visit Website".into())
+        .license("AGPL-3.0".into())
+        .build();
+
     let tray_menu = MenuBuilder::new(app)
         .items(&[
             &MenuItemBuilder::with_id("record", "Start Recording")
@@ -30,9 +41,7 @@ pub fn build(app: &AppHandle) {
             &MenuItemBuilder::with_id("feedback", "Give Feedback")
                 .build(app)
                 .expect(""),
-            &MenuItemBuilder::with_id("about", "About Helmer")
-                .accelerator("CommandOrControl+I")
-                .build(app)
+            &PredefinedMenuItem::about(app, "About Helmer Micro".into(), Some(about_metadata))
                 .expect(""),
             &PredefinedMenuItem::quit(app, Some("Quit")).expect(""),
         ])
