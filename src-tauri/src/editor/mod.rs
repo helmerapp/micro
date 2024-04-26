@@ -53,7 +53,7 @@ pub struct ExportOptions {
 #[tauri::command]
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let time = SystemTime::now();
-    println!("TODO: export with options: {:?}", options);
+    println!("Export options: {:?}", options);
 
     let mut settings = gifski::Settings::default();
     settings.fast = true;
