@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
-import Knob from "./Knob";
 import CONSTANTS from "../../constants";
 import ExportButton from "./ExportButton";
 
