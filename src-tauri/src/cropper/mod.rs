@@ -36,16 +36,12 @@ pub fn init_cropper(app: &AppHandle) {
         use objc::{class, msg_send, sel, sel_impl};
 
         cropper_win
-       
             .to_owned()
             .run_on_main_thread(move || {
                 let id = cropper_win.ns_window().unwrap() as cocoa::base::id;
 
                 unsafe {
-                    // set window level
-                    let _: cocoa::base::id = msg_send![id, setLevel: 25];
-
-                     // Make the webview and window background transparent
+                    // Make the webview and window background transparent
                     let color =
                     NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
                     let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
@@ -62,24 +58,36 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
-    // TODO: figure out why state doesn't work here.
-    // Ask in Tauri Discord.
-
     // let state_mutex = app.state::<Mutex<AppState>>();
     // let mut state = state_mutex.blocking_lock();
+    // match state.status ...
 
-    // match state.status {
-    //     Status::Idle => {
-    let cropper_win = app.get_webview_window("cropper").unwrap();
-    if cropper_win.is_visible().unwrap() {
-        cropper_win.hide().unwrap();
-        // state.status = Status::Idle;
-    } else {
-        cropper_win.show().unwrap();
-        cropper_win.set_focus().unwrap();
-        // state.status = Status::Cropper;
+    // TODO: figure out why the above doesn't work
+    // Ask in Tauri Discord.
+
+    if !scap::has_permission() {
+        crate::open_onboarding(app);
+        return;
     }
-    // }
-    // _ => {}
-    // }
+
+    if let Some(cropper_win) = app.get_webview_window("cropper") {
+        match cropper_win.is_visible() {
+            Ok(true) => {
+                cropper_win.hide().unwrap();
+                cropper_win
+                    .emit("reset-cropper", ())
+                    .expect("couldn't reset cropper");
+                if let Some(toolbar_win) = app.get_webview_window("toolbar") {
+                    if toolbar_win.is_visible().unwrap() {
+                        toolbar_win.hide().unwrap();
+                    }
+                }
+            }
+            Ok(false) => {
+                cropper_win.show().unwrap();
+                cropper_win.set_focus().unwrap();
+            }
+            Err(_) => {}
+        }
+    }
 }

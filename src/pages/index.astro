@@ -57,10 +57,17 @@ import Titlebar from "../components/titlebar.astro";
 </Base>
 
 <script>
+	import { invoke } from "@tauri-apps/api/core";
+	import { getCurrent } from "@tauri-apps/api/window";
+
 	const button = document.querySelector("button") as HTMLButtonElement;
 
 	button.addEventListener("click", async () => {
-		console.log("clicked");
+		invoke("request_recording_permission").then((response) => {
+			if (response) {
+				getCurrent().close().then();
+			}
+		});
 	});
 </script>
 
