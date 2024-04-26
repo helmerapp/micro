@@ -51,15 +51,6 @@ pub fn init_toolbar(app: &AppHandle) {
     }
 }
 
-pub fn toggle_toolbar(app: &AppHandle) {
-    let toolbar_win = app.get_webview_window("toolbar").unwrap();
-    if toolbar_win.is_visible().unwrap() {
-        toolbar_win.hide().unwrap();
-    } else {
-        toolbar_win.show().unwrap();
-    }
-}
-
 #[tauri::command]
 pub async fn show_toolbar(button_coords: Vec<u32>, area: Vec<u32>, app: AppHandle) {
     if app.get_webview_window("toolbar").is_none() {
