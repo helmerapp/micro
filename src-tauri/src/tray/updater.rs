@@ -28,7 +28,7 @@ pub fn check_for_update(app_handle: AppHandle) -> Result<()> {
                                     tauri::async_runtime::spawn(async move {
                                         match result {
                                             true => {
-                                                let _ = update
+                                                let update_result = update
                                                     .clone()
                                                     .download_and_install(
                                                         |size, _| {
@@ -40,6 +40,20 @@ pub fn check_for_update(app_handle: AppHandle) -> Result<()> {
                                                         },
                                                     )
                                                     .await;
+
+                                                match update_result {
+                                                    Ok(_) => {
+                                                        app_handle
+                                                            .dialog()
+                                                            .message("Update installed successfully!")
+                                                            .ok_button_label("Okay")
+                                                            .show(|_| {});
+                                                    }
+                                                    Err(e) => {
+                                                        eprintln!("failed to install update: {}", e);
+                                                    }
+                                                    
+                                                }
                                             }
                                             _ => {}
                                         }
