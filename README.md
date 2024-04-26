@@ -2,7 +2,7 @@
 
 # Helmer Micro
 
-![Stage: Beta](https://img.shields.io/static/v1?label=Stage&message=Alpha&color=2BB4AB)
+![Stage: Beta](https://img.shields.io/static/v1?label=Stage&message=Beta&color=2BB4AB)
 [![License: AGPL3.0](https://img.shields.io/static/v1?label=Licence&message=AGPL%20v3&color=000)](https://www.gnu.org/licenses/agpl-3.0)
 [![Twitter: @HelmerApp](https://img.shields.io/badge/Twitter-00acee?logo=twitter&logoColor=white)](https://twitter.com/helmerapp)
 ![Github Stars](https://img.shields.io/github/stars/helmerapp/micro)
