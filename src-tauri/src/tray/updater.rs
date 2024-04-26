@@ -46,10 +46,13 @@ pub fn check_for_update(app_handle: AppHandle) -> Result<()> {
                                                         app_handle
                                                             .dialog()
                                                             .message("Update installed successfully!")
-                                                            .ok_button_label("Okay")
-                                                            .show(|_| {});
+                                                            .ok_button_label("Relaunch")
+                                                            .show(move |_| {
+                                                                app_handle.restart();
+                                                            });
                                                     }
                                                     Err(e) => {
+                                                        // TODO: handle a failed update
                                                         eprintln!("failed to install update: {}", e);
                                                     }
                                                     
