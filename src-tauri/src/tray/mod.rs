@@ -11,6 +11,7 @@ use tauri::{
     tray::{ClickType, TrayIconBuilder},
     AppHandle,
 };
+use tauri_plugin_store::StoreBuilder;
 
 pub use updater::check_for_update;
 
@@ -35,13 +36,15 @@ pub fn build(app: &AppHandle) {
                 .expect(""),
             &PredefinedMenuItem::separator(app).expect(""),
             &CheckMenuItemBuilder::with_id("record_cursor", "Record Mouse Cursor")
-                .enabled(true)
+                .checked(get_tray_setting(app, "record_cursor".to_string()))
                 .build(app)
                 .expect(""),
-            &CheckMenuItemBuilder::with_id("start_at_login", "Start at Login")
+            &CheckMenuItemBuilder::with_id("autostart", "Start at Login")
+                .checked(get_tray_setting(app, "autostart".to_string()))
                 .build(app)
                 .expect(""),
             &CheckMenuItemBuilder::with_id("share_usage_data", "Share Usage Data")
+                .checked(get_tray_setting(app, "share_usage_data".to_string()))
                 .build(app)
                 .expect(""),
             &PredefinedMenuItem::separator(app).expect(""),
@@ -78,18 +81,9 @@ pub fn build(app: &AppHandle) {
             "updates" => {
                 check_for_update(app.clone(), false).expect("Failed to check for updates");
             }
-            "record_cursor" => {
-                // TODO: implement
-                println!("Record cursor")
-            }
-            "start_at_login" => {
-                // TODO: implement
-                println!("Start at login")
-            }
-            "share_usage_data" => {
-                // TODO: implement
-                println!("Share usage data")
-            }
+            "record_cursor" => update_tray_setting(app, "record_cursor".to_string()),
+            "autostart" => update_tray_setting(app, "autostart".to_string()),
+            "share_usage_data" => update_tray_setting(app, "share_usage_data".to_string()),
             _ => (),
         })
         .on_tray_icon_event(|tray, event| {
@@ -112,4 +106,40 @@ pub fn build(app: &AppHandle) {
     }
 
     tray.build(app).expect("Failed to build tray");
+}
+
+fn get_tray_setting(app: &AppHandle, key: String) -> bool {
+    let mut store = StoreBuilder::new("app_data.bin").build(app.clone());
+    store.load().unwrap_or_default();
+
+    let setting_value = store
+        .get(key.clone())
+        .unwrap_or(&serde_json::Value::Bool(true))
+        .as_bool()
+        .unwrap();
+
+    setting_value
+}
+
+fn update_tray_setting(app: &AppHandle, key: String) {
+    let mut store = StoreBuilder::new("app_data.bin").build(app.clone());
+    store.load().unwrap_or_default();
+
+    // Get current value or true if not found
+    let setting_value = get_tray_setting(app, key.clone());
+
+    match setting_value {
+        true => {
+            store.insert(key.clone(), false.into()).unwrap();
+        }
+        false => {
+            store.insert(key.clone(), true.into()).unwrap();
+        }
+    }
+    store.save().expect("Failed to save store");
+
+    // log updated value
+    let updated_value = get_tray_setting(app, key.clone());
+
+    println!("{}: {}", key, updated_value);
 }
