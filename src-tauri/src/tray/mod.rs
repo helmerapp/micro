@@ -14,7 +14,7 @@ use tauri::{
 
 pub fn build(app: &AppHandle) {
     let about_metadata = AboutMetadataBuilder::new()
-        .short_version("Alpha".into())
+        .short_version("Beta".into())
         .icon(Some(
             Image::from_bytes(include_bytes!("../../icons/128x128.png")).expect(""),
         ))
