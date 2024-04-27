@@ -16,7 +16,6 @@ export default function Editor() {
 	const [totalFrames, setTotalFrames] = useState(0);
 	const [selectedFrames, setSelectedFrames] = useState([0, totalFrames]);
 	const [isOkSharingUsageData, setIsOkSharingUsageData] = useState(true);
-	const posthog = usePostHog();
 
 	useEffect(() => {
 		setSelectedFrames([0, totalFrames]);
@@ -28,6 +27,8 @@ export default function Editor() {
 			setIsOkSharingUsageData(res as boolean);
 		})
 	}, [])
+
+	const posthog = usePostHog();
 
 	const exportHandler = (options: {
 		fps: number,
