@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core'
 
 import CONSTANTS from '../../constants';
@@ -12,6 +12,10 @@ export default function Editor() {
 	const [exporting, setExporting] = useState(false);
 	const [totalFrames, setTotalFrames] = useState(0);
 	const [selectedFrames, setSelectedFrames] = useState([0, totalFrames]);
+
+	useEffect(() => {
+		setSelectedFrames([0, totalFrames]);
+	}, [totalFrames]);
 
 	const exportHandler = (options: {
 		fps: number,
