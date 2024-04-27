@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core'
+import { PostHogProvider, usePostHog } from "posthog-js/react"
 
 import CONSTANTS from '../../constants';
 import Preview from "./Preview";
@@ -7,6 +8,9 @@ import Controls from "./Controls";
 import Trimmer from './Trimmer';
 
 const previewFps = CONSTANTS.previewFps;
+const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
+const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST;
+
 
 export default function Editor() {
 	const [exporting, setExporting] = useState(false);
@@ -17,6 +21,8 @@ export default function Editor() {
 		setSelectedFrames([0, totalFrames]);
 	}, [totalFrames]);
 
+	const posthog = usePostHog();
+
 	const exportHandler = (options: {
 		fps: number,
 		size: number,
@@ -25,6 +31,19 @@ export default function Editor() {
 		loop_gif: boolean
 	}) => {
 		setExporting(true);
+
+		const isOkayWithSendingData = true;
+
+		if (isOkayWithSendingData) {
+			posthog.capture('gif_exported', {
+				fps: options.fps,
+				size: options.size,
+				speed: options.speed,
+				loop: options.loop_gif,
+				duration: Math.abs(selectedFrames[1] - selectedFrames[0]) / CONSTANTS.previewFps,
+			});
+		}
+
 		invoke('export_handler', {
 			options: {
 				// Pass the range as time because it may be
@@ -39,20 +58,28 @@ export default function Editor() {
 	}
 
 	return (
-		<main className="w-full h-full flex flex-col bg-[#181818] p-8 items-center">
-			<Preview
-				onPreviewLoad={(f) => setTotalFrames(f)}
-			/>
-			<Trimmer
-				totalFrames={totalFrames}
-				selectedFrames={selectedFrames}
-				setSelectedFrames={setSelectedFrames}
-			/>
-			<Controls
-				exportHandler={exportHandler}
-				selectedFrames={selectedFrames}
-				exporting={exporting}
-			/>
-		</main>
+		<PostHogProvider
+			apiKey={posthogKey}
+			options={{
+				api_host: posthogHost,
+				api_transport: "fetch"
+			}}
+		>
+			<main className="w-full h-full flex flex-col bg-[#181818] p-8 items-center">
+				<Preview
+					onPreviewLoad={(f) => setTotalFrames(f)}
+				/>
+				<Trimmer
+					totalFrames={totalFrames}
+					selectedFrames={selectedFrames}
+					setSelectedFrames={setSelectedFrames}
+				/>
+				<Controls
+					exporting={exporting}
+					exportHandler={exportHandler}
+					selectedFrames={selectedFrames}
+				/>
+			</main>
+		</PostHogProvider>
 	);
 }
