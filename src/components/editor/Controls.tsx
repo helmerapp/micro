@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import * as Switch from '@radix-ui/react-switch';
-import Knob from "./Knob";
 import CONSTANTS from "../../constants";
 import ExportButton from "./ExportButton";
 
@@ -51,7 +50,7 @@ export default function Controls({
 
 	const [fps, setFps] = useState(30);
 	const [size, setSize] = useState(1000);
-	const [loop, setLoop] = useState(false);
+	const [loop, setLoop] = useState(true);
 	const [speed, setSpeed] = useState(1);
 	const [quality, setQuality] = useState(90);
 

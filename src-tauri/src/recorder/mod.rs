@@ -1,6 +1,6 @@
 use std::{sync::mpsc, thread};
 
-use crate::{AppState, Status};
+use crate::{open_onboarding, AppState, Status};
 
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
@@ -12,6 +12,13 @@ use henx::{VideoEncoder, VideoEncoderOptions};
 
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
+    // If no permissions, open onboarding screen
+    if !scap::has_permission() {
+        eprintln!("no permission to record screen");
+        open_onboarding(&app_handle);
+        return;
+    }
+
     let app_handle_clone = app_handle.clone();
     start_frame_capture(app_handle_clone).await;
 
@@ -88,6 +95,16 @@ pub async fn start_recording(app_handle: AppHandle) {
         drop(recorder);
     }
 
+    // if there exists an editor, close it here
+    // TODO: ideal would be to use the existing editor itself
+    // update it's preview path and animate to the right dimensions
+    let existing_editor_win = app_handle.get_webview_window("editor");
+    if let Some(existing_editor_win) = existing_editor_win {
+        existing_editor_win
+            .close()
+            .expect("couldn't destory and close existing editor");
+    }
+
     // drop the sender to close the channel
     drop(tx);
     // wait for the encoding thread to finish
@@ -98,6 +115,9 @@ pub async fn start_recording(app_handle: AppHandle) {
     println!("Creating Editor Window");
     println!("Preview path: {:?}", preview_path);
     println!("Preview dimensions: {}x{}", output_width, output_height);
+
+    // sleep 1 second
+    std::thread::sleep(std::time::Duration::from_secs(1));
 
     // initialise the editor with the file path of encoded video
     let preview_path_string = preview_path.as_ref().unwrap().to_str().unwrap().to_string();
@@ -111,9 +131,11 @@ pub async fn start_recording(app_handle: AppHandle) {
 
 #[tauri::command]
 pub async fn stop_recording(app_handle: AppHandle) {
-    // Hide cropper and toolbar
+    // Hide and reset cropper (toolbar also handled)
     crate::cropper::toggle_cropper(&app_handle);
-    crate::toolbar::toggle_toolbar(&app_handle);
+    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
+    cropper_win.emit("capture-stopped", ()).unwrap();
+    cropper_win.set_ignore_cursor_events(false).unwrap();
 
     // Stop capturing frames and drop recorder
     let state = app_handle.state::<AppState>();
@@ -126,4 +148,9 @@ pub async fn stop_recording(app_handle: AppHandle) {
     let mut status = state.status.lock().await;
     *status = Status::Editing;
     drop(status);
+}
+
+#[tauri::command]
+pub async fn request_recording_permission(_: AppHandle) -> bool {
+    scap::request_permission()
 }

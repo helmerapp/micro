@@ -48,6 +48,12 @@ impl Default for AppState {
 const SHORTCUT: &str = "CmdOrCtrl+Shift+2";
 
 fn initialize_micro(app_handle: &AppHandle) {
+    // Build system tray
+    tray::build(&app_handle);
+
+    // Initialize cropping window
+    cropper::init_cropper(&app_handle);
+
     // Register global shortcut
     app_handle
         .plugin(
@@ -60,12 +66,6 @@ fn initialize_micro(app_handle: &AppHandle) {
                 .build(),
         )
         .expect("Failed to initialize global shortcut");
-
-    // Build system tray
-    tray::build(&app_handle);
-
-    // Initialize cropping window
-    cropper::init_cropper(&app_handle);
 }
 
 fn main() {
@@ -92,30 +92,11 @@ fn main() {
                 .unwrap();
 
             // If this is the first run, show onboarding screen
-            if first_run {
-                let mut onboarding_win = WebviewWindowBuilder::new(
-                    app_handle,
-                    "onboarding",
-                    WebviewUrl::App("/".into()),
-                )
-                .accept_first_mouse(true)
-                .always_on_top(true)
-                .title("Helmer Micro")
-                .inner_size(600.0, 580.0)
-                .visible(true)
-                .focused(true)
-                .center();
-
-                #[cfg(target_os = "macos")]
-                {
-                    onboarding_win = onboarding_win.title_bar_style(tauri::TitleBarStyle::Overlay);
-                }
-
-                onboarding_win.build().expect("Failed to open onboarding");
+            if first_run || !scap::has_permission() {
+                open_onboarding(app_handle);
 
                 // Set first run to false
                 store.insert("first_run".to_string(), false.into()).unwrap();
-
                 store.save().expect("Failed to save store")
             }
 
@@ -127,10 +108,38 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             recorder::start_recording,
             recorder::stop_recording,
+            recorder::request_recording_permission,
             editor::export_handler,
             toolbar::show_toolbar,
             toolbar::hide_toolbar
         ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
+}
+
+fn open_onboarding(app_handle: &AppHandle) {
+    match app_handle.get_webview_window("onboarding") {
+        Some(window) => {
+            if window.is_visible().unwrap() {
+                window.set_focus().unwrap();
+            }
+        }
+        None => create_onboarding_win(app_handle),
+    }
+}
+
+fn create_onboarding_win(app_handle: &AppHandle) {
+    let mut onboarding_win =
+        WebviewWindowBuilder::new(app_handle, "onboarding", WebviewUrl::App("/".into()))
+            .accept_first_mouse(true)
+            .inner_size(600.0, 580.0)
+            .title("Helmer Micro")
+            .visible(true)
+            .focused(true)
+            .center();
+    #[cfg(target_os = "macos")]
+    {
+        onboarding_win = onboarding_win.title_bar_style(tauri::TitleBarStyle::Overlay);
+    }
+    onboarding_win.build().expect("Failed to open onboarding");
 }

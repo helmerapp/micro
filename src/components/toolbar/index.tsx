@@ -14,7 +14,8 @@ const ToolbarReact = () => {
 			if (event.key === "Escape" || event.key === "Esc") {
 
 				const cropperWindow = getAll().find((win) => win.label === "cropper");
-				cropperWindow?.hide(); // TODO: also reset the crop area here
+				cropperWindow?.hide();
+				cropperWindow?.emit("reset-cropper");
 
 				invoke("hide_toolbar");
 				stopRecording();
@@ -46,10 +47,10 @@ const ToolbarReact = () => {
 					? `conic-gradient(white 360deg, lightseagreen 360deg, lightseagreen 360deg)`
 					: `conic-gradient(white 0deg, lightseagreen 0deg, lightseagreen 360deg)`
 			}}
-			transition={{
+			transition={recording ? {
 				duration: MAX_RECORDING_LIMIT_SECONDS,
 				ease: "linear"
-			}}
+			} : undefined}
 			onAnimationComplete={(e) => {
 				// TODO: refactor this to use framer motion variants
 				// @ts-expect-error: backgroundImage is not a valid property

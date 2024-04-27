@@ -8,15 +8,6 @@ mod frame_encoder;
 use frame_encoder::FrameEncoder;
 
 pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
-    // TODO: if there exits an editor, close it here
-    let existing_editor_win = app.get_webview_window("editor");
-
-    if let Some(existing_editor_win) = existing_editor_win {
-        existing_editor_win
-            .close()
-            .expect("couldn't close existing editor");
-    }
-
     let (width, height) = size;
     let editor_url = format!(
         "/editor?file={}&width={}&height={}",
@@ -62,7 +53,7 @@ pub struct ExportOptions {
 #[tauri::command]
 pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let time = SystemTime::now();
-    println!("TODO: export with options: {:?}", options);
+    println!("Export options: {:?}", options);
 
     let mut settings = gifski::Settings::default();
     settings.fast = true;
@@ -85,7 +76,9 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
 
     let gif_encoder = Arc::new(gif_encoder);
 
-    let gif_name = chrono::Local::now().format("HM-%y%m%d-%I%M%p").to_string();
+    let gif_name = chrono::Local::now()
+        .format("GIF %Y-%m-%d at %I-%M-%S %p")
+        .to_string();
     let gif_path = app_handle
         .path()
         .desktop_dir()
@@ -121,6 +114,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let base_ts;
     match &frames[0] {
         Frame::BGR0(f) => base_ts = f.display_time,
+        Frame::BGRA(f) => base_ts = f.display_time,
         Frame::RGB(f) => base_ts = f.display_time,
         _ => {
             base_ts = 0;
@@ -176,7 +170,7 @@ pub fn unit_frame_handler(
     let frame_encoder = FrameEncoder::new(gif_encoder.clone(), index, base_ts);
     match frame {
         Frame::BGR0(bgr_frame) => frame_encoder.encode_bgr(bgr_frame),
-        Frame::BGRA(bgra_frame) => frame_encoder.encode_bgra(bgra_frame),
+        Frame::BGRA(bgra_frame) => frame_encoder.encode_bgra(bgra_frame, speed, start_ts, end_ts),
         Frame::RGB(rgb_frame) => frame_encoder.encode_rgb(rgb_frame, speed, start_ts, end_ts),
         _ => {
             panic!("This frame type is not supported yet");

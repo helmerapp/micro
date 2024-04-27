@@ -12,29 +12,56 @@ pub fn check_for_update(app_handle: AppHandle) -> Result<()> {
                     Ok(update_option) => {
                         if let Some(update) = update_option {
                             let update_str = format!(
-                                "Current Version: {}\nLatest Version: {}",
+                                "Your Version: {}\nLatest Version: {}",
                                 update.current_version, update.version
                             );
 
-                            println!("{}", update_str);
+                            println!("update available:\n\tdownload url: {}", update.download_url);
 
                             app_handle
                                 .dialog()
                                 .message(update_str)
-                                .title("A new version of Helmer Micro is out!")
+                                .title("A new version is available!")
                                 .ok_button_label("Install")
                                 .cancel_button_label("Cancel")
-                                .show(|result| match result {
-                                    true => {
-                                        // TODO: install update
-                                        // update.download_and_install(None, None);
-                                    }
-                                    _ => {}
+                                .show(move |result| {
+                                    tauri::async_runtime::spawn(async move {
+                                        match result {
+                                            true => {
+                                                let update_result = update
+                                                    .clone()
+                                                    .download_and_install(
+                                                        |size, _| {
+                                                            println!("downloading update...");
+                                                            println!("size: {}", size);
+                                                        },
+                                                        || {
+                                                            println!("update downloaded, proceeding to install!");
+                                                        },
+                                                    )
+                                                    .await;
+
+                                                match update_result {
+                                                    Ok(_) => {
+                                                        app_handle
+                                                            .dialog()
+                                                            .message("Update installed successfully!")
+                                                            .ok_button_label("Relaunch")
+                                                            .show(move |_| {
+                                                                app_handle.restart();
+                                                            });
+                                                    }
+                                                    Err(e) => {
+                                                        // TODO: handle a failed update
+                                                        eprintln!("failed to install update: {}", e);
+                                                    }
+                                                    
+                                                }
+                                            }
+                                            _ => {}
+                                        }
+                                    });
                                 });
-                            println!(
-                                "update available:\n\tdownload url: {}\n\tsignature: {}",
-                                update.download_url, update.signature
-                            );
                         } else {
                             app_handle
                                 .dialog()
