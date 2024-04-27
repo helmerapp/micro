@@ -30,6 +30,10 @@ export default function Editor() {
 
 	const posthog = usePostHog();
 
+	useEffect(() => {
+		setSelectedFrames([0, totalFrames]);
+	}, [totalFrames]);
+
 	const exportHandler = (options: {
 		fps: number,
 		size: number,
