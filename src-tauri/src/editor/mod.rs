@@ -114,6 +114,7 @@ pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
     let base_ts;
     match &frames[0] {
         Frame::BGR0(f) => base_ts = f.display_time,
+        Frame::BGRA(f) => base_ts = f.display_time,
         Frame::RGB(f) => base_ts = f.display_time,
         _ => {
             base_ts = 0;
