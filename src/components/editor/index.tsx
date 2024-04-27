@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core'
 import { PostHogProvider, usePostHog } from "posthog-js/react"
 
@@ -18,6 +18,10 @@ export default function Editor() {
 	const [selectedFrames, setSelectedFrames] = useState([0, totalFrames]);
 
 	const posthog = usePostHog();
+
+	useEffect(() => {
+		setSelectedFrames([0, totalFrames]);
+	}, [totalFrames]);
 
 	const exportHandler = (options: {
 		fps: number,
