@@ -55,13 +55,20 @@ impl FrameEncoder {
         Img::new(rgba_data, frame.width as usize, frame.height as usize)
     }
 
-    pub fn encode_bgra(&self, bgra_frame: &BGRAFrame) {
+    pub fn encode_bgra(&self, bgra_frame: &BGRAFrame, speed: f32, start_ts: f64, end_ts: f64) {
         let img = self.transform_frame_bgra(bgra_frame);
+        let frame_pts = (bgra_frame.display_time - self.base_ts) as f64 / TIMEBASE;
+
+        if frame_pts < start_ts || frame_pts > end_ts {
+            println!("Ignoring frame {} with t {}", self.index, frame_pts);
+            return;
+        }
+
         self.gif_encoder
             .add_frame_rgba(
                 self.index,
                 img,
-                (bgra_frame.display_time - self.base_ts) as f64 / TIMEBASE,
+                frame_pts / (speed as f64),
             )
             .unwrap_or_else(|err| {
                 eprintln!("Error adding frame to encoder: {:?}", err);
