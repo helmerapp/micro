@@ -15,8 +15,6 @@ use tauri_plugin_store::StoreBuilder;
 
 pub use updater::check_for_update;
 
-pub use updater::check_for_update;
-
 pub fn build(app: &AppHandle) {
     let about_metadata = AboutMetadataBuilder::new()
         .short_version("Beta".into())
