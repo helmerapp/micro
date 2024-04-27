@@ -170,7 +170,7 @@ pub fn unit_frame_handler(
     let frame_encoder = FrameEncoder::new(gif_encoder.clone(), index, base_ts);
     match frame {
         Frame::BGR0(bgr_frame) => frame_encoder.encode_bgr(bgr_frame),
-        Frame::BGRA(bgra_frame) => frame_encoder.encode_bgra(bgra_frame),
+        Frame::BGRA(bgra_frame) => frame_encoder.encode_bgra(bgra_frame, speed, start_ts, end_ts),
         Frame::RGB(rgb_frame) => frame_encoder.encode_rgb(rgb_frame, speed, start_ts, end_ts),
         _ => {
             panic!("This frame type is not supported yet");
