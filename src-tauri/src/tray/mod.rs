@@ -39,10 +39,6 @@ pub fn build(app: &AppHandle) {
                 .checked(get_tray_setting(app, "record_cursor".to_string()))
                 .build(app)
                 .expect(""),
-            &CheckMenuItemBuilder::with_id("autostart", "Start at Login")
-                .checked(get_tray_setting(app, "autostart".to_string()))
-                .build(app)
-                .expect(""),
             &CheckMenuItemBuilder::with_id("share_usage_data", "Share Usage Data")
                 .checked(get_tray_setting(app, "share_usage_data".to_string()))
                 .build(app)
@@ -82,7 +78,6 @@ pub fn build(app: &AppHandle) {
                 check_for_update(app.clone(), false).expect("Failed to check for updates");
             }
             "record_cursor" => update_tray_setting(app, "record_cursor".to_string()),
-            "autostart" => update_tray_setting(app, "autostart".to_string()),
             "share_usage_data" => update_tray_setting(app, "share_usage_data".to_string()),
             _ => (),
         })
