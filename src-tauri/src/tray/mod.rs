@@ -34,11 +34,15 @@ pub fn build(app: &AppHandle) {
             &MenuItemBuilder::with_id("start_at_login", "Start at Login")
                 .build(app)
                 .expect(""),
-            &MenuItemBuilder::with_id("updates", "Check for Updates")
+            &PredefinedMenuItem::separator(app).expect(""),
+            &MenuItemBuilder::with_id("website", "Visit Website")
+                .build(app)
+                .expect(""),
+            &MenuItemBuilder::with_id("feedback", "Give Feedback")
                 .build(app)
                 .expect(""),
             &PredefinedMenuItem::separator(app).expect(""),
-            &MenuItemBuilder::with_id("feedback", "Give Feedback")
+            &MenuItemBuilder::with_id("updates", "Check for Updates")
                 .build(app)
                 .expect(""),
             &PredefinedMenuItem::about(app, "About Helmer Micro".into(), Some(about_metadata))
@@ -56,9 +60,9 @@ pub fn build(app: &AppHandle) {
                 toggle_cropper(app);
             }
             "feedback" => {
-                open("https://www.helmer.app/support").expect("Failed to open feedback link");
+                open("https://www.helmer.app/feedback").expect("Failed to open feedback link");
             }
-            "about" => {
+            "website" => {
                 open("https://www.helmer.app/micro").expect("failed to open about link");
             }
             "updates" => {
