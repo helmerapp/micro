@@ -3,32 +3,15 @@ import Base from "../components/base.astro";
 ---
 
 <Base>
-	<main>
-		<section class="hidden">
+	<main class="w-full h-full overflow-hidden cursor-crosshair relative">
+		<section class="hidden absolute before:top-[100%] after:bottom-[100%]">
 			<div id="selectionBorder"></div>
-			<div id="selectionInner"></div>
+			<div id="selectionInner" class="w-full h-full absolute"></div>
 		</section>
 	</main>
 </Base>
 
 <style>
-	main {
-		width: 100%;
-		height: 100%;
-		overflow: hidden;
-		cursor: crosshair;
-		position: relative;
-	}
-	section {
-		position: absolute;
-	}
-
-	#selectionInner {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-	}
-
 	section::before,
 	section::after,
 	#selectionInner::before,
@@ -38,14 +21,6 @@ import Base from "../components/base.astro";
 		width: 100%;
 		height: 100vh;
 		background: rgba(0, 0, 0, 0.5);
-	}
-
-	section::before {
-		top: 100%;
-	}
-
-	section::after {
-		bottom: 100%;
 	}
 
 	#selectionInner::before,

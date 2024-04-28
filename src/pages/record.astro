@@ -8,40 +8,6 @@ import RecordButton from "../components/cropper/RecordButton";
 </Base>
 
 <style is:global>
-	main {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border-radius: 50%;
-		width: fit-content;
-		height: fit-content;
-	}
-	button {
-		width: 3rem;
-		height: 3rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: lightseagreen;
-		outline: none;
-		border-radius: 50%;
-		transition: transform 0.4s cubic-bezier(0.47, 1.64, 0.41, 0.8);
-		transform: scale(1);
-		overflow: hidden;
-		cursor: pointer;
-		margin: 0.2em;
-		/* box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0); */
-	}
-
-	button:hover {
-		transform: scale(1.05);
-		/* box-shadow: 1px 1px 24px 4px rgba(255, 29, 155, 0.2); */
-	}
-
-	button:active {
-		transform: scale(0.95);
-	}
-
 	button::before {
 		content: "";
 		position: absolute;

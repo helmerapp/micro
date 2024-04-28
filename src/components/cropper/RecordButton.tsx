@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { getAll } from "@tauri-apps/api/window";
+import { getAll, getCurrent } from "@tauri-apps/api/window";
 import { motion } from "framer-motion";
 
 const MAX_RECORDING_LIMIT_SECONDS = 20;
@@ -19,9 +19,10 @@ const RecordButton = () => {
 		// TODO: just escape? or other keys too?
 		if (event.key === "Escape" || event.key === "Esc") {
 			const cropperWindow = getAll().find((win) => win.label === "cropper");
+			const recordButtonWindow = getCurrent();
 			cropperWindow?.hide();
 			cropperWindow?.emit("reset-cropper");
-			invoke("hide_toolbar");
+			recordButtonWindow?.hide();
 			stopRecording();
 		}
 	};
@@ -39,6 +40,7 @@ const RecordButton = () => {
 
 	return (
 		<motion.main
+			className="m-auto w-fit h-fit p-1"
 			animate={{
 				backgroundImage: recording
 					? `conic-gradient(white 360deg, lightseagreen 360deg, lightseagreen 360deg)`
@@ -57,7 +59,7 @@ const RecordButton = () => {
 			}}
 		>
 			<button
-				className="record"
+				className="w-12 h-12 flex items-center justify-center rounded-full outline-none overflow-hidden cursor-pointer bg-[lightseagreen] transition-transform"
 				onClick={() => recording ? stopRecording() : startRecording()}
 			>
 				{
