@@ -9,6 +9,8 @@ use tauri::{
     AppHandle,
 };
 
+pub use updater::check_for_update;
+
 pub fn build(app: &AppHandle) {
     let about_metadata = AboutMetadataBuilder::new()
         .short_version("Alpha".into())
@@ -66,7 +68,7 @@ pub fn build(app: &AppHandle) {
                 open("https://www.helmer.app/micro").expect("failed to open about link");
             }
             "updates" => {
-                updater::check_for_update(app.clone()).expect("Failed to check for updates");
+                check_for_update(app.clone(), false).expect("Failed to check for updates");
             }
             _ => (),
         })

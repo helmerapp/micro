@@ -2,7 +2,7 @@ use tauri::{AppHandle, Result};
 use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_updater::UpdaterExt;
 
-pub fn check_for_update(app_handle: AppHandle) -> Result<()> {
+pub fn check_for_update(app_handle: AppHandle, silent_if_none: bool) -> Result<()> {
     tauri::async_runtime::spawn(async move {
         let updater = app_handle.updater();
         match updater {
@@ -63,11 +63,16 @@ pub fn check_for_update(app_handle: AppHandle) -> Result<()> {
                                     });
                                 });
                         } else {
-                            app_handle
-                                .dialog()
-                                .message("You're on the latest version!")
-                                .ok_button_label("Okay")
-                                .show(|_| {});
+                            match silent_if_none {
+                                true => {}
+                                _ => {
+                                    app_handle
+                                        .dialog()
+                                        .message("You're on the latest version!")
+                                        .ok_button_label("Okay")
+                                        .show(|_| {});
+                                }
+                            }
                         }
                     }
                     Err(e) => {
