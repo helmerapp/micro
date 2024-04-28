@@ -34,6 +34,13 @@ export default function Editor() {
 		setSelectedFrames([0, totalFrames]);
 	}, [totalFrames]);
 
+	useEffect(() => {
+		invoke('is_ok_sharing_usage_data').then((res) => {
+			console.log("Is Ok Sharing Usage Data", res);
+			setIsOkSharingUsageData(res as boolean);
+		})
+	}, [])
+
 	const exportHandler = (options: {
 		fps: number,
 		size: number,
