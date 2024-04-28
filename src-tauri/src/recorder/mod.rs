@@ -19,13 +19,16 @@ pub async fn start_recording(app_handle: AppHandle) {
         return;
     }
 
-    let app_handle_clone = app_handle.clone();
-    start_frame_capture(app_handle_clone).await;
-
-    let state = app_handle.state::<AppState>();
+    // Disable cursor events on cropper window
+    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
+    cropper_win.set_ignore_cursor_events(true).unwrap();
 
     // Start capturing frames
+    let app_handle_clone = app_handle.clone();
+    start_frame_capture(app_handle_clone).await;
     println!("Capturing frames...");
+
+    let state = app_handle.state::<AppState>();
     let mut frames = state.frames.lock().await;
 
     // Reset frames to empty array to allow user to
@@ -131,7 +134,7 @@ pub async fn start_recording(app_handle: AppHandle) {
 
 #[tauri::command]
 pub async fn stop_recording(app_handle: AppHandle) {
-    // Hide and reset cropper (toolbar also handled)
+    // Hide and reset cropper
     crate::cropper::toggle_cropper(&app_handle);
     let cropper_win = app_handle.get_webview_window("cropper").unwrap();
     cropper_win.emit("capture-stopped", ()).unwrap();

@@ -9,10 +9,6 @@ use tauri::{AppHandle, Manager};
 pub const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
 
 pub async fn start_frame_capture(app_handle: AppHandle) {
-    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
-    cropper_win.set_ignore_cursor_events(true).unwrap();
-    cropper_win.emit("capture-started", ()).unwrap();
-
     let state = app_handle.state::<AppState>();
 
     let mut status = state.status.lock().await;
