@@ -44,7 +44,7 @@ pub fn build(app: &AppHandle) {
                 .build(app)
                 .expect(""),
             &PredefinedMenuItem::separator(app).expect(""),
-            &MenuItemBuilder::with_id("updates", "Check for Updates...")
+            &MenuItemBuilder::with_id("website", "Visit Website")
                 .build(app)
                 .expect(""),
             &MenuItemBuilder::with_id("feedback", "Give Feedback")
