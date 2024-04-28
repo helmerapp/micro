@@ -4,7 +4,6 @@
 mod cropper;
 mod editor;
 mod recorder;
-mod toolbar;
 mod tray;
 
 use dotenv::dotenv;
@@ -122,13 +121,12 @@ fn main() {
         })
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
-            recorder::request_recording_permission,
-            recorder::start_recording,
-            recorder::stop_recording,
             tray::is_ok_sharing_usage_data,
             editor::export_handler,
-            toolbar::show_toolbar,
-            toolbar::hide_toolbar,
+            cropper::update_crop_area,
+            recorder::stop_recording,
+            recorder::start_recording,
+            recorder::request_recording_permission,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
