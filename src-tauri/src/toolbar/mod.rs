@@ -10,6 +10,7 @@ pub fn init_toolbar(app: &AppHandle) {
             .resizable(false)
             .visible(false)
             .focused(true)
+            .shadow(false)
             .center();
 
     #[cfg(not(target_os = "macos"))]
@@ -20,8 +21,8 @@ pub fn init_toolbar(app: &AppHandle) {
     let toolbar_win = toolbar_win.build().expect("Failed to open toolbar");
 
     let size = Size::Logical(LogicalSize {
-        width: 70.0,
-        height: 70.0,
+        width: 64.0,
+        height: 64.0,
     });
 
     toolbar_win.set_size(size).unwrap();
