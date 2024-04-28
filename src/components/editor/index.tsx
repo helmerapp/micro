@@ -16,6 +16,7 @@ export default function Editor() {
 	const [exporting, setExporting] = useState(false);
 	const [totalFrames, setTotalFrames] = useState(0);
 	const [selectedFrames, setSelectedFrames] = useState([0, totalFrames]);
+	const [isOkSharingUsageData, setIsOkSharingUsageData] = useState(true);
 
 	useEffect(() => {
 		setSelectedFrames([0, totalFrames]);
@@ -27,6 +28,13 @@ export default function Editor() {
 		setSelectedFrames([0, totalFrames]);
 	}, [totalFrames]);
 
+	useEffect(() => {
+		invoke('is_ok_sharing_usage_data').then((res) => {
+			console.log("Is Ok Sharing Usage Data", res);
+			setIsOkSharingUsageData(res as boolean);
+		})
+	}, [])
+
 	const exportHandler = (options: {
 		fps: number,
 		size: number,
@@ -36,9 +44,7 @@ export default function Editor() {
 	}) => {
 		setExporting(true);
 
-		const isOkayWithSendingData = true;
-
-		if (isOkayWithSendingData) {
+		if (isOkSharingUsageData) {
 			posthog.capture('gif_exported', {
 				fps: options.fps,
 				size: options.size,
