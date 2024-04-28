@@ -20,6 +20,7 @@
 		"window:allow-close",
 		"window:allow-set-title",
 		"window:allow-start-dragging",
-		"global-shortcut:allow-register"
+		"global-shortcut:allow-register",
+		"sentry:default"
 	]
 }

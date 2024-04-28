@@ -11,13 +11,11 @@ const previewFps = CONSTANTS.previewFps;
 const posthogKey = import.meta.env.PUBLIC_POSTHOG_KEY;
 const posthogHost = import.meta.env.PUBLIC_POSTHOG_HOST;
 
-
 export default function Editor() {
 	const [exporting, setExporting] = useState(false);
 	const [totalFrames, setTotalFrames] = useState(0);
 	const [selectedFrames, setSelectedFrames] = useState([0, totalFrames]);
 	const [isOkSharingUsageData, setIsOkSharingUsageData] = useState(true);
-
 	const posthog = usePostHog();
 
 	useEffect(() => {
@@ -30,10 +28,6 @@ export default function Editor() {
 			setIsOkSharingUsageData(res as boolean);
 		})
 	}, [])
-
-	useEffect(() => {
-		setSelectedFrames([0, totalFrames]);
-	}, [totalFrames]);
 
 	const exportHandler = (options: {
 		fps: number,

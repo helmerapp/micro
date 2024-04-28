@@ -7,6 +7,7 @@ mod recorder;
 mod toolbar;
 mod tray;
 
+use dotenv::dotenv;
 use scap::{capturer::Capturer, frame::Frame};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
@@ -69,7 +70,22 @@ fn initialize_micro(app_handle: &AppHandle) {
 }
 
 fn main() {
+    dotenv().ok();
+
+    let sentry_client = tauri_plugin_sentry::sentry::init((
+        std::env::var("SENTRY_DSN").unwrap_or("".to_string()),
+        tauri_plugin_sentry::sentry::ClientOptions {
+            release: tauri_plugin_sentry::sentry::release_name!(),
+            ..Default::default()
+        },
+    ));
+
+    // Everything before here runs in both app and crash reporter processes
+    let _guard = tauri_plugin_sentry::minidump::init(&sentry_client);
+    // Everything after here runs in only the app process
+
     tauri::Builder::default()
+        .plugin(tauri_plugin_sentry::init())
         .plugin(tauri_plugin_single_instance::init(|_, _, _| {}))
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
