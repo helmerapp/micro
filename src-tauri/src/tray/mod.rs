@@ -21,6 +21,7 @@ pub fn build(app: &AppHandle) {
         .website("https://www.helmer.app/micro".into())
         .website_label("Visit Website".into())
         .license("AGPL-3.0".into())
+        .version(app.package_info().version.to_string().into())
         .build();
 
     let tray_menu = MenuBuilder::new(app)
