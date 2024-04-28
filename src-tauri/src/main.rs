@@ -7,13 +7,13 @@ mod recorder;
 mod toolbar;
 mod tray;
 
+use dotenv::dotenv;
 use scap::{capturer::Capturer, frame::Frame};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut;
 use tauri_plugin_store::StoreBuilder;
 use tokio::sync::Mutex;
-use dotenv::dotenv;
 
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
@@ -72,9 +72,8 @@ fn initialize_micro(app_handle: &AppHandle) {
 fn main() {
     dotenv().ok();
 
-    let sentry_dsn = std::env::var("SENTRY_DSN").expect("SENTRY_DSN must be set.");
-    let client = tauri_plugin_sentry::sentry::init((
-        sentry_dsn,
+    let sentry_client = tauri_plugin_sentry::sentry::init((
+        std::env::var("SENTRY_DSN").unwrap_or("".to_string()),
         tauri_plugin_sentry::sentry::ClientOptions {
             release: tauri_plugin_sentry::sentry::release_name!(),
             ..Default::default()
@@ -82,7 +81,7 @@ fn main() {
     ));
 
     // Everything before here runs in both app and crash reporter processes
-    let _guard = tauri_plugin_sentry::minidump::init(&client);
+    let _guard = tauri_plugin_sentry::minidump::init(&sentry_client);
     // Everything after here runs in only the app process
 
     tauri::Builder::default()
