@@ -2,30 +2,29 @@ import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getAll } from "@tauri-apps/api/window";
 import { motion } from "framer-motion";
-import "./toolbar.css";
 
 const MAX_RECORDING_LIMIT_SECONDS = 20;
 
-const ToolbarReact = () => {
+const RecordButton = () => {
 	const [recording, setRecording] = useState(false);
 
 	useEffect(() => {
-		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key === "Escape" || event.key === "Esc") {
-
-				const cropperWindow = getAll().find((win) => win.label === "cropper");
-				cropperWindow?.hide();
-				cropperWindow?.emit("reset-cropper");
-
-				invoke("hide_toolbar");
-				stopRecording();
-			}
-		};
 		document.addEventListener("keydown", handleKeyDown);
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
 		};
 	}, []);
+
+	const handleKeyDown = (event: KeyboardEvent) => {
+		// TODO: just escape? or other keys too?
+		if (event.key === "Escape" || event.key === "Esc") {
+			const cropperWindow = getAll().find((win) => win.label === "cropper");
+			cropperWindow?.hide();
+			cropperWindow?.emit("reset-cropper");
+			invoke("hide_toolbar");
+			stopRecording();
+		}
+	};
 
 	const startRecording = () => {
 		invoke("start_recording");
@@ -37,8 +36,6 @@ const ToolbarReact = () => {
 		setRecording(false);
 		invoke("stop_recording", {});
 	};
-
-	const handleClick = () => recording ? stopRecording() : startRecording();
 
 	return (
 		<motion.main
@@ -59,7 +56,10 @@ const ToolbarReact = () => {
 				}
 			}}
 		>
-			<button className="record" onClick={handleClick}>
+			<button
+				className="record"
+				onClick={() => recording ? stopRecording() : startRecording()}
+			>
 				{
 					recording
 						? (
@@ -78,4 +78,4 @@ const ToolbarReact = () => {
 	);
 };
 
-export default ToolbarReact;
+export default RecordButton;
