@@ -107,6 +107,7 @@ fn create_cropper_win(app: &AppHandle) {
             })
             .unwrap();
     }
+
 }
 
 pub fn init_cropper(app: &AppHandle) {
