@@ -2820,7 +2820,6 @@ dependencies = [
  "tempfile",
  "tokio",
  "window-shadows",
- "window-vibrancy 0.4.3",
 ]
 
 [[package]]
@@ -5073,7 +5072,7 @@ dependencies = [
  "urlpattern",
  "webkit2gtk",
  "webview2-com",
- "window-vibrancy 0.5.0",
+ "window-vibrancy",
  "windows 0.56.0",
 ]
 
@@ -6282,19 +6281,6 @@ dependencies = [
  "objc",
  "raw-window-handle 0.5.2",
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "window-vibrancy"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af6abc2b9c56bd95887825a1ce56cde49a2a97c07e28db465d541f5098a2656c"
-dependencies = [
- "cocoa",
- "objc",
- "raw-window-handle 0.5.2",
- "windows-sys 0.52.0",
- "windows-version",
 ]
 
 [[package]]

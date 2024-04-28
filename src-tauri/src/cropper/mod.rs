@@ -2,22 +2,24 @@ use crate::AppState;
 use tauri::{AppHandle, LogicalSize, Manager, Position, Size, WebviewUrl, WebviewWindowBuilder};
 
 fn create_record_button_win(app: &AppHandle) {
-    let mut record_win = WebviewWindowBuilder::new(app, "record", WebviewUrl::App("/record".into()))
-        .accept_first_mouse(true)
-        .always_on_top(true)
-        .decorations(false)
-        .resizable(false)
-        .visible(false)
-        .focused(true)
-        .shadow(false)
-        .skip_taskbar(true);
+    let mut record_win =
+        WebviewWindowBuilder::new(app, "record", WebviewUrl::App("/record".into()))
+            .inner_size(64.0, 64.0)
+            .accept_first_mouse(true)
+            .skip_taskbar(true)
+            .shadow(false)
+            .always_on_top(true)
+            .decorations(false)
+            .resizable(false)
+            .visible(false)
+            .focused(true);
 
     #[cfg(not(target_os = "macos"))]
     {
-        record_win = toolbar_win.transparent(true);
+        record_win = record_win.transparent(true);
     }
 
-    let record_win = record_win.build().expect("Failed to open toolbar");
+    let record_win = record_win.build().expect("Failed to build record button window");
 
     let size = Size::Logical(LogicalSize {
         width: 64.0,
@@ -113,7 +115,6 @@ fn create_cropper_win(app: &AppHandle) {
             })
             .unwrap();
     }
-
 }
 
 pub fn init_cropper(app: &AppHandle) {
@@ -124,7 +125,6 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
-
     if !scap::has_permission() {
         crate::open_onboarding(app);
         return;
@@ -157,7 +157,6 @@ pub fn toggle_cropper(app: &AppHandle) {
 
 #[tauri::command]
 pub async fn update_crop_area(app: AppHandle, button_coords: Vec<u32>, area: Vec<u32>) {
-
     println!("update_crop_area fired");
     println!("button_coords: {:?}", button_coords);
     println!("area: {:?}", area);
