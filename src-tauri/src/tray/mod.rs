@@ -103,7 +103,7 @@ pub fn build(app: &AppHandle) {
     tray.build(app).expect("Failed to build tray");
 }
 
-fn get_tray_setting(app: &AppHandle, key: String) -> bool {
+pub fn get_tray_setting(app: &AppHandle, key: String) -> bool {
     let mut store = StoreBuilder::new("app_data.bin").build(app.clone());
     store.load().unwrap_or_default();
 

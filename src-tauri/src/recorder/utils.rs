@@ -29,12 +29,14 @@ pub async fn start_frame_capture(app_handle: AppHandle) {
         area[3] as f64 - area[1] as f64,
     ];
 
+    let record_cursor = crate::tray::get_tray_setting(&app_handle, "record_cursor".into());
+
     // Initialize scap
     let options = Options {
         fps: 60,
         targets: Vec::new(),
-        show_cursor: true,
-        show_highlight: true,
+        show_cursor: record_cursor,
+        show_highlight: false,
         excluded_targets: None,
         output_type: FRAME_TYPE,
         output_resolution: Resolution::_1080p, // TODO: doesn't respect aspect ratio yet
