@@ -80,8 +80,8 @@ fn main() {
             app.set_activation_policy(ActivationPolicy::Accessory);
 
             let app_handle = app.app_handle();
-            let mut store = StoreBuilder::new("app_data.bin").build(app.handle().clone());
 
+            let mut store = StoreBuilder::new("app_data.bin").build(app.handle().clone());
             store.load().unwrap_or_default();
 
             // let first_run = true;
@@ -94,13 +94,13 @@ fn main() {
             // If this is the first run, show onboarding screen
             if first_run || !scap::has_permission() {
                 open_onboarding(app_handle);
-
-                // Set first run to false
                 store.insert("first_run".to_string(), false.into()).unwrap();
                 store.save().expect("Failed to save store")
             }
 
             initialize_micro(app_handle);
+
+            let _ = tray::check_for_update(app_handle.clone(), true);
 
             Ok(())
         })

@@ -1,3 +1,9 @@
+html,body{
+	display: flex;
+	justify-content: start;
+	align-items: center;
+}
+
 main {
 	transform: rotate(180deg);
 	padding: 0.1em;

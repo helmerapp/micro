@@ -9,6 +9,8 @@ use tauri::{
     AppHandle,
 };
 
+pub use updater::check_for_update;
+
 pub fn build(app: &AppHandle) {
     let about_metadata = AboutMetadataBuilder::new()
         .short_version("Alpha".into())
@@ -19,6 +21,7 @@ pub fn build(app: &AppHandle) {
         .website("https://www.helmer.app/micro".into())
         .website_label("Visit Website".into())
         .license("AGPL-3.0".into())
+        .version(app.package_info().version.to_string().into())
         .build();
 
     let tray_menu = MenuBuilder::new(app)
@@ -66,7 +69,7 @@ pub fn build(app: &AppHandle) {
                 open("https://www.helmer.app/micro").expect("failed to open about link");
             }
             "updates" => {
-                updater::check_for_update(app.clone()).expect("Failed to check for updates");
+                check_for_update(app.clone(), false).expect("Failed to check for updates");
             }
             _ => (),
         })
