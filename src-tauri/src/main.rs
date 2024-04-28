@@ -123,12 +123,13 @@ fn main() {
         })
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
+            recorder::request_recording_permission,
             recorder::start_recording,
             recorder::stop_recording,
-            recorder::request_recording_permission,
+            tray::is_ok_sharing_usage_data,
             editor::export_handler,
             toolbar::show_toolbar,
-            toolbar::hide_toolbar
+            toolbar::hide_toolbar,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
