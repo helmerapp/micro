@@ -135,3 +135,8 @@ fn update_tray_setting(app: &AppHandle, key: String) {
 
     println!("{}: {}", key, updated_value);
 }
+
+#[tauri::command]
+pub async fn is_ok_sharing_usage_data(app: AppHandle) -> bool {
+    get_tray_setting(&app, "share_usage_data".to_string())
+}
