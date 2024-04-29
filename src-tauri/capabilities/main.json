@@ -5,7 +5,7 @@
 	"windows": [
 		"editor",
 		"cropper",
-		"toolbar",
+		"record",
 		"onboarding"
 	],
 	"permissions": [
@@ -17,8 +17,10 @@
 		"menu:default",
 		"tray:default",
 		"window:allow-hide",
+		"window:allow-show",
 		"window:allow-close",
 		"window:allow-set-title",
+		"window:allow-set-position",
 		"window:allow-start-dragging",
 		"global-shortcut:allow-register"
 	]
