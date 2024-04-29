@@ -110,9 +110,9 @@ fn main() {
             recorder::start_recording,
             recorder::stop_recording,
             tray::is_ok_sharing_usage_data,
-            editor::export_handler,
             toolbar::show_toolbar,
             toolbar::hide_toolbar,
+            editor::export_gif,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");

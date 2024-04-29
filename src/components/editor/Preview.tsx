@@ -3,18 +3,26 @@ import { convertFileSrc } from '@tauri-apps/api/core'
 
 import CONSTANTS from "../../constants";
 import Spinner from "./Spinner";
+import Trimmer from "./Trimmer";
 
 const PREVIEW_WIDTH = 600;
 
+const { previewFps } = CONSTANTS;
+
 export default function Preview({
-	onPreviewLoad
-}: Readonly<{
-	onPreviewLoad: (e: number) => void
-}>) {
-	const previewFps = CONSTANTS.previewFps;
+	selectedFrames,
+	setSelectedFrames,
+}: {
+	selectedFrames: number[],
+	setSelectedFrames: React.Dispatch<React.SetStateAction<number[]>>,
+}) {
 	const videoRef = useRef<HTMLVideoElement>(null) as React.MutableRefObject<HTMLVideoElement>;
 
-	const [videoLoaded, setVideoLoaded] = useState(false);
+	const [totalFrames, setTotalFrames] = useState(0);
+
+	useEffect(() => {
+		setSelectedFrames([0, totalFrames]);
+	}, [totalFrames])
 
 	const handlePlayPause = () => {
 		if (videoRef.current.paused) {
@@ -48,26 +56,33 @@ export default function Preview({
 			const duration = videoRef.current.duration;
 			const frames = Math.floor(duration * previewFps);
 
-			setVideoLoaded(true); // hide spinner
-			onPreviewLoad(frames); // pass total frames upwards
+			setTotalFrames(frames); // pass total frames upwards
 		});
-
 	}, []);
 
-	return <div className="w-full h-fit rounded-xl overflow-hidden mt-5 mb-0 flex flex-col border border-neutral-600 items-center">
-		{
-			!videoLoaded && <Spinner />
-		}
-		<video
-			className="object-cover"
-			onClick={handlePlayPause}
-			controls={false}
-			ref={videoRef}
-			style={{
-				opacity: videoLoaded ? 1 : 0
-			}}
-			muted
+	return <>
+
+
+		<div className="w-full h-fit rounded-xl overflow-hidden mt-5 mb-0 flex flex-col border border-neutral-600 items-center">
+			{
+				!(totalFrames > 0) && <Spinner />
+			}
+			<video
+				style={{ opacity: totalFrames > 0 ? 1 : 0 }}
+				className="object-cover"
+				onClick={handlePlayPause}
+				controls={false}
+				ref={videoRef}
+				muted
+			/>
+		</div>
+
+		<Trimmer
+			videoRef={videoRef}
+			totalFrames={totalFrames}
+			selectedFrames={selectedFrames}
+			setSelectedFrames={setSelectedFrames}
 		/>
 
-	</div>
+	</>
 }

@@ -1,6 +1,6 @@
 ---
 import Base from "../components/base.astro";
-import EditorReact from "../components/editor"
+import EditorReact from "../components/editor";
 import Titlebar from "../components/titlebar.astro";
 ---
 
@@ -8,3 +8,9 @@ import Titlebar from "../components/titlebar.astro";
 	<Titlebar />
 	<EditorReact client:load />
 </Base>
+
+<style is:global>
+	select {
+		-webkit-appearance: none;
+	}
+</style>
