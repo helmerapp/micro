@@ -22,7 +22,6 @@
 		"window:allow-set-title",
 		"window:allow-set-position",
 		"window:allow-start-dragging",
-		"global-shortcut:allow-register",
-		"sentry:default"
+		"global-shortcut:allow-register"
 	]
 }
