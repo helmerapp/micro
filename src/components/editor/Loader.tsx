@@ -1,17 +1,8 @@
 export default function Loader() {
-
-	return <span id="loader">
+	return <span id="loader" className="w-3 h-3 rounded-full block mx-auto mt-4 mb-4 relative text-white box-border">
 		<style>
 			{`
 				#loader {
-					width: 12px;
-					height: 12px;
-					border-radius: 50%;
-					display: block;
-					margin:15px auto;
-					position: relative;
-					color: #FFF;
-					box-sizing: border-box;
 					animation: animloader 2s linear infinite;
 				}
 				
