@@ -3,10 +3,14 @@ import { invoke } from "@tauri-apps/api/core";
 import { getAll, getCurrent } from "@tauri-apps/api/window";
 import { motion } from "framer-motion";
 
+import { usePostHog } from "posthog-js/react";
+import Posthog from "../Posthog";
+
 const MAX_RECORDING_LIMIT_SECONDS = 20;
 
 const RecordButton = () => {
 	const [recording, setRecording] = useState(false);
+	const posthog = usePostHog();
 
 	useEffect(() => {
 		document.addEventListener("keydown", handleKeyDown);
@@ -29,6 +33,7 @@ const RecordButton = () => {
 
 	const startRecording = () => {
 		invoke("start_recording");
+		posthog?.capture("RecordingStarted");
 		setRecording(true);
 	};
 
