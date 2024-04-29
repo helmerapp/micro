@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core'
 import { usePostHog } from "posthog-js/react"
 
@@ -6,7 +6,6 @@ import CONSTANTS from '../../constants';
 import Controls from "./Controls";
 import Posthog from '../Posthog';
 import Preview from "./Preview";
-import Trimmer from './Trimmer';
 
 const { previewFps } = CONSTANTS;
 
@@ -14,8 +13,7 @@ export default function Editor() {
 	const posthog = usePostHog();
 
 	const [exporting, setExporting] = useState(false);
-	const [totalFrames, setTotalFrames] = useState(0);
-	const [selectedFrames, setSelectedFrames] = useState([0, totalFrames]);
+	const [selectedFrames, setSelectedFrames] = useState([0, 0]);
 	const [gifSettings, setGifSettings] = useState({
 		fps: 30,
 		size: 1000,
@@ -24,14 +22,10 @@ export default function Editor() {
 		loop_gif: true,
 	});
 
-	useEffect(() => {
-		setSelectedFrames([0, totalFrames]);
-	}, [totalFrames]);
-
 	const exportHandler = () => {
 
+		// Prevent multiple exports
 		if (exporting) return;
-
 		setExporting(true);
 
 		const options = {
@@ -50,30 +44,22 @@ export default function Editor() {
 			'Duration': Math.abs(selectedFrames[1] - selectedFrames[0]) / CONSTANTS.previewFps,
 		});
 
-		invoke('export_gif', {
-			options
-		}).then(() => {
-			setExporting(false);
-		})
+		invoke('export_gif', { options }).then(() => setExporting(false));
 	}
 
 	return (
 		<Posthog>
 			<main className="w-full h-full flex flex-col bg-[#181818] p-8 items-center">
 				<Preview
-					onPreviewLoad={(f) => setTotalFrames(f)}
-				/>
-				<Trimmer
-					totalFrames={totalFrames}
 					selectedFrames={selectedFrames}
 					setSelectedFrames={setSelectedFrames}
 				/>
 				<Controls
 					exporting={exporting}
 					gifSettings={gifSettings}
-					setGifSettings={setGifSettings}
-					exportHandler={exportHandler}
 					selectedFrames={selectedFrames}
+					exportHandler={exportHandler}
+					setGifSettings={setGifSettings}
 				/>
 			</main>
 		</Posthog>
