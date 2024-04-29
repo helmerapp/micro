@@ -129,9 +129,9 @@ pub fn toggle_cropper(app: &AppHandle) {
                 cropper_win
                     .emit("reset-cropper", ())
                     .expect("couldn't reset cropper");
-                if let Some(rb_win) = app.get_webview_window("record") {
-                    if rb_win.is_visible().unwrap() {
-                        rb_win.hide().unwrap();
+                if let Some(record_button_win) = app.get_webview_window("record") {
+                    if record_button_win.is_visible().unwrap() {
+                        record_button_win.hide().unwrap();
                     }
                 }
             }
@@ -156,7 +156,7 @@ pub async fn update_crop_area(app: AppHandle, button_coords: Vec<u32>, area: Vec
         let pos = Position::Logical((button_coords[0], button_coords[1]).into());
         record_button_window.set_position(pos).unwrap();
 
-        // make sure the window is positioned correctly
+        // wait to ensure window is positioned correctly
         std::thread::sleep(std::time::Duration::from_millis(100));
 
         record_button_window.show().unwrap();

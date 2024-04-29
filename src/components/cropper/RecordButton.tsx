@@ -35,12 +35,12 @@ const RecordButton = () => {
 	const stopRecording = () => {
 		if (!recording) return;
 		setRecording(false);
-		invoke("stop_recording", {});
+		invoke("stop_recording");
 	};
 
 	return (
 		<motion.main
-			className="m-auto w-fit h-fit p-1"
+			className="m-auto w-fit h-fit p-1 rounded-full overflow-hidden relative"
 			animate={{
 				backgroundImage: recording
 					? `conic-gradient(white 360deg, lightseagreen 360deg, lightseagreen 360deg)`
