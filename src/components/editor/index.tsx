@@ -11,42 +11,48 @@ import Trimmer from './Trimmer';
 const { previewFps } = CONSTANTS;
 
 export default function Editor() {
+	const posthog = usePostHog();
+
 	const [exporting, setExporting] = useState(false);
 	const [totalFrames, setTotalFrames] = useState(0);
 	const [selectedFrames, setSelectedFrames] = useState([0, totalFrames]);
-
-	const posthog = usePostHog();
+	const [gifSettings, setGifSettings] = useState({
+		fps: 30,
+		size: 1000,
+		speed: 1,
+		quality: 90,
+		loop_gif: true,
+	});
 
 	useEffect(() => {
 		setSelectedFrames([0, totalFrames]);
 	}, [totalFrames]);
 
-	const exportHandler = (options: {
-		fps: number,
-		size: number,
-		speed: number,
-		bounce: boolean,
-		loop_gif: boolean
-	}) => {
+	const exportHandler = () => {
+
+		if (exporting) return;
+
 		setExporting(true);
 
-		posthog?.capture('GifExportStarted', {
-			fps: options.fps,
-			size: options.size,
-			speed: options.speed,
-			loop: options.loop_gif,
-			duration: Math.abs(selectedFrames[1] - selectedFrames[0]) / CONSTANTS.previewFps,
+		const options = {
+			// Pass the range as time because it may be
+			// different than frame count in rust
+			...gifSettings,
+			range: [selectedFrames[0] / previewFps, selectedFrames[1] / previewFps],
+		}
+
+		// TODO: add app version to the event
+		posthog?.capture('GifExported', {
+			'FPS': options.fps,
+			'Size': options.size,
+			'Speed': options.speed,
+			'Loop': options.loop_gif,
+			'Duration': Math.abs(selectedFrames[1] - selectedFrames[0]) / CONSTANTS.previewFps,
 		});
 
-		invoke('export_handler', {
-			options: {
-				// Pass the range as time because it may be
-				// different than frame count in rust
-				range: [selectedFrames[0] / previewFps, selectedFrames[1] / previewFps],
-				...options,
-			}
+		invoke('export_gif', {
+			options
 		}).then(() => {
-			console.log("Export Finished")
 			setExporting(false);
 		})
 	}
@@ -64,6 +70,8 @@ export default function Editor() {
 				/>
 				<Controls
 					exporting={exporting}
+					gifSettings={gifSettings}
+					setGifSettings={setGifSettings}
 					exportHandler={exportHandler}
 					selectedFrames={selectedFrames}
 				/>

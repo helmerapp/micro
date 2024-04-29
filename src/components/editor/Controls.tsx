@@ -29,30 +29,37 @@ const getEstimatedFileSize = (
 	const totalBytes = (totalPixels * qFactor + 1.5) / 2.5
 	const totalKb = totalBytes / 1024;
 	const totalMb = totalKb / 1024;
-	return totalMb.toFixed(2);
+	return totalMb.toFixed(0);
 }
 
 export default function Controls({
+	gifSettings,
+	setGifSettings,
 	exportHandler,
 	selectedFrames,
 	exporting
 }: {
-	exportHandler: (data: {
+	gifSettings: {
 		fps: number,
 		size: number,
 		speed: number,
-		bounce: boolean,
-		loop_gif: boolean
-	}) => void,
+		quality: number,
+		loop_gif: boolean,
+	},
+	setGifSettings: (settings: any) => void,
+	exportHandler: () => void,
 	selectedFrames: number[],
 	exporting: boolean
 }) {
 
-	const [fps, setFps] = useState(30);
-	const [size, setSize] = useState(1000);
-	const [loop, setLoop] = useState(true);
-	const [speed, setSpeed] = useState(1);
-	const [quality, setQuality] = useState(90);
+	const updateGifSettings = (key: string, val: any) => {
+		setGifSettings({
+			...gifSettings,
+			[key]: val
+		});
+	}
+
+	const { fps, size, speed, quality, loop_gif } = gifSettings;
 
 	// TODO: implement quality setting in UI
 	// Gifski quality setting: https://docs.rs/gifski/latest/gifski/struct.Settings.html#structfield.quality
@@ -70,8 +77,8 @@ export default function Controls({
 		<div className="flex w-full justify-between">
 			<Label text="Size">
 				<select className="rounded-lg p-2 bg-black"
-					defaultValue={"1000"}
-					onChange={(e) => setSize(Number.parseFloat(e.target.value))}>
+					value={size}
+					onChange={(e) => updateGifSettings("size", Number(e.target.value))}>
 					<option value="200">200px</option>
 					<option value="400">400px</option>
 					<option value="800">800px</option>
@@ -81,8 +88,8 @@ export default function Controls({
 			</Label>
 			<Label text="Smooth?">
 				<select className="rounded-lg p-2 bg-black"
-					defaultValue={"30"}
-					onChange={(e) => setFps(Number(e.target.value))}>
+					value={fps}
+					onChange={(e) => updateGifSettings("fps", Number(e.target.value))}>
 					<option value="15">Meh</option>
 					<option value="30">Yes</option>
 					<option value="60">Yaaaaas!</option>
@@ -93,8 +100,8 @@ export default function Controls({
 			</Label>
 			<Label text="Speed">
 				<select className="rounded-lg p-2 bg-black"
-					defaultValue={"1"}
-					onChange={(e) => setSpeed(Number(e.target.value))}>
+					value={speed}
+					onChange={(e) => updateGifSettings("speed", Number(e.target.value))}>
 					<option value="0.5">Half</option>
 					<option value="1">Normal</option>
 					<option value="2">Double</option>
@@ -105,8 +112,10 @@ export default function Controls({
 			</Label>
 			<Label text="Loop">
 				<select className="rounded-lg p-2 bg-black"
-					defaultValue={"30"}
-					onChange={(e) => e.target.value === "true" ? setLoop(true) : setLoop(false)}>
+					value={loop_gif ? "true" : "false"}
+					onChange={(e) => e.target.value === "true"
+						? updateGifSettings("loop_gif", true)
+						: updateGifSettings("loop_gif", false)}>
 					<option value="true">Yes</option>
 					<option value="false">No</option>
 				</select>
@@ -123,9 +132,7 @@ export default function Controls({
 		<p>Estimated GIF Size: {estimatedSize}mb </p>
 		<ExportButton
 			exporting={exporting}
-			clickHandler={() => {
-				exportHandler({ size, fps, speed, loop_gif: loop, bounce: false })
-			}}
+			clickHandler={exportHandler}
 		/>
 	</form>
 }
