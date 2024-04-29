@@ -47,11 +47,10 @@ pub struct ExportOptions {
     fps: u32,
     speed: f32,
     loop_gif: bool,
-    bounce: bool,
 }
 
 #[tauri::command]
-pub async fn export_handler(options: ExportOptions, app_handle: AppHandle) {
+pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
     let time = SystemTime::now();
     println!("Export options: {:?}", options);
 

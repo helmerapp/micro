@@ -106,7 +106,7 @@ fn main() {
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
             tray::is_ok_sharing_usage_data,
-            editor::export_handler,
+            editor::export_gif,
             cropper::update_crop_area,
             recorder::stop_recording,
             recorder::start_recording,
