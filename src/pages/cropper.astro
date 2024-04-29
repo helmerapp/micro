@@ -64,7 +64,6 @@ import Base from "../components/base.astro";
 	let endX = 0;
 	let endY = 0;
 	let isSelecting = false;
-	let isRecordButtonVisible = false;
 
 	// Constants
 	const selectionEl = document.querySelector("section");
@@ -86,9 +85,7 @@ import Base from "../components/base.astro";
 		selectionEl!.classList.remove("hidden");
 		startX = e.clientX - selectableAreaEl!.offsetLeft;
 		startY = e.clientY - selectableAreaEl!.offsetTop;
-		if (isRecordButtonVisible) {
-			hideRecordButton();
-		}
+		hideRecordButton();
 	});
 
 	selectableAreaEl!.addEventListener("mousemove", (e) => {
@@ -123,10 +120,7 @@ import Base from "../components/base.astro";
 	}
 
 	function hideRecordButton() {
-		console.log("Hiding record button");
-		recordButtonWindow.hide().then(() => {
-			isRecordButtonVisible = false;
-		});
+		recordButtonWindow.hide();
 	}
 
 	function hideCropper() {
