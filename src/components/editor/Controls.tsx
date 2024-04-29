@@ -72,8 +72,8 @@ export default function Controls({
 
 	const estimatedSize = getEstimatedFileSize(fps, width, height, quality, durationInFrames);
 
-	return <form className="flex flex-col gap-6 h-fit w-full items-center">
-		<div className="flex w-full justify-between gap-4">
+	return <form className="flex flex-col h-fit w-full items-center">
+		<div className="flex w-full justify-between gap-4 mb-6">
 			<Label text="Size">
 				<select className="rounded-lg p-2 bg-black w-full"
 					value={size}
@@ -114,10 +114,11 @@ export default function Controls({
 				</select>
 			</Label>
 		</div>
-		<p>Estimated GIF Size: {estimatedSize}mb </p>
+		<p className="text-xs mb-2 opacity-70">Estimated GIF Size: ~{estimatedSize}mb </p>
 		<ExportButton
 			exporting={exporting}
 			clickHandler={exportHandler}
 		/>
+		<p className="text-xs absolute bottom-4 opacity-40">🚧 interface work-in-progress, errors to be expected. 🚧</p>
 	</form>
 }
