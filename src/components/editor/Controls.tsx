@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import * as Switch from '@radix-ui/react-switch';
+import React from "react";
 import CONSTANTS from "../../constants";
 import ExportButton from "./ExportButton";
 
@@ -7,8 +6,8 @@ const Label = ({ text, children }: {
 	text: string,
 	children: React.ReactNode
 }) => {
-	return <label className="flex flex-col gap-2">
-		<span className="text">{text}</span>
+	return <label className="flex flex-col gap-2 w-full">
+		<span className="text uppercase font-bold text-xs opacity-60">{text}</span>
 		{children}
 	</label>
 }
@@ -74,9 +73,9 @@ export default function Controls({
 	const estimatedSize = getEstimatedFileSize(fps, width, height, quality, durationInFrames);
 
 	return <form className="flex flex-col gap-6 h-fit w-full items-center">
-		<div className="flex w-full justify-between">
+		<div className="flex w-full justify-between gap-4">
 			<Label text="Size">
-				<select className="rounded-lg p-2 bg-black"
+				<select className="rounded-lg p-2 bg-black w-full"
 					value={size}
 					onChange={(e) => updateGifSettings("size", Number(e.target.value))}>
 					<option value="200">200px</option>
@@ -91,12 +90,9 @@ export default function Controls({
 					value={fps}
 					onChange={(e) => updateGifSettings("fps", Number(e.target.value))}>
 					<option value="15">Meh</option>
-					<option value="30">Yes</option>
-					<option value="60">Yaaaaas!</option>
+					<option value="30">Good</option>
+					<option value="60">Butter</option>
 				</select>
-				{/* <input type="range" min="15" max="60" value={fps}
-					onChange={(e) => setFps(Number(e.target.value))}
-				/> */}
 			</Label>
 			<Label text="Speed">
 				<select className="rounded-lg p-2 bg-black"
@@ -106,9 +102,6 @@ export default function Controls({
 					<option value="1">Normal</option>
 					<option value="2">Double</option>
 				</select>
-				{/* <input type="range" min="0.5" max="2"
-					value={speed} step="0.1"
-					onChange={e => setSpeed(Number(e.target.value))} /> */}
 			</Label>
 			<Label text="Loop">
 				<select className="rounded-lg p-2 bg-black"
@@ -119,14 +112,6 @@ export default function Controls({
 					<option value="true">Yes</option>
 					<option value="false">No</option>
 				</select>
-				{/* <Switch.Root
-					className="w-[36px] h-[18px] bg-[#111] rounded-full relative focus:shadow-black data-[state=checked]:bg-black outline-none cursor-default"
-					id="loop"
-					checked={loop}
-					onCheckedChange={e => setLoop(e)}
-				>
-					<Switch.Thumb className="block w-[16px] h-[16px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[19px]" />
-				</Switch.Root> */}
 			</Label>
 		</div>
 		<p>Estimated GIF Size: {estimatedSize}mb </p>
