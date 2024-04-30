@@ -13,7 +13,7 @@ Helmer Micro is a cross-platform GIF recording app. It's open-source and built u
 
 ## Motivation
 
-GIFs are clearly the internet's favourite file format, but notoriously hard to create. We, the team behind [Helmer](https//www.helmer.app), wanted to create a small tool to make it easy and effortless for everyone!
+GIFs are clearly the internet's favourite file format, but notoriously hard to create. We, the team behind [Helmer](https://www.helmer.app), wanted to create a small tool to make it easy and effortless for everyone!
 
 Alongside our tiny quest this app is also:
 
@@ -36,7 +36,7 @@ Lastly: don't forget to share your GIFs online with a `#MadeWithMicro` hashtag, 
 
 ### Pre-requisites
 
-1. Set up all the [Tauri Pre-requisites](https://beta.tauri.app/guides/prerequisites/)
+1. Set up all the [Tauri Pre-requisites](https://beta.tauri.app/start/prerequisites/)
 2. Install [NodeJS](https://nodejs.org/en) 20.0 (or newer)
 3. Install Yarn by running `npm install --global yarn`
 
