@@ -3,9 +3,9 @@
   "version": "../package.json",
   "identifier": "com.helmermicro.dev",
   "build": {
-    "beforeDevCommand": "yarn dev",
+    "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "yarn build",
+    "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
   },
   "app": {

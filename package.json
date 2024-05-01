@@ -3,8 +3,8 @@
   "version": "0.3.1",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "bunx --bun astro dev",
+    "build": "bunx --bun astro build",
     "tauri": "tauri"
   },
   "dependencies": {
