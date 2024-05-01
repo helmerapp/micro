@@ -36,14 +36,13 @@ Lastly: don't forget to share your GIFs online with a `#MadeWithMicro` hashtag, 
 
 ### Pre-requisites
 
-1. Set up all the [Tauri Pre-requisites](https://beta.tauri.app/guides/prerequisites/)
-2. Install [NodeJS](https://nodejs.org/en) 20.0 (or newer)
-3. Install Yarn by running `npm install --global yarn`
+1. Set up the [Tauri Pre-requisites](https://beta.tauri.app/guides/prerequisites/) — we can skip Node.
+2. Install [Bun Runtime](https://bun.sh/docs/installation) v1.1.6 (or newer)
 
 ### Guide
 
 Our app is written with Tauri using Typescript and Rust. The frontend is powered by [Astro](https://astro.build)
 
-1. To spin up the dev environment, run `yarn tauri dev`
-2. To build the app for your current OS/architecture, run `yarn tauri build`
+1. To spin up the dev environment, run `bun tauri dev`
+2. To build the app for your current OS/architecture, run `bun tauri build`
 3. Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) spec to name branches and commits
