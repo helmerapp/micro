@@ -96,6 +96,21 @@ import Base from "../components/base.astro";
 
 	selectableAreaEl!.addEventListener("mouseup", () => {
 		if (isSelecting) {
+			// Since our recorder expects coordinates in the
+			// [topX, topY, bottomX, bottomY] format, we interchange
+			// start and end values if required
+			if (startX > endX) {
+				const temp = startX;
+				startX = endX;
+				endX = temp;
+			}
+
+			if (startY > endY) {
+				const temp = startY;
+				startY = endY;
+				endY = temp;
+			}
+
 			const buttonX = startX > endX ? endX - 24 : endX;
 			const buttonY = startY > endY ? endY - 24 : endY;
 
