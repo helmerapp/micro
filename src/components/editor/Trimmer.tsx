@@ -5,23 +5,26 @@ import CONSTANTS from "../../constants";
 const { previewFps } = CONSTANTS;
 
 export default function Trimmer({
+	videoRef,
 	totalFrames,
 	selectedFrames,
 	setSelectedFrames,
-	videoRef
 }: {
+	videoRef: React.MutableRefObject<HTMLVideoElement>
 	totalFrames: number
 	selectedFrames: number[],
 	setSelectedFrames: (e: number[]) => void,
-	videoRef: React.MutableRefObject<HTMLVideoElement>
 }) {
 
 	const [audioContext, setAudioContext] = useState<null | AudioContext>(null);
 	const [currentFrame, setCurrentFrame] = useState(0);
 
 	const animationRef = useRef<any>(null);
-
 	const videoEl = videoRef.current;
+
+	useEffect(() => {
+		setSelectedFrames([0, totalFrames]);
+	}, [totalFrames])
 
 
 	useEffect(() => {
@@ -105,7 +108,7 @@ export default function Trimmer({
 		source.stop(audioContext.currentTime + 0.02);
 	};
 
-	return <div className="w-full h-fit flex flex-col gap-2 mt-5 pb-4 mb-1">
+	return <div className="w-full h-fit flex flex-col gap-2 mt-8 pb-4 mb-1">
 		<Slider.Root
 			min={0}
 			step={1}
@@ -131,38 +134,54 @@ export default function Trimmer({
 				<div className="w-full h-4 flex justify-between items-end">
 					{Array.from({ length: totalFrames }, (_, i) => {
 
-						let color = "bg-[rgba(255,255,255,0.3)]"
+						const selected = selectedFrames[0] <= i && i <= selectedFrames[1];
+						const current = i === currentFrame;
+						const seconds = (i - selectedFrames[0]) / previewFps;
 
-						// if i is included in selected frames
-						if (i >= selectedFrames[0] && i <= selectedFrames[1]) {
-							color = "bg-[orange]"
-						}
-
-						if (i === currentFrame) {
-							return <div key={i} className={`w-full h-full bg-[white] ml-[1px] mr-[1px]`} />
-						}
-
-						if (i % previewFps === selectedFrames[0]) {
-							return (
-								<div key={i} className={`w-full h-full ${color} ml-[1px] mr-[1px]`} />
-							)
-						} else {
-							return (
-								<div key={i} className={`w-full h-2/3 ${color} ml-[1px] mr-[1px] rounded-lg`} />
-							)
-						}
+						return <Frame key={i} selected={selected} current={current} seconds={seconds} />
 					})}
 				</div>
-				{/* <Slider.Range className="absolute bg-white rounded-full h-full" /> */}
 			</Slider.Track>
 			<Slider.Thumb
-				className="block w-2 h-3 bg-[orange] rounded-full translate-y-1"
+				className="inline-block w-2 h-2 bg-[orange] rounded-full translate-y-[-6px]"
 				aria-label="Start Frame"
 			/>
 			<Slider.Thumb
-				className="block w-2 h-3 bg-[orange] rounded-full translate-y-1"
+				className="inline-block w-2 h-2 bg-[orange] rounded-full translate-y-[-6px]"
 				aria-label="End Frame"
 			/>
 		</Slider.Root>
 	</div>
+}
+
+
+const Frame = ({ selected, current, seconds }: {
+	selected: boolean,
+	current: boolean,
+	seconds: number
+}) => {
+
+	let color = "bg-[rgba(255,255,255,0.3)]"
+	let width = "w-[1px]"
+	let height = "h-[4px]"
+
+	if (selected) {
+		color = "bg-[orange]"
+		height = "h-[50%]"
+	}
+
+	if (current) {
+		color = "bg-white"
+		width = "w-[1px]"
+		height = "h-full"
+	}
+
+	return <div className={`${width} ${height} ${color} ml-[1px] mr-[1px] relative`}>
+		{
+			seconds % 1 === 0
+				? <div className="absolute text-xs text-white bottom-5 text-center opacity-40 translate-x-[-50%]">{seconds}s</div>
+				: null
+		}
+	</div>
+
 }
