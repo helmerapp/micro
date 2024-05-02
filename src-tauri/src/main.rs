@@ -12,6 +12,7 @@ use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut;
 use tauri_plugin_store::StoreBuilder;
 use tokio::sync::Mutex;
+use tauri_plugin_global_shortcut::ShortcutState;
 
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
@@ -59,8 +60,10 @@ fn initialize_micro(app_handle: &AppHandle) {
             tauri_plugin_global_shortcut::Builder::new()
                 .with_shortcut(SHORTCUT)
                 .expect("Failed to register global shortcut")
-                .with_handler(|app, _shortcut, _| {
-                    cropper::toggle_cropper(app);
+                .with_handler(|app, _, event| {
+                    if event.state == ShortcutState::Pressed {
+                        cropper::toggle_cropper(app);
+                    }
                 })
                 .build(),
         )
