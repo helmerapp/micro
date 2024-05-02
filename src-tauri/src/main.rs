@@ -17,29 +17,19 @@ use tauri_plugin_global_shortcut::ShortcutState;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 
-#[derive(Debug, PartialEq)]
-pub enum Status {
-    Idle,
-    Cropper,
-    Recording,
-    Editing,
-}
-
 pub struct AppState {
-    cropped_area: Mutex<Vec<u32>>,
-    status: Mutex<Status>,
     frames: Mutex<Vec<Frame>>,
     recorder: Mutex<Option<Capturer>>,
+    cropped_area: Mutex<Vec<u32>>,
     preview_path: Mutex<Option<PathBuf>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
-            cropped_area: Mutex::new(Vec::new()),
-            status: Mutex::new(Status::Idle),
             frames: Mutex::new(Vec::new()),
             recorder: Mutex::new(None),
+            cropped_area: Mutex::new(Vec::new()),
             preview_path: Mutex::new(None),
         }
     }

@@ -1,6 +1,6 @@
 use std::{sync::mpsc, thread};
 
-use crate::{open_onboarding, AppState, Status};
+use crate::{open_onboarding, AppState};
 
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
@@ -146,11 +146,6 @@ pub async fn stop_recording(app_handle: AppHandle) {
     (*recorder).as_mut().unwrap().stop_capture();
     recorder.take();
     drop(recorder);
-
-    // Update app state to editing
-    let mut status = state.status.lock().await;
-    *status = Status::Editing;
-    drop(status);
 }
 
 #[tauri::command]
