@@ -1,4 +1,4 @@
-use crate::{AppState, Status};
+use crate::AppState;
 use rand::Rng;
 use scap::{
     capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
@@ -10,10 +10,6 @@ pub const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
 
 pub async fn start_frame_capture(app_handle: AppHandle) {
     let state = app_handle.state::<AppState>();
-
-    let mut status = state.status.lock().await;
-    *status = Status::Recording;
-    drop(status);
 
     // area is of the form [x1, y1, x2, y2]
     // we need it of the form [x1, y1, x2-x1, y2-y1]
