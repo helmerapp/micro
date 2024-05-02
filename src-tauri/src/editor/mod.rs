@@ -1,7 +1,7 @@
 use crate::AppState;
 use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
-use std::{sync::Arc, thread, time::SystemTime};
+use std::{sync::Arc, thread};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
 mod frame_encoder;
@@ -24,7 +24,10 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     let mut editor_win =
         WebviewWindowBuilder::new(app, "editor", WebviewUrl::App(editor_url.into()))
             .title("Helmer Micro")
+            .hidden_title(true)
             .accept_first_mouse(true)
+            .max_inner_size(800.0, 1000.0)
+            .min_inner_size(600.0, 400.0)
             .inner_size(EDITOR_WIDTH.into(), editor_win_height.into())
             .decorations(true)
             .resizable(false)
@@ -51,7 +54,7 @@ pub struct ExportOptions {
 
 #[tauri::command]
 pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
-    // let time = SystemTime::now();
+    // let time = std::time::SystemTime::now();
     println!("Export options: {:?}", options);
 
     let mut settings = gifski::Settings::default();
