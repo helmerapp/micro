@@ -6,7 +6,7 @@ import Titlebar from "../components/titlebar.astro";
 
 <Base>
 	<Titlebar />
-	<EditorReact client:load />
+	<EditorReact client:only="react"/>
 </Base>
 
 <style is:global>
