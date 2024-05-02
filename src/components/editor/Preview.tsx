@@ -55,11 +55,11 @@ export default function Preview({
 
 
 	return <>
-		<div className="w-full h-fit rounded-xl overflow-hidden mt-5 mb-0 flex flex-col items-center bg-stone-800 ">
+		<div className="w-full h-fit rounded-xl overflow-hidden mt-2 mb-0 bg-neutral-900 ">
 			{totalFrames === 0 && <Spinner />}
 			<video
 				style={{ opacity: totalFrames > 0 ? 1 : 0 }}
-				className="object-cover w-full"
+				className="object-contain max-w-full w-fit h-auto rounded-xl overflow-hidden"
 				onClick={handlePlayPause}
 				controls={false}
 				ref={videoRef}
