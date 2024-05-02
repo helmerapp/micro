@@ -130,8 +130,8 @@ export default function Trimmer({
 				setSelectedFrames(e)
 			}}
 		>
-			<Slider.Track className="relative w-full">
-				<div className="w-full h-4 flex justify-between items-end">
+			<Slider.Track className="relative w-full flex items-center justify-center">
+				<div className="w-[98%] h-4 flex justify-between items-end">
 					{Array.from({ length: totalFrames }, (_, i) => {
 
 						const selected = selectedFrames[0] <= i && i <= selectedFrames[1];
@@ -173,6 +173,10 @@ const Frame = ({ selected, current, seconds }: {
 	if (current) {
 		color = "bg-white"
 		width = "w-[1px]"
+		height = "h-full"
+	}
+
+	if (seconds % 1 === 0) {
 		height = "h-full"
 	}
 
