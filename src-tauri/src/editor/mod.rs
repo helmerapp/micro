@@ -51,17 +51,17 @@ pub struct ExportOptions {
 
 #[tauri::command]
 pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
-    let time = SystemTime::now();
+    // let time = SystemTime::now();
     println!("Export options: {:?}", options);
 
     let mut settings = gifski::Settings::default();
     settings.fast = true;
 
+    let fps = options.fps;
     let width = options.size;
+    let speed = options.speed;
     let frame_start_time = options.range[0] as f64;
     let frame_end_time = options.range[1] as f64;
-    let speed = options.speed;
-    let fps = options.fps;
 
     match options.loop_gif {
         true => settings.repeat = gifski::Repeat::Infinite,
@@ -121,7 +121,7 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
     }
 
     let step = ((60.0 * speed) / fps as f32).floor() as usize;
-    println!("Encoding {} frames to GIF by step {}", frames.len(), step);
+    // println!("Encoding {} frames to GIF by step {}", frames.len(), step);
 
     for frame in frames.iter().step_by(step) {
         let gif_encoder_clone = gif_encoder.clone();
@@ -138,23 +138,23 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
         );
 
         // if i % 5 === 0 then log time elapsed
-        if (i % 5) == 0 {
-            // log time elapsed since start
-            let time_elapsed = time.elapsed().unwrap();
-            println!("Time elapsed: {:?}", time_elapsed);
-        }
+        // if (i % 5) == 0 {
+        //     // log time elapsed since start
+        //     let time_elapsed = time.elapsed().unwrap();
+        //     println!("Time elapsed: {:?}", time_elapsed);
+        // }
 
         i += 1;
     }
 
     drop(gif_encoder);
-    println!("GIF Encoded");
+    // println!("GIF Encoded");
 
     handle.join().unwrap();
-    println!("GIF Written to file");
+    // println!("GIF Written to file");
 
-    let time_elapsed = time.elapsed().unwrap();
-    println!("Completed in {:?} seconds", time_elapsed.as_secs());
+    // let time_elapsed = time.elapsed().unwrap();
+    // println!("Completed in {:?} seconds", time_elapsed.as_secs());
 }
 
 pub fn unit_frame_handler(
