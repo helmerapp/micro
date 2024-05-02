@@ -59,7 +59,7 @@ fn initialize_micro(app_handle: &AppHandle) {
             tauri_plugin_global_shortcut::Builder::new()
                 .with_shortcut(SHORTCUT)
                 .expect("Failed to register global shortcut")
-                .with_handler(|app, _| {
+                .with_handler(|app, _shortcut, _| {
                     cropper::toggle_cropper(app);
                 })
                 .build(),
