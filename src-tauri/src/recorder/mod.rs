@@ -1,6 +1,6 @@
 use std::{sync::mpsc, thread};
 
-use crate::{open_onboarding, AppState};
+use crate::{open_welcome_window, AppState};
 
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
@@ -12,10 +12,10 @@ use henx::{VideoEncoder, VideoEncoderOptions};
 
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
-    // If no permissions, open onboarding screen
+    // If no permissions, open welcome window
     if !scap::has_permission() {
         eprintln!("no permission to record screen");
-        open_onboarding(&app_handle);
+        open_welcome_window(&app_handle);
         return;
     }
 

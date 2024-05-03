@@ -10,9 +10,9 @@ use scap::{capturer::Capturer, frame::Frame};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut;
+use tauri_plugin_global_shortcut::ShortcutState;
 use tauri_plugin_store::StoreBuilder;
 use tokio::sync::Mutex;
-use tauri_plugin_global_shortcut::ShortcutState;
 
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
@@ -83,9 +83,9 @@ fn main() {
                 .as_bool()
                 .unwrap();
 
-            // If this is the first run, show onboarding screen
+            // If this is the first run, show welcome screen
             if first_run || !scap::has_permission() {
-                open_onboarding(app_handle);
+                open_welcome_window(app_handle);
                 store.insert("first_run".to_string(), false.into()).unwrap();
                 store.save().expect("Failed to save store")
             }
@@ -109,20 +109,20 @@ fn main() {
         .expect("error while running Helmer Micro");
 }
 
-fn open_onboarding(app_handle: &AppHandle) {
-    match app_handle.get_webview_window("onboarding") {
+fn open_welcome_window(app_handle: &AppHandle) {
+    match app_handle.get_webview_window("welcome") {
         Some(window) => {
             if window.is_visible().unwrap() {
                 window.set_focus().unwrap();
             }
         }
-        None => create_onboarding_win(app_handle),
+        None => create_welcome_win(app_handle),
     }
 }
 
-fn create_onboarding_win(app_handle: &AppHandle) {
-    let mut onboarding_win =
-        WebviewWindowBuilder::new(app_handle, "onboarding", WebviewUrl::App("/".into()))
+fn create_welcome_win(app_handle: &AppHandle) {
+    let mut welcome_win =
+        WebviewWindowBuilder::new(app_handle, "welcome", WebviewUrl::App("/".into()))
             .accept_first_mouse(true)
             .inner_size(600.0, 580.0)
             .title("Helmer Micro")
@@ -131,7 +131,7 @@ fn create_onboarding_win(app_handle: &AppHandle) {
             .center();
     #[cfg(target_os = "macos")]
     {
-        onboarding_win = onboarding_win.title_bar_style(tauri::TitleBarStyle::Overlay);
+        welcome_win = welcome_win.title_bar_style(tauri::TitleBarStyle::Overlay);
     }
-    onboarding_win.build().expect("Failed to open onboarding");
+    welcome_win.build().expect("Failed to open welcome window");
 }

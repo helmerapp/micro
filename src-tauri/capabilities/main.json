@@ -6,7 +6,7 @@
 		"editor",
 		"cropper",
 		"record",
-		"onboarding"
+		"welcome"
 	],
 	"permissions": [
 		"path:default",

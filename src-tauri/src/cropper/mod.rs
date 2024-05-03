@@ -119,7 +119,7 @@ pub fn init_cropper(app: &AppHandle) {
 
 pub fn toggle_cropper(app: &AppHandle) {
     if !scap::has_permission() {
-        crate::open_onboarding(app);
+        crate::open_welcome_window(app);
         return;
     }
 
