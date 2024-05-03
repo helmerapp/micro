@@ -36,7 +36,9 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
 
     #[cfg(target_os = "macos")]
     {
-        editor_win = editor_win.title_bar_style(tauri::TitleBarStyle::Overlay);
+        editor_win = editor_win
+            .title_bar_style(tauri::TitleBarStyle::Overlay)
+            .hidden_title(true);
     }
 
     let editor_win = editor_win.build().expect("Failed to build editor window");
