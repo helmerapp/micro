@@ -1,7 +1,7 @@
 use crate::AppState;
 use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
-use std::{sync::Arc, thread, time::SystemTime};
+use std::{sync::Arc, thread};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
 mod frame_encoder;
@@ -18,18 +18,20 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     const TOOLS_HEIGHT: u32 = 280;
 
     let preview_height_adjusted = EDITOR_WIDTH * height / width;
-
     let editor_win_height = preview_height_adjusted + TOOLS_HEIGHT;
 
     let mut editor_win =
         WebviewWindowBuilder::new(app, "editor", WebviewUrl::App(editor_url.into()))
             .title("Helmer Micro")
+            .hidden_title(true)
             .accept_first_mouse(true)
+            .max_inner_size(800.0, 1000.0)
+            .min_inner_size(600.0, 400.0)
             .inner_size(EDITOR_WIDTH.into(), editor_win_height.into())
             .decorations(true)
             .resizable(false)
-            .visible(true)
-            .focused(true)
+            .visible(false)
+            .focused(false)
             .center();
 
     #[cfg(target_os = "macos")]
@@ -37,7 +39,15 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
         editor_win = editor_win.title_bar_style(tauri::TitleBarStyle::Overlay);
     }
 
-    editor_win.build().expect("Failed to build editor window");
+    let editor_win = editor_win.build().expect("Failed to build editor window");
+
+    // wait 100ms
+    std::thread::sleep(std::time::Duration::from_millis(100));
+
+    editor_win.show().expect("Failed to show editor window");
+    editor_win
+        .set_focus()
+        .expect("Failed to set focus on editor window");
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -51,17 +61,17 @@ pub struct ExportOptions {
 
 #[tauri::command]
 pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
-    let time = SystemTime::now();
+    // let time = std::time::SystemTime::now();
     println!("Export options: {:?}", options);
 
     let mut settings = gifski::Settings::default();
     settings.fast = true;
 
+    let fps = options.fps;
     let width = options.size;
+    let speed = options.speed;
     let frame_start_time = options.range[0] as f64;
     let frame_end_time = options.range[1] as f64;
-    let speed = options.speed;
-    let fps = options.fps;
 
     match options.loop_gif {
         true => settings.repeat = gifski::Repeat::Infinite,
@@ -121,7 +131,7 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
     }
 
     let step = ((60.0 * speed) / fps as f32).floor() as usize;
-    println!("Encoding {} frames to GIF by step {}", frames.len(), step);
+    // println!("Encoding {} frames to GIF by step {}", frames.len(), step);
 
     for frame in frames.iter().step_by(step) {
         let gif_encoder_clone = gif_encoder.clone();
@@ -138,23 +148,23 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
         );
 
         // if i % 5 === 0 then log time elapsed
-        if (i % 5) == 0 {
-            // log time elapsed since start
-            let time_elapsed = time.elapsed().unwrap();
-            println!("Time elapsed: {:?}", time_elapsed);
-        }
+        // if (i % 5) == 0 {
+        //     // log time elapsed since start
+        //     let time_elapsed = time.elapsed().unwrap();
+        //     println!("Time elapsed: {:?}", time_elapsed);
+        // }
 
         i += 1;
     }
 
     drop(gif_encoder);
-    println!("GIF Encoded");
+    // println!("GIF Encoded");
 
     handle.join().unwrap();
-    println!("GIF Written to file");
+    // println!("GIF Written to file");
 
-    let time_elapsed = time.elapsed().unwrap();
-    println!("Completed in {:?} seconds", time_elapsed.as_secs());
+    // let time_elapsed = time.elapsed().unwrap();
+    // println!("Completed in {:?} seconds", time_elapsed.as_secs());
 }
 
 pub fn unit_frame_handler(
