@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import * as Slider from '@radix-ui/react-slider';
 import CONSTANTS from "../../constants";
 
@@ -31,7 +32,7 @@ export default function Trimmer({
 		const updateFrame = () => {
 
 			// If video is paused, don't update frame
-			if (videoEl.paused) {
+			if (videoEl?.paused) {
 				animationRef.current = requestAnimationFrame(updateFrame);
 				return;
 			}
@@ -131,7 +132,7 @@ export default function Trimmer({
 			}}
 		>
 			<Slider.Track className="relative w-full flex items-center justify-center">
-				<div className="w-[98%] h-4 flex justify-between items-end">
+				<div className="w-[99%] h-4 flex justify-between items-end">
 					{Array.from({ length: totalFrames }, (_, i) => {
 
 						const selected = selectedFrames[0] <= i && i <= selectedFrames[1];
@@ -160,32 +161,26 @@ const Frame = ({ selected, current, seconds }: {
 	current: boolean,
 	seconds: number
 }) => {
-
-	let color = "bg-[rgba(255,255,255,0.3)]"
-	let width = "w-[1px]"
-	let height = "h-[4px]"
-
-	if (selected) {
-		color = "bg-[orange]"
-		height = "h-[50%]"
-	}
-
-	if (current) {
-		color = "bg-white"
-		width = "w-[1px]"
-		height = "h-full"
-	}
-
-	if (seconds % 1 === 0) {
-		height = "h-full"
-	}
-
-	return <div className={`${width} ${height} ${color} ml-[1px] mr-[1px] relative`}>
+	return <motion.div className={`relative w-[1px] rounded`}
+		style={{
+			backgroundColor: current
+				? "white"
+				: selected
+					? "orange"
+					: "rgba(255,255,255,0.3)",
+			height: (seconds % 1 === 0) || current
+				? "100%"
+				: selected
+					? "50%"
+					: "4px",
+			transformOrigin: "bottom bottom",
+		}}
+	>
 		{
 			seconds % 1 === 0
 				? <div className="absolute text-xs text-white bottom-5 text-center opacity-40 translate-x-[-50%]">{seconds}s</div>
 				: null
 		}
-	</div>
+	</motion.div>
 
 }
