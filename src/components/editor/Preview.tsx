@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { convertFileSrc } from '@tauri-apps/api/core'
+import { motion } from "framer-motion";
 
-import Spinner from "./Spinner";
 import Trimmer from "./Trimmer";
 import CONSTANTS from "../../constants";
 
@@ -55,11 +55,19 @@ export default function Preview({
 
 
 	return <>
-		<div className="w-full h-fit rounded-xl overflow-hidden mt-2 mb-0 bg-neutral-900">
-			{totalFrames === 0 && <Spinner />}
-			<video
-				style={{ opacity: totalFrames > 0 ? 1 : 0 }}
-				className="object-contain max-w-full w-fit h-auto rounded-xl overflow-hidden"
+		<div className="w-full h-full mt-2 mb-0 ">
+			<motion.video
+				className="object-contain max-w-full w-auto h-auto rounded-xl overflow-hidden m-auto p-0 perspective-[800px] max-h-[660px]"
+				animate={{
+					scale: [0.2, 1],
+					y: ["-100%", "0%"],
+					rotateZ: [30, 0],
+					skew: [30, 0],
+					filter: ["blur(100px)", "blur(0px)"],
+					borderRadius: ["50%", "0.75rem"],
+					boxShadow: ["0px 0px 0px 0px rgba(0,0,0,0)", "0px 12px 24px 0px rgba(0,0,0,0.2)"],
+				}}
+				transition={{ duration: 2, ease: "anticipate" }}
 				onClick={handlePlayPause}
 				controls={false}
 				ref={videoRef}
