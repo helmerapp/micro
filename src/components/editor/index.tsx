@@ -35,12 +35,12 @@ export default function Editor() {
 			range: [selectedFrames[0] / previewFps, selectedFrames[1] / previewFps],
 		}
 
-		// TODO: add app version to the event
 		posthog?.capture('GifExported', {
 			'FPS': options.fps,
 			'Size': options.size,
 			'Speed': options.speed,
 			'Loop': options.loop_gif,
+			'Quality': options.quality,
 			'Duration': Math.abs(selectedFrames[1] - selectedFrames[0]) / CONSTANTS.previewFps,
 		});
 

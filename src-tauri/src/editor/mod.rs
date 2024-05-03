@@ -18,7 +18,6 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     const TOOLS_HEIGHT: u32 = 280;
 
     let preview_height_adjusted = EDITOR_WIDTH * height / width;
-
     let editor_win_height = preview_height_adjusted + TOOLS_HEIGHT;
 
     let mut editor_win =
@@ -31,8 +30,8 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
             .inner_size(EDITOR_WIDTH.into(), editor_win_height.into())
             .decorations(true)
             .resizable(false)
-            .visible(true)
-            .focused(true)
+            .visible(false)
+            .focused(false)
             .center();
 
     #[cfg(target_os = "macos")]
@@ -40,7 +39,15 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
         editor_win = editor_win.title_bar_style(tauri::TitleBarStyle::Overlay);
     }
 
-    editor_win.build().expect("Failed to build editor window");
+    let editor_win = editor_win.build().expect("Failed to build editor window");
+
+    // wait 100ms
+    std::thread::sleep(std::time::Duration::from_millis(100));
+
+    editor_win.show().expect("Failed to show editor window");
+    editor_win
+        .set_focus()
+        .expect("Failed to set focus on editor window");
 }
 
 #[derive(Debug, Serialize, Deserialize)]
