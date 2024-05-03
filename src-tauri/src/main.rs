@@ -12,33 +12,24 @@ use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut;
 use tauri_plugin_store::StoreBuilder;
 use tokio::sync::Mutex;
+use tauri_plugin_global_shortcut::ShortcutState;
 
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 
-#[derive(Debug, PartialEq)]
-pub enum Status {
-    Idle,
-    Cropper,
-    Recording,
-    Editing,
-}
-
 pub struct AppState {
-    cropped_area: Mutex<Vec<u32>>,
-    status: Mutex<Status>,
     frames: Mutex<Vec<Frame>>,
     recorder: Mutex<Option<Capturer>>,
+    cropped_area: Mutex<Vec<u32>>,
     preview_path: Mutex<Option<PathBuf>>,
 }
 
 impl Default for AppState {
     fn default() -> Self {
         Self {
-            cropped_area: Mutex::new(Vec::new()),
-            status: Mutex::new(Status::Idle),
             frames: Mutex::new(Vec::new()),
             recorder: Mutex::new(None),
+            cropped_area: Mutex::new(Vec::new()),
             preview_path: Mutex::new(None),
         }
     }
@@ -59,11 +50,10 @@ fn initialize_micro(app_handle: &AppHandle) {
             tauri_plugin_global_shortcut::Builder::new()
                 .with_shortcut(SHORTCUT)
                 .expect("Failed to register global shortcut")
-                .with_handler(|app, _, event| match event.state {
-                    tauri_plugin_global_shortcut::ShortcutState::Pressed => {
-                        crate::cropper::toggle_cropper(app);
+                .with_handler(|app, _, event| {
+                    if event.state == ShortcutState::Pressed {
+                        cropper::toggle_cropper(app);
                     }
-                    _ => {}
                 })
                 .build(),
         )
