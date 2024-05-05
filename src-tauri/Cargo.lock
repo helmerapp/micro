@@ -1127,7 +1127,7 @@ version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "330c60081dcc4c72131f8eb70510f1ac07223e5d4163db481a04a0befcffa412"
 dependencies = [
- "libloading 0.8.3",
+ "libloading 0.7.4",
 ]
 
 [[package]]
@@ -2480,7 +2480,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c2a198fb6b0eada2a8df47933734e6d35d350665a33a3593d7164fa52c75c19"
 dependencies = [
  "cfg-if",
- "windows-targets 0.52.5",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -2938,7 +2938,7 @@ version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "681030a937600a36906c185595136d26abfebb4aa9c65701cefcaf8578bb982b"
 dependencies = [
- "proc-macro-crate 2.0.2",
+ "proc-macro-crate 1.3.1",
  "proc-macro2",
  "quote",
  "syn 2.0.60",
@@ -3932,7 +3932,7 @@ dependencies = [
 [[package]]
 name = "scap"
 version = "0.0.3"
-source = "git+https://github.com/helmerapp/scap/?branch=main#b67a42aeaeb440f3a161792fbbb93261f8322b25"
+source = "git+https://github.com/helmerapp/scap/?branch=main#966db80424f68479e9c28b55d997e9f92cb2be00"
 dependencies = [
  "apple-sys",
  "bytes",
