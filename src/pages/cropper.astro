@@ -111,13 +111,8 @@ import Base from "../components/base.astro";
 				endY = temp;
 			}
 
-			// add button coords by keeping the resolution in mind
-			const buttonX = startX > endX ? endX - 24 : endX;
-			const buttonY = startY > endY ? endY - 24 : endY;
-
 			isSelecting = false;
 			invoke("update_crop_area", {
-				buttonCoords: [buttonX, buttonY],
 				area: [startX + 2, startY + 2, endX - 7, endY - 7], // added these number using trial and error to remove border from the captured frame
 			})
 		}

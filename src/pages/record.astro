@@ -1,10 +1,15 @@
 ---
 import Base from "../components/base.astro";
+import DragHandle from "../components/cropper/DragHandle";
 import RecordButton from "../components/cropper/RecordButton";
 ---
 
 <Base>
-	<RecordButton client:only="react"/>
+	<div class="flex flex-row items-center">
+		<DragHandle client:only="react"/>
+		<RecordButton client:only="react"/>
+		<DragHandle client:only="react"/>
+	</div>
 </Base>
 
 <style is:global>

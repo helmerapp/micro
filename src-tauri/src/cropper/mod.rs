@@ -1,10 +1,16 @@
 use crate::AppState;
-use tauri::{AppHandle, Manager, Position, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder};
 
 fn create_record_button_win(app: &AppHandle) {
+
+    let primary_monitor = app.primary_monitor().unwrap().unwrap();
+    let scale_factor = primary_monitor.scale_factor();
+    let monitor_size: LogicalSize<f64> = primary_monitor.size().to_logical(scale_factor);
+
     let mut record_win =
         WebviewWindowBuilder::new(app, "record", WebviewUrl::App("/record".into()))
             .inner_size(64.0, 64.0)
+            .position((monitor_size.width / 2.0) - 32.0,  monitor_size.height - 200.0)
             .accept_first_mouse(true)
             .skip_taskbar(true)
             .shadow(false)
@@ -68,6 +74,7 @@ fn create_cropper_win(app: &AppHandle) {
             .decorations(false)
             .resizable(false)
             .visible(false)
+            .shadow(false)
             .focused(false);
 
     // set transparent only on windows and linux
@@ -149,17 +156,10 @@ pub fn toggle_cropper(app: &AppHandle) {
 }
 
 #[tauri::command]
-pub async fn update_crop_area(app: AppHandle, button_coords: Vec<u32>, area: Vec<u32>) {
-    println!("button_coords: {:?}", button_coords);
+pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
     println!("area: {:?}", area);
 
     if let Some(record_button_window) = app.get_webview_window("record") {
-        let pos = Position::Logical((button_coords[0], button_coords[1]).into());
-        record_button_window.set_position(pos).unwrap();
-
-        // wait to ensure window is positioned correctly
-        std::thread::sleep(std::time::Duration::from_millis(100));
-
         record_button_window.show().unwrap();
     }
 
