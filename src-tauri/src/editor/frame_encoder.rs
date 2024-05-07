@@ -68,7 +68,7 @@ impl FrameEncoder {
             .add_frame_rgba(
                 self.index,
                 img,
-                frame_pts / (speed as f64),
+                (frame_pts - start_ts) / (speed as f64),
             )
             .unwrap_or_else(|err| {
                 eprintln!("Error adding frame to encoder: {:?}", err);
