@@ -1,5 +1,7 @@
 use crate::AppState;
 use tauri::{AppHandle, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder};
+use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WINDOW_DISPLAY_AFFINITY};
+
 
 fn create_record_button_win(app: &AppHandle) {
 
@@ -26,6 +28,15 @@ fn create_record_button_win(app: &AppHandle) {
 
     let record_win = record_win.build().expect("Failed to build record button window");
 
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(hwnd) = record_win.hwnd() {
+            let affinity = WINDOW_DISPLAY_AFFINITY(0x00000011);
+            unsafe {
+                let _ = SetWindowDisplayAffinity(hwnd, affinity);
+            }
+        }
+    }
     #[cfg(target_os = "macos")]
     {
         use cocoa::{appkit::NSColor, base::nil, foundation::NSString};
@@ -85,6 +96,16 @@ fn create_cropper_win(app: &AppHandle) {
 
     let cropper_win = cropper_win.build().expect("Failed to open cropper");
     cropper_win.set_visible_on_all_workspaces(true).unwrap();
+
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(hwnd) = cropper_win.hwnd() {
+            let affinity = WINDOW_DISPLAY_AFFINITY(0x00000011);
+            unsafe {
+                let _ = SetWindowDisplayAffinity(hwnd, affinity);
+            }
+        }
+    }
 
     #[cfg(target_os = "macos")]
     {
