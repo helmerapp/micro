@@ -3933,7 +3933,7 @@ dependencies = [
 [[package]]
 name = "scap"
 version = "0.0.3"
-source = "git+https://github.com/helmerapp/scap/?branch=main#966db80424f68479e9c28b55d997e9f92cb2be00"
+source = "git+https://github.com/helmerapp/scap/?branch=main#477c24736db3b0bac76f03ebf40e4c8ca918b1b1"
 dependencies = [
  "apple-sys",
  "bytes",

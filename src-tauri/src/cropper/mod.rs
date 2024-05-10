@@ -11,6 +11,7 @@ fn create_record_button_win(app: &AppHandle) {
 
     let mut record_win =
         WebviewWindowBuilder::new(app, "record", WebviewUrl::App("/record".into()))
+            .title("recorder window")
             .inner_size(64.0, 64.0)
             .position((monitor_size.width / 2.0) - 32.0,  monitor_size.height - 200.0)
             .accept_first_mouse(true)
@@ -76,6 +77,7 @@ fn create_cropper_win(app: &AppHandle) {
     // create cropper window
     let mut cropper_win =
         WebviewWindowBuilder::new(app, "cropper", WebviewUrl::App("/cropper".into()))
+            .title("cropper window")
             // .inner_size(monitor_size.width, monitor_size.height)
             .inner_size(monitor_size.width, monitor_size.height)
             .accept_first_mouse(true)

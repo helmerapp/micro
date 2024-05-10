@@ -30,6 +30,7 @@ pub async fn start_frame_capture(app_handle: AppHandle) {
         show_cursor: record_cursor,
         show_highlight: false,
         excluded_targets: None,
+        excluded_windows: Some(vec!["recorder window".to_string(), "cropper window".to_string()]),
         output_type: FRAME_TYPE,
         output_resolution: Resolution::_1080p, // TODO: doesn't respect aspect ratio yet
         source_rect: Some(CGRect {
