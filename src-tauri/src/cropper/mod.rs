@@ -1,10 +1,19 @@
 use crate::AppState;
 use tauri::{AppHandle, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder};
-use windows::Win32::UI::WindowsAndMessaging::{SetWindowDisplayAffinity, WINDOW_DISPLAY_AFFINITY};
 
+#[cfg(target_os = "windows")]
+fn hide_using_window_affinity(hwnd: windows::Win32::Foundation::HWND) {
+    use windows::Win32::UI::WindowsAndMessaging::{
+        SetWindowDisplayAffinity, WINDOW_DISPLAY_AFFINITY,
+    };
+
+    let affinity = WINDOW_DISPLAY_AFFINITY(0x00000011);
+    unsafe {
+        let _ = SetWindowDisplayAffinity(hwnd, affinity);
+    }
+}
 
 fn create_record_button_win(app: &AppHandle) {
-
     let primary_monitor = app.primary_monitor().unwrap().unwrap();
     let scale_factor = primary_monitor.scale_factor();
     let monitor_size: LogicalSize<f64> = primary_monitor.size().to_logical(scale_factor);
@@ -13,7 +22,10 @@ fn create_record_button_win(app: &AppHandle) {
         WebviewWindowBuilder::new(app, "record", WebviewUrl::App("/record".into()))
             .title("recorder window")
             .inner_size(64.0, 64.0)
-            .position((monitor_size.width / 2.0) - 32.0,  monitor_size.height - 200.0)
+            .position(
+                (monitor_size.width / 2.0) - 32.0,
+                monitor_size.height - 200.0,
+            )
             .accept_first_mouse(true)
             .skip_taskbar(true)
             .shadow(false)
@@ -27,17 +39,13 @@ fn create_record_button_win(app: &AppHandle) {
         record_win = record_win.transparent(true);
     }
 
-    let record_win = record_win.build().expect("Failed to build record button window");
+    let record_win = record_win
+        .build()
+        .expect("Failed to build record button window");
 
     #[cfg(target_os = "windows")]
-    {
-        if let Ok(hwnd) = record_win.hwnd() {
-            let affinity = WINDOW_DISPLAY_AFFINITY(0x00000011);
-            unsafe {
-                let _ = SetWindowDisplayAffinity(hwnd, affinity);
-            }
-        }
-    }
+    hide_using_window_affinity(record_win.hwnd().unwrap());
+
     #[cfg(target_os = "macos")]
     {
         use cocoa::{appkit::NSColor, base::nil, foundation::NSString};
@@ -100,14 +108,7 @@ fn create_cropper_win(app: &AppHandle) {
     cropper_win.set_visible_on_all_workspaces(true).unwrap();
 
     #[cfg(target_os = "windows")]
-    {
-        if let Ok(hwnd) = cropper_win.hwnd() {
-            let affinity = WINDOW_DISPLAY_AFFINITY(0x00000011);
-            unsafe {
-                let _ = SetWindowDisplayAffinity(hwnd, affinity);
-            }
-        }
-    }
+    hide_using_window_affinity(cropper_win.hwnd().unwrap());
 
     #[cfg(target_os = "macos")]
     {
@@ -137,7 +138,6 @@ fn create_cropper_win(app: &AppHandle) {
             })
             .unwrap();
     }
-
 }
 
 pub fn init_cropper(app: &AppHandle) {
