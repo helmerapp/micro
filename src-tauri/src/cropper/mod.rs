@@ -13,6 +13,32 @@ fn hide_using_window_affinity(hwnd: windows::Win32::Foundation::HWND) {
     }
 }
 
+#[cfg(target_os = "macos")]
+fn set_transparency_and_level(win: tauri::WebviewWindow, level: u32) {
+    use cocoa::{appkit::NSColor, base::nil, foundation::NSString};
+    use objc::{class, msg_send, sel, sel_impl};
+
+    win.to_owned().run_on_main_thread(move || {
+        let id = win.ns_window().unwrap() as cocoa::base::id;
+
+        unsafe {
+            // set window level to 25
+            let _: cocoa::base::id = msg_send![id, setLevel: level];
+
+            // Make the webview and window background transparent
+            let color = NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
+            let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
+            win.with_webview(|webview| {
+                // !!! has delay
+                let id = webview.inner();
+                let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
+                let _: cocoa::base::id =
+                    msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
+            }).ok();
+        }
+    }).expect("Couldn't set macOS transparency and level");
+}
+
 fn create_record_button_win(app: &AppHandle) {
     let primary_monitor = app.primary_monitor().unwrap().unwrap();
     let scale_factor = primary_monitor.scale_factor();
@@ -47,33 +73,7 @@ fn create_record_button_win(app: &AppHandle) {
     hide_using_window_affinity(record_win.hwnd().unwrap());
 
     #[cfg(target_os = "macos")]
-    {
-        use cocoa::{appkit::NSColor, base::nil, foundation::NSString};
-        use objc::{class, msg_send, sel, sel_impl};
-
-        record_win
-            .to_owned()
-            .run_on_main_thread(move || {
-                let id = record_win.ns_window().unwrap() as cocoa::base::id;
-
-                unsafe {
-                    // set window level to 26
-                    let _: cocoa::base::id = msg_send![id, setLevel: 26];
-
-                    let color =
-                        NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
-                    let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
-                    record_win.with_webview(|webview| {
-                        // !!! has delay
-                        let id = webview.inner();
-                        let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
-                        let _: cocoa::base::id =
-                                msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
-                    }).ok();
-                }
-            })
-        .unwrap();
-    }
+    set_transparency_and_level(record_win, 26);
 }
 
 fn create_cropper_win(app: &AppHandle) {
@@ -86,7 +86,6 @@ fn create_cropper_win(app: &AppHandle) {
     let mut cropper_win =
         WebviewWindowBuilder::new(app, "cropper", WebviewUrl::App("/cropper".into()))
             .title("cropper window")
-            // .inner_size(monitor_size.width, monitor_size.height)
             .inner_size(monitor_size.width, monitor_size.height)
             .accept_first_mouse(true)
             .skip_taskbar(true)
@@ -111,33 +110,7 @@ fn create_cropper_win(app: &AppHandle) {
     hide_using_window_affinity(cropper_win.hwnd().unwrap());
 
     #[cfg(target_os = "macos")]
-    {
-        use cocoa::{appkit::NSColor, base::nil, foundation::NSString};
-        use objc::{class, msg_send, sel, sel_impl};
-
-        cropper_win
-            .to_owned()
-            .run_on_main_thread(move || {
-                let id = cropper_win.ns_window().unwrap() as cocoa::base::id;
-
-                unsafe {
-                    // set window level to 25
-                    let _: cocoa::base::id = msg_send![id, setLevel: 25];
-                    
-                    // Make the webview and window background transparent
-                    let color =
-                    NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
-                    let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
-                    cropper_win.with_webview(|webview| {
-                        // !!! has delay
-                        let id = webview.inner();
-                        let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
-                        let _: cocoa::base::id = msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
-                    }).ok();
-                }
-            })
-            .unwrap();
-    }
+    set_transparency_and_level(cropper_win, 25);
 }
 
 pub fn init_cropper(app: &AppHandle) {
