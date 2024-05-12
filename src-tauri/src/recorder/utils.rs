@@ -10,9 +10,12 @@ pub const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
 
 pub async fn start_frame_capture(app_handle: AppHandle) {
     let state = app_handle.state::<AppState>();
+    let primary_monitor = app_handle.primary_monitor().unwrap().unwrap();
+    let scale_factor = primary_monitor.scale_factor();
 
     // area is of the form [x1, y1, x2, y2]
     // we need it of the form [x1, y1, x2-x1, y2-y1]
+    // and multiply it with scale factor to compensate for fractional scaling settings.
     let area = state.cropped_area.lock().await.clone();
     let crop_area = vec![
         area[0] as f64,
@@ -34,16 +37,18 @@ pub async fn start_frame_capture(app_handle: AppHandle) {
         output_resolution: Resolution::_1080p, // TODO: doesn't respect aspect ratio yet
         source_rect: Some(CGRect {
             origin: CGPoint {
-                x: crop_area[0],
-                y: crop_area[1],
+                x: crop_area[0]*scale_factor,
+                y: crop_area[1]*scale_factor,
             },
             size: CGSize {
-                width: crop_area[2],
-                height: crop_area[3],
+                width: crop_area[2] *scale_factor,
+                height: crop_area[3]*scale_factor,
             },
         }),
         ..Default::default()
     };
+
+    // println!("SCAP OPTIONS :\n{:?}", options);
 
     let mut frame_capturer = state.recorder.lock().await;
     *frame_capturer = Some(Capturer::new(options));

@@ -56,6 +56,10 @@ fn create_cropper_win(app: &AppHandle) {
     let scale_factor = primary_monitor.scale_factor();
     let monitor_size = primary_monitor.size().to_logical(scale_factor);
 
+    // println!("MONITOR DIMENSIONS: {:?}", monitor_size);
+    
+    // println!("ScaleFactor: {:?}", scale_factor);
+
     // create cropper window
     let mut cropper_win =
         WebviewWindowBuilder::new(app, "cropper", WebviewUrl::App("/cropper".into()))
@@ -64,6 +68,7 @@ fn create_cropper_win(app: &AppHandle) {
             .accept_first_mouse(true)
             .skip_taskbar(true)
             .position(0.0, 0.0)
+            .fullscreen(true)
             .always_on_top(true)
             .decorations(false)
             .resizable(false)
