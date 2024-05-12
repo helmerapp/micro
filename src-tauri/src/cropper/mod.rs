@@ -50,8 +50,17 @@ fn create_record_button_win(app: &AppHandle) {
     }
 }
 
+fn spawn_window(){
+    // grab a list of monitors.
+    // grab the monitor with my cursor on it.
+    // create the cropper win there.
+    // wrapper inplace of cropper window.
+    // don't create cropper window on start. create it on calling the invoke key. 
+}
+
 fn create_cropper_win(app: &AppHandle) {
     //  get size of primary monitor
+    // let monitors = app.available_monitors();
     let primary_monitor = app.primary_monitor().unwrap().unwrap();
     let scale_factor = primary_monitor.scale_factor();
     let monitor_size = primary_monitor.size().to_logical(scale_factor);
