@@ -3,6 +3,7 @@ use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, thread};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use std::path::PathBuf;
 
 mod frame_encoder;
 use frame_encoder::FrameEncoder;
@@ -61,7 +62,7 @@ pub struct ExportOptions {
 }
 
 #[tauri::command]
-pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
+pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) -> String {
     // let time = std::time::SystemTime::now();
     println!("Export options: {:?}", options);
 
@@ -95,11 +96,13 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
         .unwrap()
         .join(format!("{}.gif", gif_name));
 
-    let gif = match std::fs::File::create(gif_path) {
+    
+    let gif = match std::fs::File::create(gif_path.clone()) {
         Ok(file) => file,
         Err(err) => {
             eprintln!("Error creating GIF file: {:?}", err);
-            return;
+            let default_fallback_path = "~\\Desktop\\";
+            return default_fallback_path.to_string(); // FIXME: need help with Conditional outputs in Rust or graceful error handling.
         }
     };
 
@@ -162,10 +165,14 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
     // println!("GIF Encoded");
 
     handle.join().unwrap();
+    
+    return gif_path.into_os_string().into_string().unwrap();
     // println!("GIF Written to file");
 
     // let time_elapsed = time.elapsed().unwrap();
     // println!("Completed in {:?} seconds", time_elapsed.as_secs());
+    // let toReturn =
+    // return gif_path;
 }
 
 pub fn unit_frame_handler(

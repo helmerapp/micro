@@ -115,6 +115,8 @@ import Base from "../components/base.astro";
 			const buttonX = startX > endX ? endX - 24 : endX;
 			const buttonY = startY > endY ? endY - 24 : endY;
 
+			console.log("button x,y",[buttonX,buttonY])
+
 			isSelecting = false;
 			invoke("update_crop_area", {
 				buttonCoords: [buttonX, buttonY],

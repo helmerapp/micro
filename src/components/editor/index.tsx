@@ -44,7 +44,14 @@ export default function Editor() {
 			'Duration': Math.abs(selectedFrames[1] - selectedFrames[0]) / CONSTANTS.previewFps,
 		});
 
-		invoke('export_gif', { options }).then(() => setExporting(false));
+		invoke('export_gif', { options }).then((path) => 
+			{
+				console.log(path)
+				// TODO: when we allow for customizing export locations we could create an arg that allows us to pass in the custom location. 
+				// explorer.exe /select,"C:\Folder\subfolder\file.txt" 
+				invoke('open_file_location',{path:path});
+				setExporting(false)
+			});
 	}
 
 	return (

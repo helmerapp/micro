@@ -5,6 +5,9 @@ mod cropper;
 mod editor;
 mod recorder;
 mod tray;
+mod utils;
+
+use crate::utils::open_file_location;
 
 use scap::{capturer::Capturer, frame::Frame};
 use std::path::PathBuf;
@@ -104,6 +107,8 @@ fn main() {
             recorder::stop_recording,
             recorder::start_recording,
             recorder::request_recording_permission,
+            open_file_location
+
         ])
         .run(tauri::generate_context!())
         .expect("error while running Helmer Micro");
