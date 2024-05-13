@@ -62,6 +62,8 @@ fn create_cropper_win(app: &AppHandle) {
     //  get size of primary monitor
     // let monitors = app.available_monitors();
     let primary_monitor = app.primary_monitor().unwrap().unwrap();
+    let monitors = app.available_monitors();
+    println!("{:?}",monitors);
     let scale_factor = primary_monitor.scale_factor();
     let monitor_size = primary_monitor.size().to_logical(scale_factor);
 
@@ -131,7 +133,8 @@ pub fn toggle_cropper(app: &AppHandle) {
         crate::open_welcome_window(app);
         return;
     }
-
+    let cursor_position = app.cursor_position();
+    println!("CURSOR PHYSICAL POSITION: {:?}",cursor_position);
     if let Some(cropper_win) = app.get_webview_window("cropper") {
         match cropper_win.is_visible() {
             Ok(true) => {
@@ -159,6 +162,7 @@ pub fn toggle_cropper(app: &AppHandle) {
 
 #[tauri::command]
 pub async fn update_crop_area(app: AppHandle, button_coords: Vec<u32>, area: Vec<u32>) {
+   
     println!("button_coords: {:?}", button_coords);
     println!("area: {:?}", area);
 
