@@ -68,7 +68,6 @@ fn create_cropper_win(app: &AppHandle) {
             .accept_first_mouse(true)
             .skip_taskbar(true)
             .position(0.0, 0.0)
-            .fullscreen(true)
             .always_on_top(true)
             .decorations(false)
             .resizable(false)
