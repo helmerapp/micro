@@ -47,3 +47,26 @@ Our app is written with Tauri using Typescript and Rust. The frontend is powered
 1. To spin up the dev environment, run `yarn tauri dev`
 2. To build the app for your current OS/architecture, run `yarn tauri build`
 3. Follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#specification) spec to name branches and commits
+
+### Known Issues about development
+
+- Make sure to exit and uninstall your production micro build. 
+- Run `cargo clean` if you face this sort of error while developing on windows.  
+    ```shell
+    error: failed to run custom build command for `micro v0.3.2 (C:\Projects\helmer\micro\src-tauri)`
+
+    Caused by:
+    process didn't exit successfully: `C:\Projects\helmer\micro\src-tauri\target\debug\build\micro-d5a812206f6e950d\build-script-build` (exit code: 1)
+    --- stdout
+    cargo:rerun-if-env-changed=TAURI_CONFIG
+    cargo:rerun-if-changed=tauri.conf.json
+    cargo:rustc-cfg=desktop
+    cargo:rustc-env=TAURI_ANDROID_PACKAGE_PREFIX=com_helmermicro
+    cargo:rustc-cfg=dev
+    failed to read plugin permissions: failed to read file: The system cannot find the path specified. (os error 3)
+    error Command failed with exit code 4294967295.
+    info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+    error Command failed with exit code 101.
+    info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+    ```
+
