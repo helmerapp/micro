@@ -99,6 +99,7 @@ fn create_cropper_win(app: &AppHandle) {
             .decorations(false)
             .resizable(false)
             .visible(false)
+            .position(10, 10)
             .focused(false);
 
     // set transparent only on windows and linux
