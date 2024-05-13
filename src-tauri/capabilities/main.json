@@ -9,19 +9,25 @@
 		"welcome"
 	],
 	"permissions": [
+		"app:default",
+		"menu:default",
+		"tray:default",
 		"path:default",
 		"event:default",
 		"window:default",
-		"app:default",
 		"resources:default",
-		"menu:default",
-		"tray:default",
 		"window:allow-hide",
 		"window:allow-show",
 		"window:allow-close",
+		"window:allow-center",
+		"window:allow-minimize",
+		"window:allow-maximize",
+		"window:allow-set-size",
 		"window:allow-set-title",
+		"window:allow-set-focus",
 		"window:allow-set-position",
 		"window:allow-start-dragging",
-		"global-shortcut:allow-register"
+		"global-shortcut:allow-register",
+		"decorum:allow-show-snap-overlay"
 	]
 }

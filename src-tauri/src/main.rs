@@ -17,6 +17,8 @@ use tokio::sync::Mutex;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 
+use tauri_plugin_decorum::WebviewWindowExt;
+
 pub struct AppState {
     frames: Mutex<Vec<Frame>>,
     recorder: Mutex<Option<Capturer>>,
@@ -66,6 +68,7 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_decorum::init())
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]
@@ -126,12 +129,17 @@ fn create_welcome_win(app_handle: &AppHandle) {
             .accept_first_mouse(true)
             .inner_size(600.0, 580.0)
             .title("Helmer Micro")
-            .visible(true)
+            .visible(false)
             .focused(true)
             .center();
     #[cfg(target_os = "macos")]
     {
-        welcome_win = welcome_win.title_bar_style(tauri::TitleBarStyle::Overlay);
+        welcome_win = welcome_win
+            .title_bar_style(tauri::TitleBarStyle::Overlay)
+            .hidden_title(true);
     }
-    welcome_win.build().expect("Failed to open welcome window");
+    let welcome_win = welcome_win.build().expect("Failed to build welcome window");
+
+    welcome_win.create_overlay_titlebar().unwrap();
+    welcome_win.show().expect("Failed to show welcome window");
 }
