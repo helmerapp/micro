@@ -1,11 +1,9 @@
 ---
 import Base from "../components/base.astro";
 import EditorReact from "../components/editor";
-import Titlebar from "../components/titlebar.astro";
 ---
 
 <Base>
-	<Titlebar />
 	<EditorReact client:only="react" />
 </Base>
 

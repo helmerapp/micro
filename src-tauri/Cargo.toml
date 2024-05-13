@@ -30,6 +30,7 @@ tauri-plugin-single-instance = "2.0.0-beta"
 tauri-plugin-updater = "2.0.0-beta"
 tauri-plugin-dialog = "2.0.0-beta"
 tauri-plugin-store = "2.0.0-beta"
+tauri-plugin-decorum = { git = "https://github.com/clearlysid/tauri-plugin-decorum", branch = "main" }
 tokio = { version = "1", features = ["full"] }
 window-shadows = "0.2.1"
 os_info = { version = "3", default-features = false }
