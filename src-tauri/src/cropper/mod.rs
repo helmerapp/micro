@@ -50,12 +50,32 @@ fn create_record_button_win(app: &AppHandle) {
     }
 }
 
-fn spawn_window(){
+fn spawn_window(app: &AppHandle){
     // grab a list of monitors.
+    let monitors = app.available_monitors();
+
     // grab the monitor with my cursor on it.
+    let cursor_position = app.cursor_position();
+    // figure out the monitor based on monitors.
+    let current_monitor = monitors.iter().find(|monitor| {
+        let monitor_size = monitor.size(); 
+        let monitor_position = monitor.position();
+        let monitor_x = monitor_position.x;
+        let monitor_y = monitor_position.y;
+        let monitor_width = monitor_size.width;
+        let monitor_height = monitor_size.height;
+        let cursor_x = cursor_position.x;
+        let cursor_y = cursor_position.y;
+        cursor_x >= monitor_x && 
+        cursor_x <= monitor_x + monitor_width && 
+        cursor_y >= monitor_y && 
+        cursor_y <= monitor_y + monitor_height // don't ask questions. fr. 🤫
+    });
     // create the cropper win there.
-    // wrapper inplace of cropper window.
-    // don't create cropper window on start. create it on calling the invoke key. 
+    create_cropper_win(app);
+    // create the record button win there.
+    create_record_button_win(app);
+    
 }
 
 fn create_cropper_win(app: &AppHandle) {
