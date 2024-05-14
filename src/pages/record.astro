@@ -6,9 +6,9 @@ import RecordButton from "../components/cropper/RecordButton";
 
 <Base>
 	<div class="flex flex-row items-center">
-		<DragHandle client:only="react"/>
-		<RecordButton client:only="react"/>
-		<DragHandle client:only="react"/>
+		<DragHandle client:only="react" />
+		<RecordButton client:only="react" />
+		<DragHandle client:only="react" />
 	</div>
 </Base>
 
@@ -57,3 +57,19 @@ import RecordButton from "../components/cropper/RecordButton";
 		}
 	}
 </style>
+
+<script>
+	import { getAll, getCurrent } from "@tauri-apps/api/window";
+
+	const cropperWindow = getAll().find((win) => win.label === "cropper");
+	const recordWindow = getCurrent();
+
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape" || e.key === "Esc") {
+			e.preventDefault();
+			cropperWindow?.hide();
+			cropperWindow?.emit("reset-cropper");
+			recordWindow?.hide();
+		}
+	});
+</script>

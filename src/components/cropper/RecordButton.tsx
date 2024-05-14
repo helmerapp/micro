@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { getAll, getCurrent } from "@tauri-apps/api/window";
 import { motion } from "framer-motion";
 import { usePostHog } from "posthog-js/react";
 
@@ -20,11 +19,6 @@ const RecordButton = () => {
 	const handleKeyDown = (event: KeyboardEvent) => {
 		// TODO: just escape? or other keys too?
 		if (event.key === "Escape" || event.key === "Esc") {
-			const cropperWindow = getAll().find((win) => win.label === "cropper");
-			const recordButtonWindow = getCurrent();
-			cropperWindow?.hide();
-			cropperWindow?.emit("reset-cropper");
-			recordButtonWindow?.hide();
 			stopRecording();
 		}
 	};
