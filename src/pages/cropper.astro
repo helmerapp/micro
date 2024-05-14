@@ -76,7 +76,7 @@ import Base from "../components/base.astro";
 		console.error("Unable to find necessary elements.");
 	}
 
-	listen("reset-cropper", () => resetSelection());
+	listen("reset-area", () => resetSelection());
 
 	selectableAreaEl!.addEventListener("mousedown", (e) => {
 		isSelecting = true;

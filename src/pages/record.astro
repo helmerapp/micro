@@ -5,7 +5,7 @@ import RecordButton from "../components/cropper/RecordButton";
 ---
 
 <Base>
-	<div class="flex flex-row items-center">
+	<div class="flex flex-row items-center h-full align-middle">
 		<DragHandle client:only="react" />
 		<RecordButton client:only="react" />
 		<DragHandle client:only="react" />
@@ -68,7 +68,8 @@ import RecordButton from "../components/cropper/RecordButton";
 		if (e.key === "Escape" || e.key === "Esc") {
 			e.preventDefault();
 			cropperWindow?.hide();
-			cropperWindow?.emit("reset-cropper");
+			cropperWindow?.emit("reset-area");
+			recordWindow?.emit("reset-area");
 			recordWindow?.hide();
 		}
 	});

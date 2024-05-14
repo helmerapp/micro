@@ -1,7 +1,7 @@
 const DragHandle = () => {
 	return (
-		<div className="z-50 h-full cursor-grabbing text-white opacity-40 pl-1 pr-1 pb-1 pt-1" data-tauri-drag-region>
-			<svg width="9" height="15" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+		<div className="z-50 h-full cursor-grabbing text-white opacity-40 pl-1 pr-1 pb-1 pt-1 flex items-center" data-tauri-drag-region>
+			<svg width="6" height="12" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg"
 				style={{ pointerEvents: "none" }}>
 				<g clip-path="url(#clip0_4_2)">
 					<circle cx="2" cy="2" r="2" fill="white" fill-opacity="0.4" />

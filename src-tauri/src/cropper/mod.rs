@@ -48,7 +48,7 @@ fn create_record_button_win(app: &AppHandle) {
     let monitor_size: LogicalSize<f64> = primary_monitor.size().to_logical(scale_factor);
 
     const RECORD_BUTTON_WIDTH: f64 = 200.0;
-    const RECORD_BUTTON_HEIGHT: f64 = 64.0;
+    const RECORD_BUTTON_HEIGHT: f64 = 48.0;
 
     let mut record_win =
         WebviewWindowBuilder::new(app, "record", WebviewUrl::App("/record".into()))
@@ -60,7 +60,7 @@ fn create_record_button_win(app: &AppHandle) {
             )
             .accept_first_mouse(true)
             .skip_taskbar(true)
-            .shadow(false)
+            .shadow(true)
             .always_on_top(true)
             .decorations(false)
             .resizable(false)
@@ -143,30 +143,28 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
-    // TODO: Move this to when recording starts
-    // if !scap::has_permission() {
-    //     crate::open_welcome_window(app);
-    //     return;
-    // }
-
     if let Some(cropper_win) = app.get_webview_window("cropper") {
         if let Some(record_win) = app.get_webview_window("record") {
             match cropper_win.is_visible() {
                 Ok(true) => {
+                    record_win.hide().unwrap();
+                    record_win
+                        .emit("reset-area", ())
+                        .expect("couldn't reset area");
                     cropper_win.hide().unwrap();
                     cropper_win
-                        .emit("reset-cropper", ())
-                        .expect("couldn't reset cropper");
-                    if record_win.is_visible().unwrap() {
-                        record_win.hide().unwrap();
-                    }
+                        .emit("reset-area", ())
+                        .expect("couldn't reset area");
                 }
                 Ok(false) => {
+                    record_win
+                        .emit("reset-area", ())
+                        .expect("couldn't reset area");
                     cropper_win
-                        .emit("reset-cropper", ())
-                        .expect("couldn't reset cropper");
-                    cropper_win.show().unwrap();
+                        .emit("reset-area", ())
+                        .expect("couldn't reset area");
                     record_win.show().unwrap();
+                    cropper_win.show().unwrap();
                     cropper_win.set_focus().unwrap();
                 }
                 Err(_) => {}
@@ -182,7 +180,7 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
     if let Some(record_window) = app.get_webview_window("record") {
         record_window
             .emit("updated-crop-area", area.clone())
-            .expect("couldn't pass updates crop area to record_window");
+            .expect("couldn't pass crop area to record_window");
 
         record_window.set_focus().unwrap();
     }
