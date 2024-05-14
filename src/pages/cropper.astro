@@ -76,22 +76,17 @@ import Base from "../components/base.astro";
 		console.error("Unable to find necessary elements.");
 	}
 
-	listen("reset-cropper", () => {
-		resetSelection();
-	});
+	listen("reset-cropper", () => resetSelection());
 
 	selectableAreaEl!.addEventListener("mousedown", (e) => {
 		isSelecting = true;
 		selectionEl!.classList.remove("hidden");
 		startX = e.clientX - selectableAreaEl!.offsetLeft;
 		startY = e.clientY - selectableAreaEl!.offsetTop;
-		hideRecordButton();
 	});
 
 	selectableAreaEl!.addEventListener("mousemove", (e) => {
-		if (isSelecting) {
-			updateSelection(e);
-		}
+		if (isSelecting) updateSelection(e);
 	});
 
 	selectableAreaEl!.addEventListener("mouseup", () => {
@@ -113,9 +108,8 @@ import Base from "../components/base.astro";
 
 			isSelecting = false;
 			invoke("update_crop_area", {
-				// area: [startX + 2, startY + 2, endX - 7, endY - 7], // added these number using trial and error to remove border from the captured frame
-				area: [startX, startY, endX, endY], // added these number using trial and error to remove border from the captured frame
-			})
+				area: [startX, startY, endX, endY],
+			});
 		}
 	});
 
@@ -149,7 +143,8 @@ import Base from "../components/base.astro";
 	}
 
 	document.addEventListener("keydown", (e) => {
-		if (e.key === "Escape") {
+		if (e.key === "Escape" || e.key === "Esc") {
+			e.preventDefault();
 			hideCropper();
 		}
 	});
