@@ -26,6 +26,7 @@ henx = { git = "https://github.com/helmerapp/henx/", branch = "main" }
 windows = { version = "0.56", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tauri-utils = "2.0.0-beta"
 tauri-plugin-global-shortcut = "2.0.0-beta"
 tauri-plugin-single-instance = "2.0.0-beta"
 tauri-plugin-updater = "2.0.0-beta"

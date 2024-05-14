@@ -1,5 +1,8 @@
 use crate::AppState;
-use tauri::{AppHandle, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    utils::WindowEffect, AppHandle, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder,
+};
+use tauri_utils::{config::WindowEffectsConfig, WindowEffectState};
 
 #[cfg(target_os = "windows")]
 fn hide_using_window_affinity(hwnd: windows::Win32::Foundation::HWND) {
@@ -44,12 +47,15 @@ fn create_record_button_win(app: &AppHandle) {
     let scale_factor = primary_monitor.scale_factor();
     let monitor_size: LogicalSize<f64> = primary_monitor.size().to_logical(scale_factor);
 
+    const RECORD_BUTTON_WIDTH: f64 = 200.0;
+    const RECORD_BUTTON_HEIGHT: f64 = 64.0;
+
     let mut record_win =
         WebviewWindowBuilder::new(app, "record", WebviewUrl::App("/record".into()))
             .title("recorder window")
-            .inner_size(64.0, 64.0)
+            .inner_size(RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT)
             .position(
-                (monitor_size.width / 2.0) - 32.0,
+                (monitor_size.width / 2.0) - (RECORD_BUTTON_WIDTH / 2.0),
                 monitor_size.height - 200.0,
             )
             .accept_first_mouse(true)
@@ -58,7 +64,18 @@ fn create_record_button_win(app: &AppHandle) {
             .always_on_top(true)
             .decorations(false)
             .resizable(false)
-            .visible(false);
+            .visible(false)
+            .effects(WindowEffectsConfig {
+                #[cfg(target_os = "macos")]
+                effects: vec![WindowEffect::Popover],
+                #[cfg(target_os = "macos")]
+                state: Some(WindowEffectState::Active),
+                #[cfg(target_os = "macos")]
+                radius: Some(10.0),
+                #[cfg(target_os = "windows")]
+                effects: vec![WindowEffect::Mica],
+                ..WindowEffectsConfig::default()
+            });
 
     #[cfg(not(target_os = "macos"))]
     {
@@ -68,6 +85,11 @@ fn create_record_button_win(app: &AppHandle) {
     let record_win = record_win
         .build()
         .expect("Failed to build record button window");
+
+    record_win
+        .to_owned()
+        .set_visible_on_all_workspaces(true)
+        .expect("Couldn't set visible on all workspaces");
 
     #[cfg(target_os = "windows")]
     hide_using_window_affinity(record_win.hwnd().unwrap());
