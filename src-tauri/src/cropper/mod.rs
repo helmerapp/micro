@@ -143,31 +143,21 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
-    if let Some(cropper_win) = app.get_webview_window("cropper") {
-        if let Some(record_win) = app.get_webview_window("record") {
-            match cropper_win.is_visible() {
-                Ok(true) => {
-                    record_win.hide().unwrap();
-                    record_win
-                        .emit("reset-area", ())
-                        .expect("couldn't reset area");
-                    cropper_win.hide().unwrap();
-                    cropper_win
-                        .emit("reset-area", ())
-                        .expect("couldn't reset area");
-                }
-                Ok(false) => {
-                    record_win
-                        .emit("reset-area", ())
-                        .expect("couldn't reset area");
-                    cropper_win
-                        .emit("reset-area", ())
-                        .expect("couldn't reset area");
-                    record_win.show().unwrap();
-                    cropper_win.show().unwrap();
-                    cropper_win.set_focus().unwrap();
-                }
-                Err(_) => {}
+    if let (Some(cropper_win), Some(record_win)) = (
+        app.get_webview_window("cropper"),
+        app.get_webview_window("record"),
+    ) {
+        match cropper_win.is_visible().unwrap() || record_win.is_visible().unwrap() {
+            true => {
+                record_win.hide().unwrap();
+                cropper_win.hide().unwrap();
+                app.emit("reset-area", ()).expect("couldn't reset area");
+            }
+            false => {
+                app.emit("reset-area", ()).expect("couldn't reset area");
+                record_win.show().unwrap();
+                cropper_win.show().unwrap();
+                cropper_win.set_focus().unwrap();
             }
         }
     }
