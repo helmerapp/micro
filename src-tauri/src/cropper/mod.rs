@@ -4,17 +4,17 @@ use tauri::{
 };
 use tauri_utils::{config::WindowEffectsConfig, WindowEffectState};
 
-#[cfg(target_os = "windows")]
-fn hide_using_window_affinity(hwnd: windows::Win32::Foundation::HWND) {
-    use windows::Win32::UI::WindowsAndMessaging::{
-        SetWindowDisplayAffinity, WINDOW_DISPLAY_AFFINITY,
-    };
+// #[cfg(target_os = "windows")]
+// fn hide_using_window_affinity(hwnd: windows::Win32::Foundation::HWND) {
+//     use windows::Win32::UI::WindowsAndMessaging::{
+//         SetWindowDisplayAffinity, WINDOW_DISPLAY_AFFINITY,
+//     };
 
-    let affinity = WINDOW_DISPLAY_AFFINITY(0x00000011);
-    unsafe {
-        let _ = SetWindowDisplayAffinity(hwnd, affinity);
-    }
-}
+//     let affinity = WINDOW_DISPLAY_AFFINITY(0x00000011);
+//     unsafe {
+//         let _ = SetWindowDisplayAffinity(hwnd, affinity);
+//     }
+// }
 
 #[cfg(target_os = "macos")]
 fn set_transparency_and_level(win: tauri::WebviewWindow, level: u32) {
@@ -89,8 +89,8 @@ fn create_record_button_win(app: &AppHandle) {
         .set_visible_on_all_workspaces(true)
         .expect("Couldn't set visible on all workspaces");
 
-    #[cfg(target_os = "windows")]
-    hide_using_window_affinity(record_win.hwnd().unwrap());
+    // #[cfg(target_os = "windows")]
+    // hide_using_window_affinity(record_win.hwnd().unwrap());
 
     #[cfg(target_os = "macos")]
     set_transparency_and_level(record_win, 26);
@@ -126,8 +126,8 @@ fn create_cropper_win(app: &AppHandle) {
     let cropper_win = cropper_win.build().expect("Failed to open cropper");
     cropper_win.set_visible_on_all_workspaces(true).unwrap();
 
-    #[cfg(target_os = "windows")]
-    hide_using_window_affinity(cropper_win.hwnd().unwrap());
+    // #[cfg(target_os = "windows")]
+    // hide_using_window_affinity(cropper_win.hwnd().unwrap());
 
     #[cfg(target_os = "macos")]
     set_transparency_and_level(cropper_win, 25);
