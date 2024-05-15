@@ -42,7 +42,7 @@ const RecordButton = () => {
 	};
 
 	if (!area) {
-		return <p className="text-sm font-semibold tracking-tight w-full text-center">Drag to select an area</p>
+		return <p className="text-xs font-semibold tracking-tight w-full text-center">Drag to select an area</p>
 	} else {
 		return (
 			<motion.main
