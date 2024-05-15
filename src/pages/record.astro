@@ -57,20 +57,3 @@ import DragHandle from "../components/cropper/DragHandle.astro";
 		}
 	}
 </style>
-
-<script>
-	import { getAll, getCurrent } from "@tauri-apps/api/window";
-
-	const cropperWindow = getAll().find((win) => win.label === "cropper");
-	const recordWindow = getCurrent();
-
-	document.addEventListener("keydown", (e) => {
-		if (e.key === "Escape" || e.key === "Esc") {
-			e.preventDefault();
-			cropperWindow?.hide();
-			cropperWindow?.emit("reset-area");
-			recordWindow?.emit("reset-area");
-			recordWindow?.hide();
-		}
-	});
-</script>
