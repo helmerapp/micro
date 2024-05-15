@@ -9,13 +9,14 @@ mod tray;
 use scap::{capturer::Capturer, frame::Frame};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
-use tauri_plugin_global_shortcut;
 use tauri_plugin_global_shortcut::ShortcutState;
 use tauri_plugin_store::StoreBuilder;
 use tokio::sync::Mutex;
 
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
+
+use tauri_plugin_decorum::WebviewWindowExt;
 
 pub struct AppState {
     frames: Mutex<Vec<Frame>>,
@@ -37,15 +38,13 @@ impl Default for AppState {
 
 const SHORTCUT: &str = "CmdOrCtrl+Shift+2";
 
-fn initialize_micro(app_handle: &AppHandle) {
-    // Build system tray
-    tray::build(&app_handle);
-
-    // Initialize cropping window
-    cropper::init_cropper(&app_handle);
-
-    // Register global shortcut
-    app_handle
+fn main() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_decorum::init())
+        .plugin(tauri_plugin_single_instance::init(|_, _, _| {}))
+        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_shortcut(SHORTCUT)
@@ -57,15 +56,6 @@ fn initialize_micro(app_handle: &AppHandle) {
                 })
                 .build(),
         )
-        .expect("Failed to initialize global shortcut");
-}
-
-fn main() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|_, _, _| {}))
-        .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             // Set activation policy to Accessory on macOS
             #[cfg(target_os = "macos")]
@@ -90,9 +80,10 @@ fn main() {
                 store.save().expect("Failed to save store")
             }
 
-            initialize_micro(app_handle);
+            tray::build(&app_handle);
+            cropper::init_cropper(&app_handle);
 
-            let _ = tray::check_for_update(app_handle.clone(), true);
+            tray::check_for_update(app_handle.clone(), true).expect("Failed to check for update");
 
             Ok(())
         })
@@ -100,6 +91,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             tray::is_ok_sharing_usage_data,
             editor::export_gif,
+            cropper::hide_cropper,
             cropper::update_crop_area,
             recorder::stop_recording,
             recorder::start_recording,
@@ -126,12 +118,17 @@ fn create_welcome_win(app_handle: &AppHandle) {
             .accept_first_mouse(true)
             .inner_size(600.0, 580.0)
             .title("Helmer Micro")
-            .visible(true)
+            .visible(false)
             .focused(true)
             .center();
     #[cfg(target_os = "macos")]
     {
-        welcome_win = welcome_win.title_bar_style(tauri::TitleBarStyle::Overlay);
+        welcome_win = welcome_win
+            .title_bar_style(tauri::TitleBarStyle::Overlay)
+            .hidden_title(true);
     }
-    welcome_win.build().expect("Failed to open welcome window");
+    let welcome_win = welcome_win.build().expect("Failed to build welcome window");
+
+    welcome_win.create_overlay_titlebar().unwrap();
+    welcome_win.show().expect("Failed to show welcome window");
 }

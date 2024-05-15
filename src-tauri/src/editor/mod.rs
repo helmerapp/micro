@@ -4,6 +4,8 @@ use std::{sync::Arc, thread};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
+use tauri_plugin_decorum::WebviewWindowExt;
+
 mod frame_encoder;
 use frame_encoder::FrameEncoder;
 
@@ -27,7 +29,6 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
             .max_inner_size(800.0, 1000.0)
             .min_inner_size(600.0, 400.0)
             .inner_size(EDITOR_WIDTH.into(), editor_win_height.into())
-            .decorations(true)
             .resizable(false)
             .visible(false)
             .focused(false)
@@ -41,6 +42,7 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     }
 
     let editor_win = editor_win.build().expect("Failed to build editor window");
+    editor_win.create_overlay_titlebar().unwrap();
 
 
     editor_win
