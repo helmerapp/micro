@@ -57,7 +57,6 @@ import Base from "../components/base.astro";
 <script>
 	import { invoke } from "@tauri-apps/api/core";
 	import { listen } from "@tauri-apps/api/event";
-	import { getCurrent, getAll } from "@tauri-apps/api/window";
 
 	let startX = 0;
 	let startY = 0;
@@ -68,30 +67,23 @@ import Base from "../components/base.astro";
 	// Constants
 	const selectionEl = document.querySelector("section");
 	const selectableAreaEl = document.querySelector("main");
-	const cropperWindow = getCurrent();
-	const recordButtonWindow = getAll().find((win) => win.label === "record")!;
 
 	// Check if elements are found
 	if (!selectionEl || !selectableAreaEl) {
 		console.error("Unable to find necessary elements.");
 	}
 
-	listen("reset-cropper", () => {
-		resetSelection();
-	});
+	listen("reset-area", resetSelection);
 
 	selectableAreaEl!.addEventListener("mousedown", (e) => {
 		isSelecting = true;
 		selectionEl!.classList.remove("hidden");
 		startX = e.clientX - selectableAreaEl!.offsetLeft;
 		startY = e.clientY - selectableAreaEl!.offsetTop;
-		hideRecordButton();
 	});
 
 	selectableAreaEl!.addEventListener("mousemove", (e) => {
-		if (isSelecting) {
-			updateSelection(e);
-		}
+		if (isSelecting) updateSelection(e);
 	});
 
 	selectableAreaEl!.addEventListener("mouseup", () => {
@@ -113,9 +105,8 @@ import Base from "../components/base.astro";
 
 			isSelecting = false;
 			invoke("update_crop_area", {
-				// area: [startX + 2, startY + 2, endX - 7, endY - 7], // added these number using trial and error to remove border from the captured frame
-				area: [startX, startY, endX, endY], // added these number using trial and error to remove border from the captured frame
-			})
+				area: [startX, startY, endX, endY],
+			});
 		}
 	});
 
@@ -130,16 +121,6 @@ import Base from "../components/base.astro";
 		selectionEl!.style.top = `${height > 0 ? startY : endY}px`;
 	}
 
-	function hideRecordButton() {
-		recordButtonWindow.hide();
-	}
-
-	function hideCropper() {
-		cropperWindow.hide();
-		hideRecordButton();
-		resetSelection();
-	}
-
 	function resetSelection() {
 		selectionEl!.style.width = "0px";
 		selectionEl!.style.height = "0px";
@@ -149,8 +130,9 @@ import Base from "../components/base.astro";
 	}
 
 	document.addEventListener("keydown", (e) => {
-		if (e.key === "Escape") {
-			hideCropper();
+		if (e.key === "Escape" || e.key === "Esc") {
+			e.preventDefault();
+			invoke("hide_cropper");
 		}
 	});
 </script>

@@ -119,11 +119,10 @@ checksum = "25bdb32cbbdce2b519a9cd7df3a678443100e265d5e25ca763b7572a5104f5f3"
 [[package]]
 name = "apple-bindgen"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38f109ee76f68b4767848cb5dc93bfcc7c425deca849c4c81fa11cdce525e3d2"
+source = "git+https://github.com/Pranav2612000/apple-sys/?branch=main#11f7ad17d5d015e9c6570c85e5abfc5e9d065bd1"
 dependencies = [
  "apple-sdk",
- "bindgen 0.63.0",
+ "bindgen",
  "derive_more",
  "regex",
  "serde",
@@ -145,8 +144,7 @@ dependencies = [
 [[package]]
 name = "apple-sys"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12b3a1c3342678cd72676d0c1644fde496c1f65ea41f51465f54a89cad3bdf34"
+source = "git+https://github.com/Pranav2612000/apple-sys/?branch=main#11f7ad17d5d015e9c6570c85e5abfc5e9d065bd1"
 dependencies = [
  "apple-bindgen",
  "apple-sdk",
@@ -391,28 +389,6 @@ checksum = "8c3c1a368f70d6cf7302d78f8f7093da241fb8e8807c05cc9e51a125895a6d5b"
 
 [[package]]
 name = "bindgen"
-version = "0.63.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "36d860121800b2a9a94f9b5604b332d5cffb234ce17609ea479d723dbc9d3885"
-dependencies = [
- "bitflags 1.3.2",
- "cexpr",
- "clang-sys",
- "lazy_static",
- "lazycell",
- "log",
- "peeking_take_while",
- "proc-macro2",
- "quote",
- "regex",
- "rustc-hash",
- "shlex",
- "syn 1.0.109",
- "which",
-]
-
-[[package]]
-name = "bindgen"
 version = "0.69.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a00dc851838a2120612785d195287475a3ac45514741da670b735818822129a0"
@@ -424,12 +400,15 @@ dependencies = [
  "itertools",
  "lazy_static",
  "lazycell",
+ "log",
+ "prettyplease",
  "proc-macro2",
  "quote",
  "regex",
  "rustc-hash",
  "shlex",
  "syn 2.0.63",
+ "which",
 ]
 
 [[package]]
@@ -522,9 +501,9 @@ checksum = "79296716171880943b8470b5f8d03aa55eb2e645a4874bdbb28adb49162e012c"
 
 [[package]]
 name = "bytemuck"
-version = "1.15.0"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d6d68c57235a3a081186990eca2867354726650f42f7516ca50c28d6281fd15"
+checksum = "78834c15cb5d5efe3452d58b1e8ba890dd62d21907f867f383358198e56ebca5"
 
 [[package]]
 name = "byteorder"
@@ -866,7 +845,7 @@ version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f01585027057ff5f0a5bf276174ae4c1594a2c5bde93d5f46a016d76270f5a9"
 dependencies = [
- "bindgen 0.69.4",
+ "bindgen",
 ]
 
 [[package]]
@@ -2515,7 +2494,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf0d9716420364790e85cbb9d3ac2c950bde16a7dd36f3209b7dfdfc4a24d01f"
 dependencies = [
- "bindgen 0.69.4",
+ "bindgen",
  "cc",
  "system-deps",
 ]
@@ -2680,6 +2659,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-store",
  "tauri-plugin-updater",
+ "tauri-utils",
  "tempfile",
  "tokio",
  "window-shadows",
@@ -3173,12 +3153,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "peeking_take_while"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19b17cddbe7ec3f8bc800887bab5e717348c95ea2ca0b1bf0837fb964dc67099"
-
-[[package]]
 name = "percent-encoding"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3384,7 +3358,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "849e188f90b1dda88fe2bfe1ad31fe5f158af2c98f80fb5d13726c44f3f01112"
 dependencies = [
- "bindgen 0.69.4",
+ "bindgen",
  "libspa-sys",
  "system-deps",
 ]
@@ -3454,6 +3428,16 @@ name = "precomputed-hash"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
+
+[[package]]
+name = "prettyplease"
+version = "0.2.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f12335488a2f3b0a83b14edad48dca9879ce89b2edd10e80237e4e852dd645e"
+dependencies = [
+ "proc-macro2",
+ "syn 2.0.63",
+]
 
 [[package]]
 name = "proc-macro-crate"
@@ -3933,7 +3917,7 @@ dependencies = [
 [[package]]
 name = "scap"
 version = "0.0.3"
-source = "git+https://github.com/helmerapp/scap/?branch=main#eb56f83d1dcb4b3ef140df30851ddb9b7f14dfee"
+source = "git+https://github.com/helmerapp/scap/?branch=main#fc8f6419a73902a5b9392323084b414f939291cf"
 dependencies = [
  "apple-sys",
  "bytes",
@@ -4668,7 +4652,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-decorum"
 version = "0.1.0"
-source = "git+https://github.com/clearlysid/tauri-plugin-decorum?branch=main#0002946df4fb23410c4b541040a88fe43090f088"
+source = "git+https://github.com/clearlysid/tauri-plugin-decorum?branch=main#d29eb472b5182b5ec5b49f166cd47f3bd73ceeed"
 dependencies = [
  "anyhow",
  "cocoa",
