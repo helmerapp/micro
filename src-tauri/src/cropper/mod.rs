@@ -21,25 +21,23 @@ fn set_transparency_and_level(win: tauri::WebviewWindow, level: u32) {
     use cocoa::{appkit::NSColor, base::nil, foundation::NSString};
     use objc::{class, msg_send, sel, sel_impl};
 
-    win.to_owned().run_on_main_thread(move || {
-        let id = win.ns_window().unwrap() as cocoa::base::id;
+    let win_ns_window = win.ns_window().unwrap() as cocoa::base::id;
 
-        unsafe {
-            // set window level to 25
-            let _: cocoa::base::id = msg_send![id, setLevel: level];
+    unsafe {
+        let win_bg_color = NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
+        // set window level to 25
+        let _: cocoa::base::id = msg_send![win_ns_window, setLevel: level];
+        // Make window background transparent
+        let _: cocoa::base::id = msg_send![win_ns_window, setBackgroundColor: win_bg_color];
+    }
 
-            // Make the webview and window background transparent
-            let color = NSColor::colorWithSRGBRed_green_blue_alpha_(nil, 0.0, 0.0, 0.0, 0.0);
-            let _: cocoa::base::id = msg_send![id, setBackgroundColor: color];
-            win.with_webview(|webview| {
-                // !!! has delay
-                let id = webview.inner();
-                let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
-                let _: cocoa::base::id =
-                    msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
-            }).ok();
-        }
-    }).expect("Couldn't set macOS transparency and level");
+    win.with_webview(|webview| unsafe {
+        let id = webview.inner();
+        let no: cocoa::base::id = msg_send![class!(NSNumber), numberWithBool:0];
+        let _: cocoa::base::id =
+            msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")];
+    })
+    .ok();
 }
 
 fn create_record_button_win(app: &AppHandle) {
