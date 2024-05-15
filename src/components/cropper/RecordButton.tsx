@@ -7,31 +7,25 @@ import { usePostHog } from "posthog-js/react";
 const MAX_RECORDING_LIMIT_SECONDS = 20;
 
 const RecordButton = () => {
+	const posthog = usePostHog();
 	const [area, setArea] = useState(false);
 	const [recording, setRecording] = useState(false);
-	const posthog = usePostHog();
 
 	useEffect(() => {
+		listen("reset-area", () => setArea(false));
+		listen("updated-crop-area", () => setArea(true));
+
 		document.addEventListener("keydown", handleKeyDown);
-
-		listen("reset-area", () => {
-			setArea(false);
-		});
-
-		listen("updated-crop-area", () => {
-			// INFO: we get the area here
-			setArea(true)
-		});
 
 		return () => {
 			document.removeEventListener("keydown", handleKeyDown);
 		};
 	}, []);
 
-	const handleKeyDown = (event: KeyboardEvent) => {
-		// TODO: just escape? or other keys too?
-		if (event.key === "Escape" || event.key === "Esc") {
-			stopRecording();
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.key === "Escape" || e.key === "Esc") {
+			e.preventDefault();
+			invoke("hide_cropper").then(() => stopRecording());
 		}
 	};
 

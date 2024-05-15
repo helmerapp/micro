@@ -162,6 +162,18 @@ pub fn toggle_cropper(app: &AppHandle) {
 }
 
 #[tauri::command]
+pub async fn hide_cropper(app: AppHandle) {
+    if let (Some(cropper_win), Some(record_win)) = (
+        app.get_webview_window("cropper"),
+        app.get_webview_window("record"),
+    ) {
+        record_win.hide().unwrap();
+        cropper_win.hide().unwrap();
+        app.emit("reset-area", ()).expect("couldn't reset area");
+    }
+}
+
+#[tauri::command]
 pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
     println!("area: {:?}", area);
 
