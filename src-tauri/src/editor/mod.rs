@@ -1,7 +1,7 @@
 use crate::AppState;
 use scap::frame::Frame;
-use std::{sync::Arc, thread};
 use serde::{Deserialize, Serialize};
+use std::{sync::Arc, thread};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 
 use tauri_plugin_decorum::WebviewWindowExt;
@@ -44,25 +44,22 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     let editor_win = editor_win.build().expect("Failed to build editor window");
     editor_win.create_overlay_titlebar().unwrap();
 
-
-    editor_win
-        .clone()
+    #[cfg(target_os = "macos")]
+    {
+        editor_win.clone()
         .with_webview(move |wv| {
+            use cocoa::{base::nil, foundation::NSString};
+            use objc::{class, msg_send, sel, sel_impl};
+            
             let id = wv.inner();
-            println!("editor window webview");
-
-            #[cfg(target_os = "macos")] {
-                use cocoa::{base::nil, foundation::NSString};
-                use objc::{class, msg_send, sel, sel_impl};
-
-                let no: cocoa::base::id = unsafe { msg_send![class!(NSNumber), numberWithBool:0] };
-                let _: cocoa::base::id = unsafe { msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")] };
-            }            
-        })
+            let no: cocoa::base::id = unsafe { msg_send![class!(NSNumber), numberWithBool:0] };
+            let _: cocoa::base::id = unsafe { msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")] };
+         })
         .expect("Failed to get webview");
+    }
 
-        editor_win.show().unwrap();
-        // editor_win.set_focus().unwrap();
+    editor_win.show().unwrap();
+    editor_win.set_focus().unwrap();
 }
 
 #[derive(Debug, Serialize, Deserialize)]
