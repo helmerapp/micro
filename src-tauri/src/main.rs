@@ -23,6 +23,9 @@ pub struct AppState {
     recorder: Mutex<Option<Capturer>>,
     cropped_area: Mutex<Vec<u32>>,
     preview_path: Mutex<Option<PathBuf>>,
+
+    #[cfg(target_os = "macos")]
+    shown_permission_prompt: Mutex<bool>,
 }
 
 impl Default for AppState {
@@ -32,6 +35,9 @@ impl Default for AppState {
             recorder: Mutex::new(None),
             cropped_area: Mutex::new(Vec::new()),
             preview_path: Mutex::new(None),
+
+            #[cfg(target_os = "macos")]
+            shown_permission_prompt: Mutex::new(false),
         }
     }
 }
