@@ -13,9 +13,9 @@ fn open_permission_settings(app: &AppHandle) {
         .show(|result| match result {
             true => {
                 Command::new("open")
-									.arg("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
-									.output()
-									.expect("failed to open security settings");
+                    .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture")
+                    .output()
+                    .expect("failed to open security settings");
             }
             false => {
                 println!("User denied permission")

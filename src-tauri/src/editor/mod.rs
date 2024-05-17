@@ -50,7 +50,7 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
         .with_webview(move |wv| {
             use cocoa::{base::nil, foundation::NSString};
             use objc::{class, msg_send, sel, sel_impl};
-            
+
             let id = wv.inner();
             let no: cocoa::base::id = unsafe { msg_send![class!(NSNumber), numberWithBool:0] };
             let _: cocoa::base::id = unsafe { msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")] };
