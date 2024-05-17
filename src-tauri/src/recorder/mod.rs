@@ -151,5 +151,5 @@ pub async fn stop_recording(app_handle: AppHandle) {
 #[tauri::command]
 pub async fn request_recording_permission(app: AppHandle) {
     #[cfg(target_os = "macos")]
-    permissions::ensure_recording_permissions(&app);
+    permissions::ensure_recording_permissions(&app).await;
 }
