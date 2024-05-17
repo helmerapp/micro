@@ -28,21 +28,30 @@ fn open_permission_settings(app: &AppHandle) {
 
 pub fn ensure_recording_permissions(app: &AppHandle) {
     // scap::request_permission returns immediately
+    // It uses CGRequestScreenCaptureAccess from Apple's CoreGraphics framework
+    // Unfortunately there are no callbacks or events we can listen to.
+
     // FLOW 1: ✅ if the user has already granted permission, returns true.
     // FLOW 2: 🔴 if the user has explicitly denied permission, returns false with no prompt
     // FLOW 3: ⚠️ if user has not yet granted or denied permission, returns false but also prompts
 
-    if !scap::has_permission() {
-        println!("Don't have permission atm");
+    if !scap::request_permission() {
+        println!("Don't have permission atm.");
         // 2 situations:
+
+        // IF
 
         // the system has prompted the user for permission
         // they are about to grant it and restart app
 
+        // Then do nothing, the user will restart the app eventually
+
+        // ELSE
+
         // user has accidentally denied permission now or before
         // and we need to manually prompt them
-        open_permission_settings(&app);
 
-        // window_exists("Downloads");
+        // Demand permissions and open settings
+        // open_permission_settings(&app);
     }
 }
