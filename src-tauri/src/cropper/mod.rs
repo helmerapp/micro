@@ -134,8 +134,6 @@ fn create_cropper_win(app: &AppHandle) {
 }
 
 pub fn init_cropper(app: &AppHandle) {
-    // Note: we need to create the record button window first
-    // Because the JS in cropper window needs a handle to it
     create_record_button_win(app);
     create_cropper_win(app);
 }
@@ -151,12 +149,17 @@ pub fn toggle_cropper(app: &AppHandle) {
                 cropper_win.hide().unwrap();
                 app.emit("reset-area", ()).expect("couldn't reset area");
             }
-            false => {
-                app.emit("reset-area", ()).expect("couldn't reset area");
-                record_win.show().unwrap();
-                cropper_win.show().unwrap();
-                cropper_win.set_focus().unwrap();
-            }
+            false => match scap::has_permission() {
+                true => {
+                    app.emit("reset-area", ()).expect("couldn't reset area");
+                    record_win.show().unwrap();
+                    cropper_win.show().unwrap();
+                    cropper_win.set_focus().unwrap();
+                }
+                false => {
+                    crate::open_welcome_window(app);
+                }
+            },
         }
     }
 }
