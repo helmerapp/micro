@@ -1,14 +1,14 @@
-use std::{sync::mpsc, thread};
-
 use crate::{open_welcome_window, AppState};
-
+use henx::{VideoEncoder, VideoEncoderOptions};
+use std::{sync::mpsc, thread};
 use tauri::{AppHandle, Manager};
 use tempfile::NamedTempFile;
 
 mod utils;
 use utils::{get_random_id, start_frame_capture};
 
-use henx::{VideoEncoder, VideoEncoderOptions};
+#[cfg(target_os = "macos")]
+mod permissions;
 
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
@@ -149,6 +149,7 @@ pub async fn stop_recording(app_handle: AppHandle) {
 }
 
 #[tauri::command]
-pub async fn request_recording_permission(_: AppHandle) -> bool {
-    scap::request_permission()
+pub async fn request_recording_permission(app: AppHandle) {
+    #[cfg(target_os = "macos")]
+    permissions::ensure_recording_permissions(&app).await;
 }
