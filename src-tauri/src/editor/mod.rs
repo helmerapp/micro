@@ -19,8 +19,15 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     const EDITOR_WIDTH: u32 = 600;
     const TOOLS_HEIGHT: u32 = 280;
 
-    let preview_height_adjusted = EDITOR_WIDTH * height / width;
-    let editor_win_height = preview_height_adjusted + TOOLS_HEIGHT;
+    let mut aspect_ratio = width as f32 / height as f32;
+    
+    #[cfg(target_os = "windows")]
+    {
+        aspect_ratio = 3840.00 / 2160.00;
+    }
+
+    let preview_height_adjusted = EDITOR_WIDTH as f32 / aspect_ratio;
+    let editor_win_height = preview_height_adjusted + TOOLS_HEIGHT as f32;
 
     let mut editor_win =
         WebviewWindowBuilder::new(app, "editor", WebviewUrl::App(editor_url.into()))
