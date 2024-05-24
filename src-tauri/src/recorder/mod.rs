@@ -97,17 +97,7 @@ pub async fn start_recording(app_handle: AppHandle) {
         (*frames).push(frame);
         drop(recorder);
     }
-
-    // if there exists an editor, close it here
-    // TODO: ideal would be to use the existing editor itself
-    // update it's preview path and animate to the right dimensions
-    let existing_editor_win = app_handle.get_webview_window("editor");
-    if let Some(existing_editor_win) = existing_editor_win {
-        existing_editor_win
-            .close()
-            .expect("couldn't destory and close existing editor");
-    }
-
+    
     // drop the sender to close the channel
     drop(tx);
     // wait for the encoding thread to finish
@@ -122,14 +112,24 @@ pub async fn start_recording(app_handle: AppHandle) {
     // sleep 1 second
     std::thread::sleep(std::time::Duration::from_secs(1));
 
-    // initialise the editor with the file path of encoded video
+    // initialize the editor with the file path of encoded video
     let preview_path_string = preview_path.as_ref().unwrap().to_str().unwrap().to_string();
 
-    crate::editor::init_editor(
-        &app_handle,
-        preview_path_string,
-        (output_width, output_height),
-    );
+    let existing_editor_win = app_handle.get_webview_window("editor");
+    if existing_editor_win.is_some() {
+        crate::editor::show_editor(
+            &app_handle,
+            preview_path_string,
+            (output_width, output_height),
+        )
+    } else {
+        crate::editor::init_editor(
+            &app_handle,
+            preview_path_string,
+            (output_width, output_height),
+        )
+    };
+
 }
 
 #[tauri::command]

@@ -2,7 +2,7 @@ use crate::AppState;
 use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, thread};
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
 
 use tauri_plugin_decorum::WebviewWindowExt;
 
@@ -56,6 +56,33 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
             let _: cocoa::base::id = unsafe { msg_send![id, setValue:no forKey: NSString::alloc(nil).init_str("drawsBackground")] };
          })
         .expect("Failed to get webview");
+    }
+
+    editor_win.show().unwrap();
+    editor_win.set_focus().unwrap();
+}
+
+
+pub fn show_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
+    let (width, height) = size;
+    let editor_url =  Url::parse(&format!("http://localhost:1420/editor?file={}&width={}&height={}",video_file, width, height)).expect("Invalid URL");
+
+    const EDITOR_WIDTH: u32 = 600;
+    const TOOLS_HEIGHT: u32 = 280;
+
+    let preview_height_adjusted = EDITOR_WIDTH * height / width;
+    let editor_win_height = preview_height_adjusted + TOOLS_HEIGHT;
+
+    let ls = tauri::LogicalSize::new(EDITOR_WIDTH as f64, editor_win_height as f64);
+    let sz = tauri::Size::Logical(ls);
+
+    let mut editor_win = app.get_webview_window("editor").unwrap();
+
+    editor_win.set_size(sz).expect("Failed to set window size");
+    editor_win.navigate(editor_url);
+        
+    if editor_win.is_minimized().unwrap() {
+        editor_win.unminimize().unwrap();
     }
 
     editor_win.show().unwrap();
