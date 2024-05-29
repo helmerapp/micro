@@ -42,7 +42,9 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     }
 
     let editor_win = editor_win.build().expect("Failed to build editor window");
-    editor_win.create_overlay_titlebar().unwrap();
+    editor_win
+        .create_overlay_titlebar()
+        .expect("Failed to create overlay titlebar");
 
     #[cfg(target_os = "macos")]
     {
@@ -62,10 +64,17 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     editor_win.set_focus().unwrap();
 }
 
-
 pub fn show_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     let (width, height) = size;
-    let editor_url =  Url::parse(&format!("http://localhost:1420/editor?file={}&width={}&height={}",video_file, width, height)).expect("Invalid URL");
+
+    let editor_url = WebviewUrl::App(
+        (format!(
+            "/editor?file={}&width={}&height={}",
+            video_file, width, height
+        ))
+        .into(),
+    );
+    let editor_url = Url::parse(&editor_url.to_string()).expect("Invalid URL");
 
     const EDITOR_WIDTH: u32 = 600;
     const TOOLS_HEIGHT: u32 = 280;
@@ -80,7 +89,7 @@ pub fn show_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
 
     editor_win.set_size(sz).expect("Failed to set window size");
     editor_win.navigate(editor_url);
-        
+
     if editor_win.is_minimized().unwrap() {
         editor_win.unminimize().unwrap();
     }
