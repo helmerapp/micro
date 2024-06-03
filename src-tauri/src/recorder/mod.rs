@@ -115,20 +115,19 @@ pub async fn start_recording(app_handle: AppHandle) {
     // initialize the editor with the file path of encoded video
     let preview_path_string = preview_path.as_ref().unwrap().to_str().unwrap().to_string();
 
-    let existing_editor_win = app_handle.get_webview_window("editor");
-    if existing_editor_win.is_some() {
+    if app_handle.get_webview_window("editor").is_some() {
         crate::editor::show_editor(
             &app_handle,
             preview_path_string,
             (output_width, output_height),
         )
-    } else {
+     } else {
         crate::editor::init_editor(
             &app_handle,
             preview_path_string,
             (output_width, output_height),
         )
-    };
+     }
 
 }
 
