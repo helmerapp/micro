@@ -1,11 +1,17 @@
 {
 	"$schema": "../gen/schemas/desktop-schema.json",
 	"identifier": "desktop-capability",
-	"description": "Capabilities for all windows",
+	"description": "Capabilities for all windows; Has support for at max 4 capture windows/displays.",
 	"windows": [
 		"editor",
-		"cropper",
-		"record",
+		"cropper-0",
+		"record-0",
+		"cropper-1",
+		"record-1",
+		"cropper-2",
+		"record-2",
+		"cropper-3",
+		"record-3",
 		"welcome"
 	],
 	"permissions": [

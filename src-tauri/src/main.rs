@@ -6,7 +6,7 @@ mod editor;
 mod recorder;
 mod tray;
 
-use scap::{capturer::Capturer, frame::Frame};
+use scap::{capturer::Capturer, frame::Frame, Target};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut::ShortcutState;
@@ -23,6 +23,11 @@ pub struct AppState {
     recorder: Mutex<Option<Capturer>>,
     cropped_area: Mutex<Vec<u32>>,
     preview_path: Mutex<Option<PathBuf>>,
+    targets: Vec<Target>,
+    // index is taken since this will be used for window labels (static as of now)
+    // across all plaforms, id can be different than incrementing numbers or change
+    // due to underlying implementation.
+    current_target_ind: Mutex<i8>,
 
     #[cfg(target_os = "macos")]
     shown_permission_prompt: Mutex<bool>,
@@ -35,6 +40,9 @@ impl Default for AppState {
             recorder: Mutex::new(None),
             cropped_area: Mutex::new(Vec::new()),
             preview_path: Mutex::new(None),
+            targets: scap::get_all_targets(),
+            // Negative value means signifies no current target.
+            current_target_ind: Mutex::new(-1),
 
             #[cfg(target_os = "macos")]
             shown_permission_prompt: Mutex::new(false),

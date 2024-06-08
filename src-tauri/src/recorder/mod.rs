@@ -12,6 +12,9 @@ mod permissions;
 
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
+    let state = app_handle.state::<AppState>();
+    // hide cropper cannot be called without existence of current target.
+
     // If no permissions, open welcome window
     if !scap::has_permission() {
         eprintln!("no permission to record screen");
@@ -19,14 +22,19 @@ pub async fn start_recording(app_handle: AppHandle) {
         return;
     }
 
+    let curr_ind = state.current_target_ind.lock().await;
+    let current_target = state.targets[curr_ind.clone() as usize].clone();
+    let cropper_win = app_handle
+        .get_webview_window(format!("cropper-{}", curr_ind.clone()).as_str())
+        .unwrap();
+    drop(curr_ind);
+
     // Disable cursor events on cropper window
-    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
     cropper_win.set_ignore_cursor_events(true).unwrap();
 
     // Start capturing frames
     let app_handle_clone = app_handle.clone();
-    start_frame_capture(app_handle_clone).await;
-    println!("Capturing frames...");
+    start_frame_capture(app_handle_clone, &current_target).await;
 
     let state = app_handle.state::<AppState>();
     let mut frames = state.frames.lock().await;
@@ -135,8 +143,14 @@ pub async fn start_recording(app_handle: AppHandle) {
 #[tauri::command]
 pub async fn stop_recording(app_handle: AppHandle) {
     // Hide and reset cropper
+    let state = app_handle.state::<AppState>();
+    let curr_ind = state.current_target_ind.lock().await;
+    let cropper_win_label = format!("cropper-{}", curr_ind.clone());
+    drop(curr_ind);
     crate::cropper::toggle_cropper(&app_handle);
-    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
+    let cropper_win = app_handle
+        .get_webview_window(cropper_win_label.as_str())
+        .unwrap();
     cropper_win.emit("capture-stopped", ()).unwrap();
     cropper_win.set_ignore_cursor_events(false).unwrap();
 
