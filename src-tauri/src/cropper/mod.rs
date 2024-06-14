@@ -250,9 +250,25 @@ pub async fn hide_cropper(app: AppHandle) {
 pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
     println!("area: {:?}", area);
 
+    let mut crop_area = area.clone();
+    // add the current monitor's origin offset to area. scaled?
+
+    let current_monitor = monitor_from_point(&app).unwrap();
+    let position = PhysicalPosition::new(current_monitor.position().x, current_monitor.position().y);
+
+    let current_monitor_logical_size: LogicalSize<f64> = current_monitor
+        .size()
+        .to_logical(current_monitor.scale_factor());
+
+    // crop_area[0] += position.x as u32;
+    // crop_area[1] += position.y as u32;
+
+    println!("crop_area: {:?}", crop_area);
+
+
     if let Some(record_window) = app.get_webview_window("record") {
         record_window
-            .emit("updated-crop-area", area.clone())
+            .emit("updated-crop-area", crop_area.clone())
             .expect("couldn't pass crop area to record_window");
 
         record_window.set_focus().unwrap();
@@ -260,6 +276,6 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
 
     let state = app.state::<AppState>();
     let mut cropped_area = state.cropped_area.lock().await;
-    *cropped_area = area.clone();
+    *cropped_area = crop_area.clone();
     drop(cropped_area);
 }
