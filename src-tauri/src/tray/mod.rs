@@ -8,7 +8,7 @@ use tauri::{
         AboutMetadataBuilder, CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder,
         PredefinedMenuItem,
     },
-    tray::{ClickType, TrayIconBuilder},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle,
 };
 use tauri_plugin_store::StoreBuilder;
@@ -82,7 +82,11 @@ pub fn build(app: &AppHandle) {
             _ => (),
         })
         .on_tray_icon_event(|tray, event| {
-            if event.click_type == ClickType::Left {
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+              } = event {
                 // TODO: if not already recording
                 let app = tray.app_handle();
                 toggle_cropper(app);

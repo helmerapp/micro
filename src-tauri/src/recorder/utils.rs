@@ -1,7 +1,7 @@
 use crate::AppState;
 use rand::Rng;
 use scap::{
-    capturer::{CGPoint, CGRect, CGSize, Capturer, Options, Resolution},
+    capturer::{Point, Area, Size, Capturer, Options, Resolution},
     frame::FrameType,
 };
 use tauri::{AppHandle, Manager};
@@ -26,18 +26,18 @@ pub async fn start_frame_capture(app_handle: AppHandle) {
     // Initialize scap
     let options = Options {
         fps: 60,
-        targets: Vec::new(),
+        target: None,
         show_cursor: record_cursor,
         show_highlight: false,
         excluded_targets: None,
         output_type: FRAME_TYPE,
         output_resolution: Resolution::_1080p, // TODO: doesn't respect aspect ratio yet
-        source_rect: Some(CGRect {
-            origin: CGPoint {
+        crop_area: Some(Area {
+            origin: Point {
                 x: crop_area[0],
                 y: crop_area[1],
             },
-            size: CGSize {
+            size: Size {
                 width: crop_area[2],
                 height: crop_area[3],
             },

@@ -22,6 +22,7 @@
 		"window:allow-set-title",
 		"window:allow-set-position",
 		"window:allow-start-dragging",
+		"window:allow-monitor-from-point",
 		"global-shortcut:allow-register"
 	]
 }

@@ -1,5 +1,5 @@
 use crate::AppState;
-use tauri::{AppHandle, Manager, Position, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, Position, WebviewUrl, WebviewWindowBuilder};
 
 fn create_record_button_win(app: &AppHandle) {
     let mut record_win =
@@ -18,7 +18,9 @@ fn create_record_button_win(app: &AppHandle) {
         record_win = record_win.transparent(true);
     }
 
-    let record_win = record_win.build().expect("Failed to build record button window");
+    let record_win = record_win
+        .build()
+        .expect("Failed to build record button window");
 
     #[cfg(target_os = "macos")]
     {
@@ -50,32 +52,63 @@ fn create_record_button_win(app: &AppHandle) {
     }
 }
 
-fn spawn_window(app: &AppHandle){
+fn is_pointer_on_monitor(app: &AppHandle, monitor: &tauri::window::Monitor) -> bool {
+    let cursor_position = app.cursor_position().unwrap();
+    let posx = cursor_position.x;
+    let posy = cursor_position.y;
+    let monitor_start = monitor.position();
+    let monitor_boundaries = monitor.size();
+
+    let ms_x: f64 = monitor_start.x.into();
+    let ms_y: f64 = monitor_start.y.into();
+    let mb_w: f64 = monitor_boundaries.width.into();
+    let mb_h: f64 = monitor_boundaries.height.into();
+
+    if ((posx >= ms_x)
+        && (posy >= ms_y)
+        && (posx <= ((ms_x + mb_w) ))
+        && (posy <= ((ms_y + mb_h))))
+    {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+fn monitor_from_point(app: &AppHandle) -> Option<tauri::window::Monitor> {
+    let monitors = app.available_monitors().unwrap();
+    let cursor_position = app.cursor_position().unwrap();
+    let posx = cursor_position.x;
+    let posy = cursor_position.y;
+
+    for monitor in monitors {
+        if is_pointer_on_monitor(app, &monitor) {
+            return Some(monitor);
+        }
+    }
+    return None;
+}
+
+
+fn spawn_window(app: &AppHandle) {
     // grab a list of monitors.
-    let monitors = app.available_monitors();
+    let monitors = app.available_monitors().unwrap();
 
     // grab the monitor with my cursor on it.
-    let cursor_position = app.cursor_position();
-    // figure out the monitor based on monitors.
-    let current_monitor = monitors.iter().find(|monitor| {
-        let monitor_size = monitor.size(); 
-        let monitor_position = monitor.position();
-        let monitor_x = monitor_position.x;
-        let monitor_y = monitor_position.y;
-        let monitor_width = monitor_size.width;
-        let monitor_height = monitor_size.height;
-        let cursor_x = cursor_position.x;
-        let cursor_y = cursor_position.y;
-        cursor_x >= monitor_x && 
-        cursor_x <= monitor_x + monitor_width && 
-        cursor_y >= monitor_y && 
-        cursor_y <= monitor_y + monitor_height // don't ask questions. fr. 🤫
-    });
+    // let cursor_position = app.cursor_position().unwrap();
+    // let posx = cursor_position.x;
+    // let posy = cursor_position.y;
+    // println!("Cursor on Pos: {:?}",posx);
+    // println!("Cursor on Pos: {:?}",posy);
+    // println!("primary monitor: {:?}",monitors);
+    // println!("Cursor on monitor: {:?}", app.monitor_from_point(posx, posy)); // returns None regardless of cursor position
+    println!("Current monitor ?: {:?}", monitor_from_point(app));
+
     // create the cropper win there.
     create_cropper_win(app);
     // create the record button win there.
+
     create_record_button_win(app);
-    
 }
 
 fn create_cropper_win(app: &AppHandle) {
@@ -83,7 +116,7 @@ fn create_cropper_win(app: &AppHandle) {
     // let monitors = app.available_monitors();
     let primary_monitor = app.primary_monitor().unwrap().unwrap();
     let monitors = app.available_monitors();
-    println!("{:?}",monitors);
+    println!("{:?}", monitors);
     let scale_factor = primary_monitor.scale_factor();
     let monitor_size = primary_monitor.size().to_logical(scale_factor);
 
@@ -99,7 +132,7 @@ fn create_cropper_win(app: &AppHandle) {
             .decorations(false)
             .resizable(false)
             .visible(false)
-            .position(10, 10)
+            .position(10.00, 10.00)
             .focused(false);
 
     // set transparent only on windows and linux
@@ -139,14 +172,14 @@ fn create_cropper_win(app: &AppHandle) {
             })
             .unwrap();
     }
-
 }
 
 pub fn init_cropper(app: &AppHandle) {
     // Note: we need to create the record button window first
     // Because the JS in cropper window needs a handle to it
-    create_record_button_win(app);
-    create_cropper_win(app);
+    spawn_window(app);
+    // create_record_button_win(app);
+    // create_cropper_win(app);
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
@@ -155,7 +188,15 @@ pub fn toggle_cropper(app: &AppHandle) {
         return;
     }
     let cursor_position = app.cursor_position();
-    println!("CURSOR PHYSICAL POSITION: {:?}",cursor_position);
+    let some_monitor = app.monitor_from_point(1.0, 1.0);
+
+    let current_monitor = monitor_from_point(app).unwrap();
+    let position = PhysicalPosition::new(current_monitor.position().x, current_monitor.position().y);
+    let current_monitor_size = current_monitor.size();
+    let size = PhysicalSize::new(current_monitor_size.width, current_monitor_size.height);
+    
+    // println!("Current monitor ?: {:?}", monitor_from_point(app));
+    println!("CURSOR PHYSICAL POSITION: {:?}", current_monitor.position());
     if let Some(cropper_win) = app.get_webview_window("cropper") {
         match cropper_win.is_visible() {
             Ok(true) => {
@@ -163,6 +204,9 @@ pub fn toggle_cropper(app: &AppHandle) {
                 cropper_win
                     .emit("reset-cropper", ())
                     .expect("couldn't reset cropper");
+                    cropper_win.set_position(position);
+                    cropper_win.set_size(size);
+                    println!("Current monitor size on hide: {:?}", cropper_win.inner_size());
                 if let Some(record_button_win) = app.get_webview_window("record") {
                     if record_button_win.is_visible().unwrap() {
                         record_button_win.hide().unwrap();
@@ -172,7 +216,10 @@ pub fn toggle_cropper(app: &AppHandle) {
             Ok(false) => {
                 cropper_win
                     .emit("reset-cropper", ())
-                    .expect("couldn't reset cropper");
+                    .expect("couldn't reset cropper");    
+                cropper_win.set_position(position); // must set postition before setting the size.
+                cropper_win.set_size(size);
+                println!("Current monitor size on show: {:?}", cropper_win.inner_size());
                 cropper_win.show().unwrap();
                 cropper_win.set_focus().unwrap();
             }
@@ -183,7 +230,6 @@ pub fn toggle_cropper(app: &AppHandle) {
 
 #[tauri::command]
 pub async fn update_crop_area(app: AppHandle, button_coords: Vec<u32>, area: Vec<u32>) {
-   
     println!("button_coords: {:?}", button_coords);
     println!("area: {:?}", area);
 
