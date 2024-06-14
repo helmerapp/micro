@@ -55,7 +55,6 @@ pub fn check_for_update(app_handle: AppHandle, silent_if_none: bool) -> Result<(
                                                         // TODO: handle a failed update
                                                         eprintln!("failed to install update: {}", e);
                                                     }
-                                                    
                                                 }
                                             }
                                             _ => {}

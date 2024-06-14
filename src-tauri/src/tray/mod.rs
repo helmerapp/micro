@@ -83,13 +83,15 @@ pub fn build(app: &AppHandle) {
         })
         .on_tray_icon_event(|tray, event| {
             if let TrayIconEvent::Click {
-                button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
+                button,
+                button_state,
                 ..
               } = event {
+
                 // TODO: if not already recording
-                let app = tray.app_handle();
-                toggle_cropper(app);
+                if button_state == MouseButtonState::Up && button == MouseButton::Left {
+                    toggle_cropper(tray.app_handle());
+                }
             }
         });
 

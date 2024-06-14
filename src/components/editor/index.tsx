@@ -16,8 +16,8 @@ export default function Editor() {
 	const [selectedFrames, setSelectedFrames] = useState([0, 0]);
 	const [gifSettings, setGifSettings] = useState({
 		fps: 30,
-		size: 1000,
 		speed: 1,
+		size: 1000,
 		quality: 90,
 		loop_gif: true,
 	});
