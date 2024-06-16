@@ -1,9 +1,8 @@
 use crate::AppState;
-use core_graphics_helmer_fork::display::{self, CGDisplayBounds};
-use mouse_position::mouse_position::Mouse;
+use core_graphics_helmer_fork::display::CGDisplayBounds;
 use tauri::{
-    utils::WindowEffect, App, AppHandle, LogicalPosition, LogicalSize, Manager, Monitor,
-    PhysicalSize, Size, WebviewUrl, WebviewWindow, WebviewWindowBuilder,
+    utils::WindowEffect, AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl,
+    WebviewWindowBuilder,
 };
 use tauri_utils::{config::WindowEffectsConfig, WindowEffectState};
 
@@ -218,26 +217,6 @@ pub fn init_cropper(app: &AppHandle) {
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
-    let position = Mouse::get_mouse_position();
-    match position {
-        Mouse::Position { x, y } => {
-            if let Some(monitor) = app.monitor_from_point(x as f64, y as f64).unwrap() {
-                if let Some(target) = get_target_from_monitor(app, monitor) {
-                    tune_record_size_position(app, &target);
-                    tune_cropper_size_position(app, &target);
-                } else {
-                    eprintln!("Could not deduce display target from tuari monitor");
-                    return;
-                }
-            } else {
-                println!("Could not get tauri monitor from mouse point");
-            }
-        }
-        Mouse::Error => {
-            eprintln!("Error getting mouse position");
-            return;
-        }
-    }
     if let (Some(cropper_win), Some(record_win)) = (
         app.get_webview_window("cropper"),
         app.get_webview_window("record"),
@@ -251,6 +230,7 @@ pub fn toggle_cropper(app: &AppHandle) {
             false => match scap::has_permission() {
                 true => {
                     app.emit("reset-area", ()).expect("couldn't reset area");
+                    tune_tauri_windows(app);
                     record_win.show().unwrap();
                     cropper_win.show().unwrap();
                     cropper_win.set_focus().unwrap();
@@ -289,6 +269,24 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
     let mut cropped_area = state.cropped_area.lock().await;
     *cropped_area = area.clone();
     drop(cropped_area);
+}
+
+fn tune_tauri_windows(app: &AppHandle) {
+    let position = app.cursor_position().unwrap();
+    if let Some(monitor) = app
+        .monitor_from_point(position.x as f64, position.y as f64)
+        .unwrap()
+    {
+        if let Some(target) = get_target_from_monitor(app, monitor) {
+            tune_record_size_position(app, &target);
+            tune_cropper_size_position(app, &target);
+        } else {
+            eprintln!("Could not deduce display target from tuari monitor");
+            return;
+        }
+    } else {
+        println!("Could not get tauri monitor from mouse point");
+    }
 }
 
 fn get_target_from_monitor(app: &AppHandle, monitor: Monitor) -> Option<scap::Target> {
