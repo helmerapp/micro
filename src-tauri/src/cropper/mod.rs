@@ -42,96 +42,41 @@ fn set_transparency_and_level(win: tauri::WebviewWindow, level: u32) {
     .ok();
 }
 
-fn tune_record_size_position(app: &AppHandle, target: &scap::Target) {
-    let win_maybe = app.get_webview_window("record");
-    if let Some(win) = win_maybe {
-        const RECORD_BUTTON_WIDTH: f64 = 200.0;
-        const RECORD_BUTTON_HEIGHT: f64 = 48.0;
-        match target {
-            scap::Target::Display(display) => {
-                let monitor_size: LogicalSize<f64> = {
-                    let mode = display.raw_handle.display_mode().unwrap();
-                    LogicalSize::<f64>::new(mode.width() as f64, mode.height() as f64)
-                };
+fn tune_record_size_position(app: &AppHandle, monitor: &Monitor) {
+    let win = app.get_webview_window("record").unwrap();
 
-                #[cfg(target_os = "macos")]
-                {
-                    let position: LogicalPosition<f64> = unsafe {
-                        let bounds = CGDisplayBounds(display.raw_handle.id);
-                        LogicalPosition::<f64>::new(
-                            bounds.origin.x + (monitor_size.width / 2.0)
-                                - (RECORD_BUTTON_WIDTH / 2.0),
-                            bounds.origin.y + monitor_size.height - 200.0,
-                        )
-                    };
-                    win.set_position(position).unwrap();
-                    win.center().unwrap();
-                }
-                win.set_size(LogicalSize::new(RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT))
-                    .unwrap();
-            }
-            scap::Target::Window(_) => {}
-        }
-    }
+    const RECORD_BUTTON_WIDTH: f64 = 200.0;
+    const RECORD_BUTTON_HEIGHT: f64 = 48.0;
+
+    let scale_factor = monitor.scale_factor();
+    let monitor_size: LogicalSize<f64> = monitor.size().to_logical(scale_factor);
+    let physical_position = monitor.position();
+    let logical_position = LogicalPosition::<f64>::new(
+        physical_position.x as f64 * (monitor_size.width / 2.0) - (RECORD_BUTTON_WIDTH / 2.0),
+        physical_position.y as f64 * monitor_size.height - 200.0,
+    );
+    win.set_position(logical_position).unwrap();
+    win.center().unwrap();
+
+    win.set_size(LogicalSize::new(RECORD_BUTTON_HEIGHT, RECORD_BUTTON_HEIGHT))
+        .unwrap();
 }
 
-fn tune_cropper_size_position(app_handle: &AppHandle, target: &scap::Target) {
-    let win_maybe = app_handle.get_webview_window("cropper");
-    if let Some(win) = win_maybe {
-        match target {
-            scap::Target::Display(display) => {
-                let scale_factor = {
-                    #[cfg(target_os = "macos")]
-                    {
-                        let mode = display.raw_handle.display_mode().unwrap();
-                        (mode.pixel_width() / mode.width()) as f64
-                    }
-                    #[cfg(not(target_os = "macos"))]
-                    {
-                        let primary_monitor = app.primary_monitor().unwrap().unwrap();
-                        primary_monitor.scale_factor();
-                        primary_monitor.size().to_logical(scale_factor);
-                    }
-                };
-                let monitor_size: LogicalSize<f64> = {
-                    #[cfg(target_os = "macos")]
-                    {
-                        let mode = display.raw_handle.display_mode().unwrap();
-                        LogicalSize::<f64>::new(
-                            mode.width() as f64 * scale_factor,
-                            mode.height() as f64 * scale_factor,
-                        )
-                    }
-                    #[cfg(not(target_os = "macos"))]
-                    {
-                        let primary_monitor = app.primary_monitor().unwrap().unwrap();
+fn tune_cropper_size_position(app_handle: &AppHandle, monitor: &Monitor) {
+    let win = app_handle.get_webview_window("cropper").unwrap();
 
-                        primary_monitor.size().to_logical(scale_factor);
-                    }
-                };
-                // This is required for non-primary monitors - at least on mac
-                // Since multi-displays is currently not implemented for other
-                // platforms, this won't be required.
-                #[cfg(target_os = "macos")]
-                {
-                    let position: LogicalPosition<f64> = unsafe {
-                        let bounds = CGDisplayBounds(display.raw_handle.id);
-                        LogicalPosition::<f64>::new(
-                            bounds.origin.x * scale_factor,
-                            bounds.origin.y * scale_factor,
-                        )
-                    };
-                    win.set_position(position).unwrap();
-                    win.center().unwrap();
-                }
+    let scale_factor = monitor.scale_factor();
+    let monitor_size: LogicalSize<f64> = monitor.size().to_logical(scale_factor);
+    let physical_position = monitor.position();
+    let logical_position = LogicalPosition::<f64>::new(
+        physical_position.x as f64 * scale_factor,
+        physical_position.y as f64 * scale_factor,
+    );
+    win.set_position(logical_position).unwrap();
+    win.center().unwrap();
 
-                win.set_size(LogicalSize::new(monitor_size.width, monitor_size.height))
-                    .unwrap();
-            }
-
-            scap::Target::Window(_) => {}
-        }
-    }
+    win.set_size(LogicalSize::new(monitor_size.width, monitor_size.height))
+        .unwrap();
 }
 
 fn create_record_button_win(app: &AppHandle, label: &str) {
@@ -277,9 +222,10 @@ fn tune_tauri_windows(app: &AppHandle) {
         .monitor_from_point(position.x as f64, position.y as f64)
         .unwrap()
     {
-        if let Some(target) = get_target_from_monitor(app, monitor) {
-            tune_record_size_position(app, &target);
-            tune_cropper_size_position(app, &target);
+        if let Some(target) = get_target_from_monitor(app, &monitor) {
+            update_target(app, &target);
+            tune_record_size_position(app, &monitor);
+            tune_cropper_size_position(app, &monitor);
         } else {
             eprintln!("Could not deduce display target from tuari monitor");
             return;
@@ -289,7 +235,7 @@ fn tune_tauri_windows(app: &AppHandle) {
     }
 }
 
-fn get_target_from_monitor(app: &AppHandle, monitor: Monitor) -> Option<scap::Target> {
+fn get_target_from_monitor(app: &AppHandle, monitor: &Monitor) -> Option<scap::Target> {
     let pos = monitor.position();
     let state = app.state::<AppState>();
     let mut ret_target = None;
@@ -301,7 +247,6 @@ fn get_target_from_monitor(app: &AppHandle, monitor: Monitor) -> Option<scap::Ta
                 unsafe {
                     let bounds = CGDisplayBounds(display.raw_handle.id);
                     if bounds.origin.x == (pos.x as f64) && bounds.origin.y == (pos.y as f64) {
-                        update_target(app, target.clone());
                         ret_target = Some(target.clone());
                     }
                 };
@@ -312,7 +257,7 @@ fn get_target_from_monitor(app: &AppHandle, monitor: Monitor) -> Option<scap::Ta
     ret_target
 }
 
-fn update_target(app: &AppHandle, target: scap::Target) {
+fn update_target(app: &AppHandle, target: &scap::Target) {
     let state = app.state::<AppState>();
 
     let mut data = match state.current_target.try_lock() {
@@ -323,6 +268,6 @@ fn update_target(app: &AppHandle, target: scap::Target) {
         }
     };
 
-    *data = Some(target);
+    *data = Some(target.clone());
     drop(data);
 }
