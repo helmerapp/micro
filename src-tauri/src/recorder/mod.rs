@@ -22,19 +22,24 @@ pub async fn start_recording(app_handle: AppHandle) {
         return;
     }
 
-    let curr_ind = state.current_target_ind.lock().await;
-    let current_target = state.targets[curr_ind.clone() as usize].clone();
-    let cropper_win = app_handle
-        .get_webview_window(format!("cropper-{}", curr_ind.clone()).as_str())
-        .unwrap();
-    drop(curr_ind);
+    let curr_target = state.current_target.lock().await;
+    let target = {
+        if let Some(target) = curr_target.clone() {
+            target
+        } else {
+            eprintln!("Failed to get target for recording!");
+            return;
+        }
+    };
+    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
 
     // Disable cursor events on cropper window
     cropper_win.set_ignore_cursor_events(true).unwrap();
 
     // Start capturing frames
     let app_handle_clone = app_handle.clone();
-    start_frame_capture(app_handle_clone, &current_target).await;
+    start_frame_capture(app_handle_clone, &target).await;
+    drop(curr_target);
 
     let state = app_handle.state::<AppState>();
     let mut frames = state.frames.lock().await;
@@ -143,14 +148,8 @@ pub async fn start_recording(app_handle: AppHandle) {
 #[tauri::command]
 pub async fn stop_recording(app_handle: AppHandle) {
     // Hide and reset cropper
-    let state = app_handle.state::<AppState>();
-    let curr_ind = state.current_target_ind.lock().await;
-    let cropper_win_label = format!("cropper-{}", curr_ind.clone());
-    drop(curr_ind);
     crate::cropper::toggle_cropper(&app_handle);
-    let cropper_win = app_handle
-        .get_webview_window(cropper_win_label.as_str())
-        .unwrap();
+    let cropper_win = app_handle.get_webview_window("cropper").unwrap();
     cropper_win.emit("capture-stopped", ()).unwrap();
     cropper_win.set_ignore_cursor_events(false).unwrap();
 

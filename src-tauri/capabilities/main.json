@@ -4,14 +4,8 @@
 	"description": "Capabilities for all windows; Has support for at max 4 capture windows/displays.",
 	"windows": [
 		"editor",
-		"cropper-0",
-		"record-0",
-		"cropper-1",
-		"record-1",
-		"cropper-2",
-		"record-2",
-		"cropper-3",
-		"record-3",
+		"cropper",
+		"record",
 		"welcome"
 	],
 	"permissions": [
