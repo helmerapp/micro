@@ -741,8 +741,8 @@ dependencies = [
  "block",
  "cocoa-foundation",
  "core-foundation",
- "core-graphics",
- "foreign-types",
+ "core-graphics 0.23.2",
+ "foreign-types 0.5.0",
  "libc",
  "objc",
 ]
@@ -834,6 +834,19 @@ checksum = "06ea2b9bc92be3c2baa9334a323ebca2d6f074ff852cd1d7b11064035cd3868f"
 
 [[package]]
 name = "core-graphics"
+version = "0.22.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2581bbab3b8ffc6fcbd550bf46c355135d16e9ff2a6ea032ad6b9bf1d7efe4fb"
+dependencies = [
+ "bitflags 1.3.2",
+ "core-foundation",
+ "core-graphics-types",
+ "foreign-types 0.3.2",
+ "libc",
+]
+
+[[package]]
+name = "core-graphics"
 version = "0.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c07782be35f9e1140080c6b96f0d44b739e2278479f64e02fdab4e32dfd8b081"
@@ -841,7 +854,7 @@ dependencies = [
  "bitflags 1.3.2",
  "core-foundation",
  "core-graphics-types",
- "foreign-types",
+ "foreign-types 0.5.0",
  "libc",
 ]
 
@@ -854,7 +867,7 @@ dependencies = [
  "bitflags 2.5.0",
  "core-foundation",
  "core-graphics-types",
- "foreign-types",
+ "foreign-types 0.5.0",
  "libc",
 ]
 
@@ -1359,12 +1372,21 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "foreign-types"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f6f339eb8adc052cd2ca78910fda869aefa38d22d5cb648e6485e4d3fc06f3b1"
+dependencies = [
+ "foreign-types-shared 0.1.1",
+]
+
+[[package]]
+name = "foreign-types"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d737d9aa519fb7b749cbc3b962edcf310a8dd1f4b67c91c4f83975dbdd17d965"
 dependencies = [
  "foreign-types-macros",
- "foreign-types-shared",
+ "foreign-types-shared 0.3.1",
 ]
 
 [[package]]
@@ -1377,6 +1399,12 @@ dependencies = [
  "quote",
  "syn 2.0.66",
 ]
+
+[[package]]
+name = "foreign-types-shared"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "00b0228411908ca8685dba7fc2cdd70ec9990a6e753e89b6ac91a84c40fbaf4b"
 
 [[package]]
 name = "foreign-types-shared"
@@ -2558,6 +2586,7 @@ dependencies = [
  "gifski",
  "henx",
  "imgref",
+ "mouse_position",
  "objc",
  "opener",
  "os_info",
@@ -2619,6 +2648,17 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "mouse_position"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "824feb0675ad2ffda7b1da534f394c5779fb39d123b5f376a221d50fad54b3c2"
+dependencies = [
+ "core-graphics 0.22.3",
+ "winapi",
+ "x11-dl",
 ]
 
 [[package]]
@@ -4199,8 +4239,8 @@ checksum = "d09e57a5a6b300bf917329da0ff30a58737d83abb7b14f99a419c23e83007cb8"
 dependencies = [
  "bytemuck",
  "cfg_aliases",
- "core-graphics",
- "foreign-types",
+ "core-graphics 0.23.2",
+ "foreign-types 0.5.0",
  "js-sys",
  "log",
  "objc2",
@@ -4382,7 +4422,7 @@ dependencies = [
  "bitflags 2.5.0",
  "cocoa",
  "core-foundation",
- "core-graphics",
+ "core-graphics 0.23.2",
  "crossbeam-channel",
  "dispatch",
  "dlopen2",
@@ -5166,7 +5206,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ad8319cca93189ea9ab1b290de0595960529750b6b8b501a399ed1ec3775d60"
 dependencies = [
  "cocoa",
- "core-graphics",
+ "core-graphics 0.23.2",
  "crossbeam-channel",
  "dirs",
  "libappindicator",
@@ -5994,7 +6034,7 @@ dependencies = [
  "base64 0.22.1",
  "block",
  "cocoa",
- "core-graphics",
+ "core-graphics 0.23.2",
  "crossbeam-channel",
  "dpi",
  "dunce",

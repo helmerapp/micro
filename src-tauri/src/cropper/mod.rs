@@ -1,8 +1,9 @@
 use crate::AppState;
 use core_graphics_helmer_fork::display::CGDisplayBounds;
+use mouse_position::mouse_position::Mouse;
 use tauri::{
-    utils::WindowEffect, AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl,
-    WebviewWindowBuilder,
+    utils::WindowEffect, AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, PhysicalSize,
+    WebviewUrl, WebviewWindowBuilder,
 };
 use tauri_utils::{config::WindowEffectsConfig, WindowEffectState};
 
@@ -49,16 +50,17 @@ fn tune_record_size_position(app: &AppHandle, monitor: &Monitor) {
     const RECORD_BUTTON_HEIGHT: f64 = 48.0;
 
     let scale_factor = monitor.scale_factor();
-    let monitor_size: LogicalSize<f64> = monitor.size().to_logical(scale_factor);
+    let logical_monitor_size: LogicalSize<f64> = monitor.size().to_logical(scale_factor);
     let physical_position = monitor.position();
     let logical_position = LogicalPosition::<f64>::new(
-        physical_position.x as f64 * (monitor_size.width / 2.0) - (RECORD_BUTTON_WIDTH / 2.0),
-        physical_position.y as f64 * monitor_size.height - 200.0,
+        physical_position.x as f64 + (logical_monitor_size.width / 2.0)
+            - (RECORD_BUTTON_WIDTH / 2.0),
+        physical_position.y as f64 + logical_monitor_size.height - 200.0,
     );
     win.set_position(logical_position).unwrap();
     win.center().unwrap();
 
-    win.set_size(LogicalSize::new(RECORD_BUTTON_HEIGHT, RECORD_BUTTON_HEIGHT))
+    win.set_size(LogicalSize::new(RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT))
         .unwrap();
 }
 
@@ -66,7 +68,7 @@ fn tune_cropper_size_position(app_handle: &AppHandle, monitor: &Monitor) {
     let win = app_handle.get_webview_window("cropper").unwrap();
 
     let scale_factor = monitor.scale_factor();
-    let monitor_size: LogicalSize<f64> = monitor.size().to_logical(scale_factor);
+    let monitor_size = monitor.size();
     let physical_position = monitor.position();
     let logical_position = LogicalPosition::<f64>::new(
         physical_position.x as f64 * scale_factor,
@@ -217,21 +219,23 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
 }
 
 fn tune_tauri_windows(app: &AppHandle) {
-    let position = app.cursor_position().unwrap();
-    if let Some(monitor) = app
-        .monitor_from_point(position.x as f64, position.y as f64)
-        .unwrap()
-    {
-        if let Some(target) = get_target_from_monitor(app, &monitor) {
-            update_target(app, &target);
-            tune_record_size_position(app, &monitor);
-            tune_cropper_size_position(app, &monitor);
-        } else {
-            eprintln!("Could not deduce display target from tuari monitor");
-            return;
+    let position = Mouse::get_mouse_position();
+    match position {
+        Mouse::Position { x, y } => {
+            if let Some(monitor) = app.monitor_from_point(x as f64, y as f64).unwrap() {
+                if let Some(target) = get_target_from_monitor(app, &monitor) {
+                    update_target(app, &target);
+                    tune_record_size_position(app, &monitor);
+                    tune_cropper_size_position(app, &monitor);
+                } else {
+                    eprintln!("Could not deduce display target from tuari monitor");
+                    return;
+                }
+            } else {
+                println!("Could not get tauri monitor from mouse point");
+            }
         }
-    } else {
-        println!("Could not get tauri monitor from mouse point");
+        Mouse::Error => eprintln!("Error getting current mouse position."),
     }
 }
 
