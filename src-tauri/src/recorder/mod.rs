@@ -12,6 +12,9 @@ mod permissions;
 
 #[tauri::command]
 pub async fn start_recording(app_handle: AppHandle) {
+    let state = app_handle.state::<AppState>();
+    // hide cropper cannot be called without existence of current target.
+
     // If no permissions, open welcome window
     if !scap::has_permission() {
         eprintln!("no permission to record screen");
@@ -19,14 +22,16 @@ pub async fn start_recording(app_handle: AppHandle) {
         return;
     }
 
-    // Disable cursor events on cropper window
+    let curr_target = state.current_target.lock().await;
     let cropper_win = app_handle.get_webview_window("cropper").unwrap();
+
+    // Disable cursor events on cropper window
     cropper_win.set_ignore_cursor_events(true).unwrap();
 
     // Start capturing frames
     let app_handle_clone = app_handle.clone();
-    start_frame_capture(app_handle_clone).await;
-    println!("Capturing frames...");
+    start_frame_capture(app_handle_clone, &curr_target.clone()).await;
+    drop(curr_target);
 
     let state = app_handle.state::<AppState>();
     let mut frames = state.frames.lock().await;

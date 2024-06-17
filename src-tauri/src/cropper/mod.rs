@@ -1,6 +1,9 @@
 use crate::AppState;
+use core_graphics_helmer_fork::display::CGDisplayBounds;
+use mouse_position::mouse_position::Mouse;
 use tauri::{
-    utils::WindowEffect, AppHandle, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder,
+    utils::WindowEffect, AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl,
+    WebviewWindowBuilder,
 };
 use tauri_utils::{config::WindowEffectsConfig, WindowEffectState};
 
@@ -40,40 +43,65 @@ fn set_transparency_and_level(win: tauri::WebviewWindow, level: u32) {
     .ok();
 }
 
-fn create_record_button_win(app: &AppHandle) {
-    let primary_monitor = app.primary_monitor().unwrap().unwrap();
-    let scale_factor = primary_monitor.scale_factor();
-    let monitor_size: LogicalSize<f64> = primary_monitor.size().to_logical(scale_factor);
+fn tune_record_size_position(app: &AppHandle, monitor: &Monitor) {
+    let win = app.get_webview_window("record").unwrap();
 
     const RECORD_BUTTON_WIDTH: f64 = 200.0;
     const RECORD_BUTTON_HEIGHT: f64 = 48.0;
 
-    let mut record_win =
-        WebviewWindowBuilder::new(app, "record", WebviewUrl::App("/record".into()))
-            .title("recorder window")
-            .inner_size(RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT)
-            .position(
-                (monitor_size.width / 2.0) - (RECORD_BUTTON_WIDTH / 2.0),
-                monitor_size.height - 200.0,
-            )
-            .accept_first_mouse(true)
-            .skip_taskbar(true)
-            .shadow(true)
-            .always_on_top(true)
-            .decorations(false)
-            .resizable(false)
-            .visible(false)
-            .effects(WindowEffectsConfig {
-                #[cfg(target_os = "macos")]
-                effects: vec![WindowEffect::Popover],
-                #[cfg(target_os = "macos")]
-                state: Some(WindowEffectState::Active),
-                #[cfg(target_os = "macos")]
-                radius: Some(10.0),
-                #[cfg(target_os = "windows")]
-                effects: vec![WindowEffect::Mica],
-                ..WindowEffectsConfig::default()
-            });
+    let scale_factor = monitor.scale_factor();
+    let logical_monitor_size: LogicalSize<f64> = monitor.size().to_logical(scale_factor);
+    let physical_position = monitor.position();
+    let logical_position = LogicalPosition::<f64>::new(
+        physical_position.x as f64 + (logical_monitor_size.width / 2.0)
+            - (RECORD_BUTTON_WIDTH / 2.0),
+        physical_position.y as f64 + logical_monitor_size.height - 200.0,
+    );
+    win.set_position(logical_position).unwrap();
+    win.center().unwrap();
+
+    win.set_size(LogicalSize::new(RECORD_BUTTON_WIDTH, RECORD_BUTTON_HEIGHT))
+        .unwrap();
+}
+
+fn tune_cropper_size_position(app_handle: &AppHandle, monitor: &Monitor) {
+    let win = app_handle.get_webview_window("cropper").unwrap();
+
+    let scale_factor = monitor.scale_factor();
+    let monitor_size = monitor.size();
+    let physical_position = monitor.position();
+    let logical_position = LogicalPosition::<f64>::new(
+        physical_position.x as f64 * scale_factor,
+        physical_position.y as f64 * scale_factor,
+    );
+    win.set_position(logical_position).unwrap();
+    win.center().unwrap();
+
+    win.set_size(LogicalSize::new(monitor_size.width, monitor_size.height))
+        .unwrap();
+}
+
+fn create_record_button_win(app: &AppHandle, label: &str) {
+    let record_win = WebviewWindowBuilder::new(app, label, WebviewUrl::App("/record".into()))
+        .title(format!("recorder window {}", "record"))
+        .accept_first_mouse(true)
+        .skip_taskbar(true)
+        .shadow(true)
+        .always_on_top(true)
+        .decorations(false)
+        .resizable(false)
+        .visible(false)
+        .effects(WindowEffectsConfig {
+            #[cfg(target_os = "macos")]
+            effects: vec![WindowEffect::Popover],
+            #[cfg(target_os = "macos")]
+            state: Some(WindowEffectState::Active),
+            #[cfg(target_os = "macos")]
+            radius: Some(10.0),
+            #[cfg(target_os = "windows")]
+            effects: vec![WindowEffect::Mica],
+            ..WindowEffectsConfig::default()
+        });
 
     #[cfg(not(target_os = "macos"))]
     {
@@ -88,7 +116,6 @@ fn create_record_button_win(app: &AppHandle) {
         .to_owned()
         .set_visible_on_all_workspaces(true)
         .expect("Couldn't set visible on all workspaces");
-
     // #[cfg(target_os = "windows")]
     // hide_using_window_affinity(record_win.hwnd().unwrap());
 
@@ -96,26 +123,19 @@ fn create_record_button_win(app: &AppHandle) {
     set_transparency_and_level(record_win, 26);
 }
 
-fn create_cropper_win(app: &AppHandle) {
-    //  get size of primary monitor
-    let primary_monitor = app.primary_monitor().unwrap().unwrap();
-    let scale_factor = primary_monitor.scale_factor();
-    let monitor_size = primary_monitor.size().to_logical(scale_factor);
-
+fn create_cropper_win(app: &AppHandle, label: &str) {
     // create cropper window
-    let mut cropper_win =
-        WebviewWindowBuilder::new(app, "cropper", WebviewUrl::App("/cropper".into()))
-            .title("cropper window")
-            .inner_size(monitor_size.width, monitor_size.height)
-            .accept_first_mouse(true)
-            .skip_taskbar(true)
-            .position(0.0, 0.0)
-            .always_on_top(true)
-            .decorations(false)
-            .resizable(false)
-            .visible(false)
-            .shadow(false)
-            .focused(false);
+    let cropper_win = WebviewWindowBuilder::new(app, label, WebviewUrl::App("/cropper".into()))
+        .title(format!("cropper window {}", "cropper"))
+        .accept_first_mouse(true)
+        .skip_taskbar(true)
+        .position(0.0, 0.0)
+        .always_on_top(true)
+        .decorations(false)
+        .resizable(false)
+        .visible(false)
+        .shadow(false)
+        .focused(false);
 
     // set transparent only on windows and linux
     #[cfg(not(target_os = "macos"))]
@@ -131,11 +151,12 @@ fn create_cropper_win(app: &AppHandle) {
 
     #[cfg(target_os = "macos")]
     set_transparency_and_level(cropper_win, 25);
+    //  get size of primary monitor
 }
 
 pub fn init_cropper(app: &AppHandle) {
-    create_record_button_win(app);
-    create_cropper_win(app);
+    create_record_button_win(app, "record");
+    create_cropper_win(app, "cropper");
 }
 
 pub fn toggle_cropper(app: &AppHandle) {
@@ -152,6 +173,7 @@ pub fn toggle_cropper(app: &AppHandle) {
             false => match scap::has_permission() {
                 true => {
                     app.emit("reset-area", ()).expect("couldn't reset area");
+                    tune_tauri_windows(app);
                     record_win.show().unwrap();
                     cropper_win.show().unwrap();
                     cropper_win.set_focus().unwrap();
@@ -178,8 +200,6 @@ pub async fn hide_cropper(app: AppHandle) {
 
 #[tauri::command]
 pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
-    println!("area: {:?}", area);
-
     if let Some(record_window) = app.get_webview_window("record") {
         record_window
             .emit("updated-crop-area", area.clone())
@@ -192,4 +212,76 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
     let mut cropped_area = state.cropped_area.lock().await;
     *cropped_area = area.clone();
     drop(cropped_area);
+}
+
+fn tune_tauri_windows(app: &AppHandle) {
+    let position = Mouse::get_mouse_position();
+    let monitor = {
+        match position {
+            Mouse::Position { x, y } => {
+                if let Some(monitor) = app.monitor_from_point(x as f64, y as f64).unwrap() {
+                    let target = get_target_from_monitor(app, &monitor);
+                    // In case of targe being None, primary monitor is chosen
+                    update_target(app, &target);
+                    if let Some(_) = target {
+                        monitor
+                    } else {
+                        println!("Could not deduce target from monitor!");
+                        app.primary_monitor().unwrap().unwrap()
+                    }
+                } else {
+                    println!("Could not get tauri monitor from mouse point");
+                    app.primary_monitor().unwrap().unwrap()
+                }
+            }
+            Mouse::Error => {
+                // switch to primary monitor
+                eprintln!("Error getting current mouse position.");
+                app.primary_monitor().unwrap().unwrap()
+            }
+        }
+    };
+    tune_record_size_position(app, &monitor);
+    tune_cropper_size_position(app, &monitor);
+}
+
+fn get_target_from_monitor(app: &AppHandle, monitor: &Monitor) -> Option<scap::Target> {
+    let pos = monitor.position();
+    let state = app.state::<AppState>();
+    let mut ret_target = None;
+    #[cfg(target_os = "macos")]
+    //multiple displays only supported in Mac OS
+    {
+        for target in state.targets.iter() {
+            match target {
+                scap::Target::Display(display) => {
+                    // No other fancy way to infer target from monitor other than physical position
+                    // which remains same across all monitors and display targets.
+                    unsafe {
+                        let bounds = CGDisplayBounds(display.raw_handle.id);
+                        if bounds.origin.x == (pos.x as f64) && bounds.origin.y == (pos.y as f64) {
+                            ret_target = Some(target.clone());
+                        }
+                    };
+                }
+                scap::Target::Window(_) => {}
+            }
+        }
+    }
+    ret_target
+}
+
+fn update_target(app: &AppHandle, target: &Option<scap::Target>) {
+    let state = app.state::<AppState>();
+
+    let mut data = match state.current_target.try_lock() {
+        Ok(data) => data,
+        Err(_) => {
+            eprintln!("[update_target]: Could not get lock on current target index!");
+            return;
+        }
+    };
+
+    *data = target.clone();
+    drop(data);
 }

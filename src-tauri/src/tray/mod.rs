@@ -11,6 +11,7 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle,
 };
+
 use tauri_plugin_store::StoreBuilder;
 
 pub use updater::check_for_update;
