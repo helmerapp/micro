@@ -9,7 +9,7 @@ use tauri::{AppHandle, Manager};
 
 pub const FRAME_TYPE: FrameType = FrameType::BGRAFrame;
 
-pub async fn start_frame_capture(app_handle: AppHandle, target: &scap::Target) {
+pub async fn start_frame_capture(app_handle: AppHandle, target: &Option<scap::Target>) {
     let state: tauri::State<AppState> = app_handle.state::<AppState>();
 
     // area is of the form [x1, y1, x2, y2]
@@ -18,17 +18,29 @@ pub async fn start_frame_capture(app_handle: AppHandle, target: &scap::Target) {
     let abs_area = cropped_area.clone();
     drop(cropped_area);
     let area = {
-        if let scap::Target::Display(display) = target {
-            let position = unsafe {
-                let bounds = CGDisplayBounds(display.id);
-                vec![bounds.origin.x, bounds.origin.y]
-            };
-            vec![
-                abs_area[0] as f64 + position[0],
-                abs_area[1] as f64 + position[1],
-                abs_area[2] as f64 + position[0],
-                abs_area[3] as f64 + position[1],
-            ]
+        let vec = if let Some(target) = target {
+            if let scap::Target::Display(display) = target {
+                #[cfg(target_os = "macos")]
+                {
+                    let position = unsafe {
+                        let bounds = CGDisplayBounds(display.id);
+                        vec![bounds.origin.x, bounds.origin.y]
+                    };
+                    Some(vec![
+                        abs_area[0] as f64 + position[0],
+                        abs_area[1] as f64 + position[1],
+                        abs_area[2] as f64 + position[0],
+                        abs_area[3] as f64 + position[1],
+                    ])
+                }
+            } else {
+                Option::None
+            }
+        } else {
+            Option::None
+        };
+        if let Some(vec) = vec {
+            vec
         } else {
             vec![
                 abs_area[0] as f64,
@@ -44,7 +56,7 @@ pub async fn start_frame_capture(app_handle: AppHandle, target: &scap::Target) {
     // Initialize scap
     let options = Options {
         fps: 60,
-        target: Some(target.clone()),
+        target: target.clone(),
         show_cursor: record_cursor,
         show_highlight: false,
         excluded_targets: None,

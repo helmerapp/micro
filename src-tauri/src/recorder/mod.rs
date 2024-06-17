@@ -23,14 +23,6 @@ pub async fn start_recording(app_handle: AppHandle) {
     }
 
     let curr_target = state.current_target.lock().await;
-    let target = {
-        if let Some(target) = curr_target.clone() {
-            target
-        } else {
-            eprintln!("Failed to get target for recording!");
-            return;
-        }
-    };
     let cropper_win = app_handle.get_webview_window("cropper").unwrap();
 
     // Disable cursor events on cropper window
@@ -38,7 +30,7 @@ pub async fn start_recording(app_handle: AppHandle) {
 
     // Start capturing frames
     let app_handle_clone = app_handle.clone();
-    start_frame_capture(app_handle_clone, &target).await;
+    start_frame_capture(app_handle_clone, &curr_target.clone()).await;
     drop(curr_target);
 
     let state = app_handle.state::<AppState>();

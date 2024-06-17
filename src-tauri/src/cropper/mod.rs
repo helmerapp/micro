@@ -2,8 +2,8 @@ use crate::AppState;
 use core_graphics_helmer_fork::display::CGDisplayBounds;
 use mouse_position::mouse_position::Mouse;
 use tauri::{
-    utils::WindowEffect, AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, PhysicalSize,
-    WebviewUrl, WebviewWindowBuilder,
+    utils::WindowEffect, AppHandle, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl,
+    WebviewWindowBuilder,
 };
 use tauri_utils::{config::WindowEffectsConfig, WindowEffectState};
 
@@ -124,10 +124,6 @@ fn create_record_button_win(app: &AppHandle, label: &str) {
 }
 
 fn create_cropper_win(app: &AppHandle, label: &str) {
-    // This piece of code can be used from scap if these methods are made public.
-    // It is repeated in create_button method (and not purposefully extracted into a method)
-    // as this can also be removed after/if we reuse this from scap.
-
     // create cropper window
     let cropper_win = WebviewWindowBuilder::new(app, label, WebviewUrl::App("/cropper".into()))
         .title(format!("cropper window {}", "cropper"))
@@ -220,48 +216,62 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
 
 fn tune_tauri_windows(app: &AppHandle) {
     let position = Mouse::get_mouse_position();
-    match position {
-        Mouse::Position { x, y } => {
-            if let Some(monitor) = app.monitor_from_point(x as f64, y as f64).unwrap() {
-                if let Some(target) = get_target_from_monitor(app, &monitor) {
+    let monitor = {
+        match position {
+            Mouse::Position { x, y } => {
+                if let Some(monitor) = app.monitor_from_point(x as f64, y as f64).unwrap() {
+                    let target = get_target_from_monitor(app, &monitor);
+                    // In case of targe being None, primary monitor is chosen
                     update_target(app, &target);
-                    tune_record_size_position(app, &monitor);
-                    tune_cropper_size_position(app, &monitor);
+                    if let Some(_) = target {
+                        monitor
+                    } else {
+                        println!("Could not deduce target from monitor!");
+                        app.primary_monitor().unwrap().unwrap()
+                    }
                 } else {
-                    eprintln!("Could not deduce display target from tuari monitor");
-                    return;
+                    println!("Could not get tauri monitor from mouse point");
+                    app.primary_monitor().unwrap().unwrap()
                 }
-            } else {
-                println!("Could not get tauri monitor from mouse point");
+            }
+            Mouse::Error => {
+                // switch to primary monitor
+                eprintln!("Error getting current mouse position.");
+                app.primary_monitor().unwrap().unwrap()
             }
         }
-        Mouse::Error => eprintln!("Error getting current mouse position."),
-    }
+    };
+    tune_record_size_position(app, &monitor);
+    tune_cropper_size_position(app, &monitor);
 }
 
 fn get_target_from_monitor(app: &AppHandle, monitor: &Monitor) -> Option<scap::Target> {
     let pos = monitor.position();
     let state = app.state::<AppState>();
     let mut ret_target = None;
-    for target in state.targets.iter() {
-        match target {
-            scap::Target::Display(display) => {
-                // No other fancy way to infer target from monitor other than physical position
-                // which remains same across all monitors and display targets.
-                unsafe {
-                    let bounds = CGDisplayBounds(display.raw_handle.id);
-                    if bounds.origin.x == (pos.x as f64) && bounds.origin.y == (pos.y as f64) {
-                        ret_target = Some(target.clone());
-                    }
-                };
+    #[cfg(target_os = "macos")]
+    //multiple displays only supported in Mac OS
+    {
+        for target in state.targets.iter() {
+            match target {
+                scap::Target::Display(display) => {
+                    // No other fancy way to infer target from monitor other than physical position
+                    // which remains same across all monitors and display targets.
+                    unsafe {
+                        let bounds = CGDisplayBounds(display.raw_handle.id);
+                        if bounds.origin.x == (pos.x as f64) && bounds.origin.y == (pos.y as f64) {
+                            ret_target = Some(target.clone());
+                        }
+                    };
+                }
+                scap::Target::Window(_) => {}
             }
-            scap::Target::Window(_) => {}
         }
     }
     ret_target
 }
 
-fn update_target(app: &AppHandle, target: &scap::Target) {
+fn update_target(app: &AppHandle, target: &Option<scap::Target>) {
     let state = app.state::<AppState>();
 
     let mut data = match state.current_target.try_lock() {
@@ -272,6 +282,6 @@ fn update_target(app: &AppHandle, target: &scap::Target) {
         }
     };
 
-    *data = Some(target.clone());
+    *data = target.clone();
     drop(data);
 }
