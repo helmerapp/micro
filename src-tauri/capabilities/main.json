@@ -27,6 +27,7 @@
 		"window:allow-set-focus",
 		"window:allow-set-position",
 		"window:allow-start-dragging",
+		"window:allow-monitor-from-point",
 		"global-shortcut:allow-register",
 		"decorum:allow-show-snap-overlay"
 	]
