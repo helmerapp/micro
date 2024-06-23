@@ -6,7 +6,7 @@ mod editor;
 mod recorder;
 mod tray;
 
-use scap::{capturer::Capturer, frame::Frame};
+use scap::{capturer::Capturer, frame::Frame, Target};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut::ShortcutState;
@@ -23,6 +23,7 @@ pub struct AppState {
     recorder: Mutex<Option<Capturer>>,
     cropped_area: Mutex<Vec<u32>>,
     preview_path: Mutex<Option<PathBuf>>,
+    current_target: Mutex<Option<Target>>,
 
     #[cfg(target_os = "macos")]
     shown_permission_prompt: Mutex<bool>,
@@ -35,6 +36,7 @@ impl Default for AppState {
             recorder: Mutex::new(None),
             cropped_area: Mutex::new(Vec::new()),
             preview_path: Mutex::new(None),
+            current_target: Mutex::new(None),
 
             #[cfg(target_os = "macos")]
             shown_permission_prompt: Mutex::new(false),
