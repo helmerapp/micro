@@ -105,7 +105,8 @@ import Base from "../components/base.astro";
 
 			isSelecting = false;
 			invoke("update_crop_area", {
-				area: [startX, startY, endX, endY],
+				// area: [startX, startY, endX, endY],
+				area: [startX + 2, startY + 2, endX - 7, endY - 7],
 			});
 		}
 	});
