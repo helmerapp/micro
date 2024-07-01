@@ -3,6 +3,9 @@ use scap::frame::Frame;
 use serde::{Deserialize, Serialize};
 use std::{sync::Arc, thread};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri_plugin_dialog::DialogExt;
+
+
 
 use tauri_plugin_decorum::WebviewWindowExt;
 
@@ -22,7 +25,7 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     let preview_height_adjusted = EDITOR_WIDTH * height / width;
     let editor_win_height = preview_height_adjusted + TOOLS_HEIGHT;
 
-    let mut editor_win =
+    let editor_win =
         WebviewWindowBuilder::new(app, "editor", WebviewUrl::App(editor_url.into()))
             .title("Helmer Micro")
             .accept_first_mouse(true)
@@ -97,16 +100,24 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
 
     let gif_encoder = Arc::new(gif_encoder);
 
-    let gif_name = chrono::Local::now()
+    let _gif_name = chrono::Local::now()
         .format("GIF %Y-%m-%d at %I-%M-%S %p")
         .to_string();
-    let gif_path = app_handle
-        .path()
-        .desktop_dir()
-        .unwrap()
-        .join(format!("{}.gif", gif_name));
+    let gif_path = match app_handle
+        .dialog()
+        .file()
+        .add_filter("GIF Files", &["gif"])
+        .blocking_save_file()
+    {
+        Some(path) => path,
+        None => {
+            eprintln!("Save dialog closed or cancelled.");
+            return; // Early return if dialog is closed or cancelled
+        }
+    };
 
-    let gif = match std::fs::File::create(gif_path) {
+    // Create a new file at the chosen path
+    let gif_file = match std::fs::File::create(&gif_path) {
         Ok(file) => file,
         Err(err) => {
             eprintln!("Error creating GIF file: {:?}", err);
@@ -116,7 +127,7 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
 
     let handle = thread::spawn(move || {
         println!("Writing to a GIF file");
-        let write_result = gif_writer.write(gif, &mut no_progress);
+        let write_result = gif_writer.write(gif_file, &mut no_progress);
         if let Err(err) = write_result {
             eprintln!("Error writing GIF file: {:?}", err);
         }
@@ -199,3 +210,4 @@ pub fn unit_frame_handler(
     }
     println!("Frame {} Encoded", index)
 }
+
