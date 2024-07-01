@@ -25,7 +25,7 @@ pub fn init_editor(app: &AppHandle, video_file: String, size: (u32, u32)) {
     let preview_height_adjusted = EDITOR_WIDTH * height / width;
     let editor_win_height = preview_height_adjusted + TOOLS_HEIGHT;
 
-    let editor_win =
+    let mut editor_win =
         WebviewWindowBuilder::new(app, "editor", WebviewUrl::App(editor_url.into()))
             .title("Helmer Micro")
             .accept_first_mouse(true)
