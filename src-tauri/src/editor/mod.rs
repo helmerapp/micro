@@ -104,10 +104,11 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
         .format("GIF %Y-%m-%d at %I-%M-%S %p")
         .to_string();
     let gif_path = match app_handle
-        .dialog()
-        .file()
-        .add_filter("GIF Files", &["gif"])
-        .blocking_save_file()
+    .dialog()
+    .file()
+    .add_filter("GIF Files", &["gif"])
+    .set_file_name(&_gif_name)  // Set the default filename
+    .blocking_save_file()
     {
         Some(path) => path,
         None => {
