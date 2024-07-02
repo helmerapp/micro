@@ -17,7 +17,7 @@ export default function ExportButton({ clickHandler, exporting }: {
 		{
 			exporting
 				? <Spinner size={20} />
-				: <span className="text-black">Export to Desktop</span>
+				: <span className="text-black">Export</span>
 		}
 	</button>
 }
