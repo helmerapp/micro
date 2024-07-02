@@ -100,14 +100,14 @@ pub async fn export_gif(options: ExportOptions, app_handle: AppHandle) {
 
     let gif_encoder = Arc::new(gif_encoder);
 
-    let _gif_name = chrono::Local::now()
+    let gif_name = chrono::Local::now()
         .format("GIF %Y-%m-%d at %I-%M-%S %p")
         .to_string();
     let gif_path = match app_handle
     .dialog()
     .file()
     .add_filter("GIF Files", &["gif"])
-    .set_file_name(&_gif_name)  // Set the default filename
+    .set_file_name(&gif_name)  // Set the default filename
     .blocking_save_file()
     {
         Some(path) => path,
