@@ -19,8 +19,8 @@ pub fn get_monitor_at_cursor() -> Option<u32> {
 }
 
 #[cfg(target_os = "macos")]
-pub fn get_monitor_at_cursor() -> Option<core_graphics::display::CGDirectDisplayID> {
-    use core_graphics::display::CGDirectDisplayID;
+pub fn get_monitor_at_cursor() -> Option<u32> {
+    use core_graphics::display::{CGDirectDisplayID, CGGetDisplaysWithRect};
     use core_graphics::event::CGEvent;
     use core_graphics::event_source::{CGEventSource, CGEventSourceStateID};
     use core_graphics::geometry::{CGPoint, CGRect, CGSize};
@@ -40,12 +40,7 @@ pub fn get_monitor_at_cursor() -> Option<core_graphics::display::CGDirectDisplay
         let mut display_id: CGDirectDisplayID = 0;
         let mut display_count: u32 = 0;
 
-        if core_graphics::display::CGGetDisplaysWithRect(
-            rect,
-            1,
-            &mut display_id,
-            &mut display_count,
-        ) == 0
+        if CGGetDisplaysWithRect(rect, 1, &mut display_id, &mut display_count) == 0
             && display_count > 0
         {
             Some(display_id)
