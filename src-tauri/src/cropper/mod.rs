@@ -273,7 +273,7 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
 
     let current_monitor = targets.into_iter().find(|target| match target {
         Target::Display(d) => d.id == current_monitor_handle,
-        Target::Window(w) => false,
+        Target::Window(_) => false,
     });
 
     println!("Current monitor: {:?}", current_monitor);

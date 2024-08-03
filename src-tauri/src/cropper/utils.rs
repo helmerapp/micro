@@ -1,20 +1,17 @@
 #[cfg(target_os = "windows")]
-pub fn get_monitor_at_cursor() -> Option<HMONITOR> {
+pub fn get_monitor_at_cursor() -> Option<u32> {
     use windows::Win32::Foundation::POINT;
-    use windows::Win32::Graphics::Gdi::HMONITOR;
-    use windows::Win32::UI::WindowsAndMessaging::{
-        GetCursorPos, MonitorFromPoint, MONITOR_DEFAULTTONULL,
-    };
+    use windows::Win32::Graphics::Gdi::{MonitorFromPoint, MONITOR_DEFAULTTONULL};
+    use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
 
     unsafe {
         let mut cursor_pos = POINT::default();
-        if GetCursorPos(&mut cursor_pos).as_bool() {
-            let monitor = MonitorFromPoint(cursor_pos, MONITOR_DEFAULTTONULL);
-            if !monitor.is_invalid() {
-                Some(monitor)
-            } else {
-                None
-            }
+
+        let _ = GetCursorPos(&mut cursor_pos);
+
+        let monitor = MonitorFromPoint(cursor_pos, MONITOR_DEFAULTTONULL);
+        if !monitor.is_invalid() {
+            Some(monitor.0 as u32)
         } else {
             None
         }
