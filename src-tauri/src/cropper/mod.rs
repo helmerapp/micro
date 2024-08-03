@@ -6,6 +6,8 @@ use tauri::{
 };
 use tauri_utils::{config::WindowEffectsConfig, WindowEffectState};
 
+mod utils;
+
 // #[cfg(target_os = "windows")]
 // fn hide_using_window_affinity(hwnd: windows::Win32::Foundation::HWND) {
 //     use windows::Win32::UI::WindowsAndMessaging::{
@@ -264,18 +266,19 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
     *cropped_area = area.clone();
     drop(cropped_area);
 
-    let current_monitor = monitor_from_point(&app).unwrap();
+    let current_monitor_handle = utils::get_monitor_at_cursor().unwrap();
+    println!("Current monitor at cursor: {:?}", current_monitor_handle);
+
     let targets = scap::get_all_targets();
 
-    let current_monitor = targets
-        .into_iter()
-        .find(|target| match target {
-            Target::Display(d) => d.title == *current_monitor.name().unwrap(),
-            Target::Window(w) => false,
-        });
-    
+    let current_monitor = targets.into_iter().find(|target| match target {
+        Target::Display(d) => d.id == current_monitor_handle,
+        Target::Window(w) => false,
+    });
+
+    println!("Current monitor: {:?}", current_monitor);
+
     let mut current_target = state.current_target.lock().await;
     *current_target = current_monitor;
-    drop(current_target);
-
+    // drop(current_target);
 }
