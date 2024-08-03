@@ -1,7 +1,7 @@
 use crate::AppState;
 use rand::Rng;
 use scap::{
-    capturer::{Point, Area, Size, Capturer, Options, Resolution},
+    capturer::{Area, Capturer, Options, Point, Resolution, Size},
     frame::FrameType,
 };
 use tauri::{AppHandle, Manager};
@@ -20,13 +20,16 @@ pub async fn start_frame_capture(app_handle: AppHandle) {
         area[2] as f64 - area[0] as f64,
         area[3] as f64 - area[1] as f64,
     ];
+    let current_target = state.current_target.lock().await.clone();
 
     let record_cursor = crate::tray::get_tray_setting(&app_handle, "record_cursor".into());
+
+    println!("Target: {:?}", current_target);
 
     // Initialize scap
     let options = Options {
         fps: 60,
-        target: None,
+        target: current_target,
         show_cursor: record_cursor,
         show_highlight: false,
         excluded_targets: None,

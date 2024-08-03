@@ -2552,6 +2552,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "cocoa",
+ "core-graphics",
  "gifski",
  "henx",
  "imgref",

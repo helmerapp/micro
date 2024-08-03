@@ -1,8 +1,12 @@
 use crate::AppState;
+use scap::Target;
 use tauri::{
-    utils::WindowEffect, AppHandle, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder,
+    utils::WindowEffect, AppHandle, LogicalSize, Manager, PhysicalPosition, PhysicalSize, Position,
+    WebviewUrl, WebviewWindowBuilder,
 };
 use tauri_utils::{config::WindowEffectsConfig, WindowEffectState};
+
+mod utils;
 
 // #[cfg(target_os = "windows")]
 // fn hide_using_window_affinity(hwnd: windows::Win32::Foundation::HWND) {
@@ -83,7 +87,6 @@ fn create_record_button_win(app: &AppHandle) {
     let record_win = record_win
         .build()
         .expect("Failed to build record button window");
-
     record_win
         .to_owned()
         .set_visible_on_all_workspaces(true)
@@ -96,9 +99,45 @@ fn create_record_button_win(app: &AppHandle) {
     set_transparency_and_level(record_win, 26);
 }
 
+fn is_pointer_on_monitor(app: &AppHandle, monitor: &tauri::window::Monitor) -> bool {
+    let cursor_position = app.cursor_position().unwrap();
+    let posx = cursor_position.x;
+    let posy = cursor_position.y;
+    let monitor_start = monitor.position();
+    let monitor_boundaries = monitor.size();
+
+    let ms_x: f64 = monitor_start.x.into();
+    let ms_y: f64 = monitor_start.y.into();
+    let mb_w: f64 = monitor_boundaries.width.into();
+    let mb_h: f64 = monitor_boundaries.height.into();
+
+    if ((posx >= ms_x) && (posy >= ms_y) && (posx <= (ms_x + mb_w)) && (posy <= (ms_y + mb_h))) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+fn monitor_from_point(app: &AppHandle) -> Option<tauri::window::Monitor> {
+    let monitors = app.available_monitors().unwrap();
+    let cursor_position = app.cursor_position().unwrap();
+    let posx = cursor_position.x;
+    let posy = cursor_position.y;
+
+    for monitor in monitors {
+        if is_pointer_on_monitor(app, &monitor) {
+            return Some(monitor);
+        }
+    }
+    return None;
+}
+
 fn create_cropper_win(app: &AppHandle) {
     //  get size of primary monitor
+    // let monitors = app.available_monitors();
     let primary_monitor = app.primary_monitor().unwrap().unwrap();
+    // let monitors = app.available_monitors();
+    // println!("{:?}", monitors);
     let scale_factor = primary_monitor.scale_factor();
     let monitor_size = primary_monitor.size().to_logical(scale_factor);
 
@@ -143,17 +182,51 @@ pub fn toggle_cropper(app: &AppHandle) {
         app.get_webview_window("cropper"),
         app.get_webview_window("record"),
     ) {
+        let cursor_position = app.cursor_position();
+        let some_monitor = app.monitor_from_point(1.0, 1.0);
+
+        let current_monitor = monitor_from_point(app).unwrap();
+        let position =
+            PhysicalPosition::new(current_monitor.position().x, current_monitor.position().y);
+        let current_monitor_size = current_monitor.size();
+
+        let cmsw: f64 = current_monitor_size.width.into(); // all because a simple cast from i32 to u32 is black magic in rust
+        let cmsh: f64 = current_monitor_size.height.into();
+
+        let px: f64 = position.x.into();
+        let py: f64 = position.y.into();
+
+        let recorder_position = PhysicalPosition::new(((cmsw) / 2.0) + px, ((cmsh) - 200.0) + py);
+
+        let current_monitor_logical_size: LogicalSize<f64> = current_monitor
+            .size()
+            .to_logical(current_monitor.scale_factor());
+        let size = PhysicalSize::new(current_monitor_size.width, current_monitor_size.height);
+
         match cropper_win.is_visible().unwrap() || record_win.is_visible().unwrap() {
             true => {
                 record_win.hide().unwrap();
                 cropper_win.hide().unwrap();
+                cropper_win.set_position(position);
+                cropper_win.set_size(size);
+                println!(
+                    "Current monitor size on hide: {:?}",
+                    cropper_win.inner_size()
+                );
                 app.emit("reset-area", ()).expect("couldn't reset area");
             }
             false => match scap::has_permission() {
                 true => {
                     app.emit("reset-area", ()).expect("couldn't reset area");
+                    record_win.set_position(recorder_position);
                     record_win.show().unwrap();
                     cropper_win.show().unwrap();
+                    cropper_win.set_position(position); // must set postition before setting the size.
+                    cropper_win.set_size(size);
+                    println!(
+                        "Current monitor size on show: {:?}",
+                        cropper_win.inner_size()
+                    );
                     cropper_win.set_focus().unwrap();
                 }
                 false => {
@@ -192,4 +265,20 @@ pub async fn update_crop_area(app: AppHandle, area: Vec<u32>) {
     let mut cropped_area = state.cropped_area.lock().await;
     *cropped_area = area.clone();
     drop(cropped_area);
+
+    let current_monitor_handle = utils::get_monitor_at_cursor().unwrap();
+    println!("Current monitor at cursor: {:?}", current_monitor_handle);
+
+    let targets = scap::get_all_targets();
+
+    let current_monitor = targets.into_iter().find(|target| match target {
+        Target::Display(d) => d.id == current_monitor_handle,
+        Target::Window(_) => false,
+    });
+
+    println!("Current monitor: {:?}", current_monitor);
+
+    let mut current_target = state.current_target.lock().await;
+    *current_target = current_monitor;
+    // drop(current_target);
 }
